@@ -1,0 +1,12 @@
+.env
+target/
+node_modules/
+dist/
+build/
+logs/
+*.log
+.DS_Store
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.paperflow.admin.mapper.AdminMapper">
+    <sql id="SourceStatsSelect">
+        s.source_id,
+        s.source_name,
+        s.provider,
+        COALESCE(ws.work_count, 0) AS work_count,
+        COALESCE(fs.original_file_count, 0) AS original_file_count,
+        COALESCE(fs.matched_file_count, 0) AS matched_file_count,
+        COALESCE(fs.parsed_file_count, 0) AS parsed_file_count,
+        COALESCE(fs.ready_file_count, 0) AS ready_file_count,
+        COALESCE(fs.parse_failed_file_count, 0) AS parse_failed_file_count,
+        COALESCE(fs.block_failed_file_count, 0) AS block_failed_file_count,
+        COALESCE(fs.unsupported_file_count, 0) AS unsupported_file_count
+    </sql>
+
+    <sql id="SourceStatsJoin">
+        LEFT JOIN (
+            SELECT source_id, COUNT(*) AS work_count
+            FROM work_source
+            GROUP BY source_id
+        ) ws ON ws.source_id = s.source_id
+        LEFT JOIN (
+            SELECT
+                f.source_id,
+                COUNT(*) AS original_file_count,
+                COUNT(*) FILTER (WHERE j.flag_match = 1) AS matched_file_count,
+                COUNT(*) FILTER (WHERE j.flag_text = 2) AS parsed_file_count,
+                COUNT(*) FILTER (WHERE j.flag_text = 2 AND j.flag_block = 1) AS ready_file_count,
+                COUNT(*) FILTER (WHERE j.flag_text = -1) AS parse_failed_file_count,
+                COUNT(*) FILTER (WHERE j.flag_text = 2 AND j.flag_block = -1) AS block_failed_file_count,
+                COUNT(*) FILTER (WHERE j.flag_text = -2) AS unsupported_file_count
+            FROM original_file f
+            JOIN original_file_job j ON j.file_id = f.file_id
+            GROUP BY f.source_id
+        ) fs ON fs.source_id = s.source_id
+    </sql>
+
+    <sql id="SourceFilters">
+        <where>
+            <if test="sourceId != null">
+                LOWER(s.source_id) LIKE CONCAT('%', LOWER(#{sourceId}), '%')
+            </if>
+            <if test="sourceName != null">
+                AND LOWER(s.source_name) LIKE CONCAT('%', LOWER(#{sourceName}), '%')
+            </if>
+            <if test="provider != null">
+                AND LOWER(s.provider) LIKE CONCAT('%', LOWER(#{provider}), '%')
+            </if>
+            <if test="hasOriginalFiles != null and hasOriginalFiles">
+                AND COALESCE(fs.original_file_count, 0) &gt; 0
+            </if>
+            <if test="hasOriginalFiles != null and !hasOriginalFiles">
+                AND COALESCE(fs.original_file_count, 0) = 0
+            </if>
+            <if test="hasFailures != null and hasFailures">
+                AND (COALESCE(fs.parse_failed_file_count, 0) + COALESCE(fs.block_failed_file_count, 0)) &gt; 0
+            </if>
+            <if test="hasFailures != null and !hasFailures">
+                AND (COALESCE(fs.parse_failed_file_count, 0) + COALESCE(fs.block_failed_file_count, 0)) = 0
+            </if>
+        </where>
+    </sql>
+
+    <select id="countSources" resultType="long">
+        SELECT COUNT(*)
+        FROM source s
+        <include refid="SourceStatsJoin"/>
+        <include refid="SourceFilters"/>
+    </select>
+
+    <select id="listSources" resultType="com.paperflow.admin.model.SourceRow">
+        SELECT <include refid="SourceStatsSelect"/>
+        FROM source s
+        <include refid="SourceStatsJoin"/>
+        <include refid="SourceFilters"/>
+        <choose>
+            <when test="sort == 'workCountDesc'">
+                ORDER BY COALESCE(ws.work_count, 0) DESC, s.source_id ASC
+            </when>
+            <when test="sort == 'failureCountDesc'">
+                ORDER BY
+                    (COALESCE(fs.parse_failed_file_count, 0) + COALESCE(fs.block_failed_file_count, 0)) DESC,
+                    s.source_id ASC
+            </when>
+            <otherwise>
+                ORDER BY s.source_id ASC
+            </otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="findSource" resultType="com.paperflow.admin.model.SourceRow">
+        SELECT <include refid="SourceStatsSelect"/>
+        FROM source s
+        <include refid="SourceStatsJoin"/>
+        WHERE s.source_id = #{sourceId}
+    </select>
+
+    <select id="findTaskStatusTotals" resultType="com.paperflow.admin.model.TaskStatusTotalsRow">
+        SELECT
+            (SELECT COUNT(*) FROM source) AS source_count,
+            (SELECT COUNT(*) FROM work) AS work_count,
+            (SELECT COUNT(DISTINCT file_id) FROM original_file) AS original_file_count,
+            (
+                SELECT COUNT(DISTINCT matched_work_id)
+                FROM original_file_job
+                WHERE flag_match = 1 AND matched_work_id IS NOT NULL
+            ) AS matched_work_count,
+            (
+                SELECT COUNT(DISTINCT file_id)
+                FROM original_file_job
+                WHERE flag_text = 2
+            ) AS parsed_file_count,
+            (
+                SELECT COUNT(DISTINCT file_id)
+                FROM original_file_job
+                WHERE flag_block = 1
+            ) AS block_imported_file_count
+    </select>
+
+    <select id="listTaskStatusSources" resultType="com.paperflow.admin.model.TaskStatusSourceRow">
+        SELECT
+            s.source_id,
+            s.source_name,
+            s.provider,
+            COALESCE(ws.work_count, 0) AS work_count,
+            COALESCE(fs.original_file_count, 0) AS original_file_count,
+            COALESCE(ms.matched_work_count, 0) AS matched_work_count,
+            COALESCE(fs.parsed_file_count, 0) AS parsed_file_count,
+            COALESCE(fs.block_imported_file_count, 0) AS block_imported_file_count
+        FROM source s
+        LEFT JOIN (
+            SELECT source_id, COUNT(DISTINCT work_id) AS work_count
+            FROM work_source
+            GROUP BY source_id
+        ) ws ON ws.source_id = s.source_id
+        LEFT JOIN (
+            SELECT
+                f.source_id,
+                COUNT(DISTINCT f.file_id) AS original_file_count,
+                COUNT(DISTINCT f.file_id) FILTER (WHERE j.flag_text = 2) AS parsed_file_count,
+                COUNT(DISTINCT f.file_id) FILTER (WHERE j.flag_block = 1) AS block_imported_file_count
+            FROM original_file f
+            LEFT JOIN original_file_job j ON j.file_id = f.file_id
+            GROUP BY f.source_id
+        ) fs ON fs.source_id = s.source_id
+        LEFT JOIN (
+            SELECT ws.source_id, COUNT(DISTINCT ws.work_id) AS matched_work_count
+            FROM work_source ws
+            JOIN original_file_job j ON j.matched_work_id = ws.work_id
+            WHERE j.flag_match = 1
+            GROUP BY ws.source_id
+        ) ms ON ms.source_id = s.source_id
+        ORDER BY s.source_id ASC
+    </select>
+
+    <sql id="WorkStatusCase">
+        CASE
+            WHEN j.file_id IS NULL THEN 'NO_MATCHED_FILE'
+            WHEN j.flag_text = -2 THEN 'UNSUPPORTED_TEXT_INPUT'
+            WHEN j.flag_text = -1 THEN 'PARSE_FAILED'
+            WHEN j.flag_text = 1 THEN 'PARSING'
+            WHEN j.flag_text = 2 AND j.flag_block = -1 THEN 'BLOCK_FAILED'
+            WHEN j.flag_text = 2 AND j.flag_block = 1 THEN 'READY'
+            WHEN j.flag_text = 2 AND j.flag_block = 0 THEN 'PARSED'
+            ELSE 'MATCHED'
+        END
+    </sql>
+
+    <sql id="WorkStatusFilter">
+        <choose>
+            <when test="processingStatus == 'NO_MATCHED_FILE'">
+                j.file_id IS NULL
+            </when>
+            <when test="processingStatus == 'MATCHED'">
+                j.file_id IS NOT NULL
+            </when>
+            <when test="processingStatus == 'PARSING'">
+                j.flag_text = 1
+            </when>
+            <when test="processingStatus == 'PARSE_FAILED'">
+                j.flag_text = -1
+            </when>
+            <when test="processingStatus == 'UNSUPPORTED_TEXT_INPUT'">
+                j.flag_text = -2
+            </when>
+            <when test="processingStatus == 'PARSED'">
+                j.flag_text = 2
+            </when>
+            <when test="processingStatus == 'BLOCK_FAILED'">
+                j.flag_text = 2 AND j.flag_block = -1
+            </when>
+            <when test="processingStatus == 'READY'">
+                j.flag_text = 2 AND j.flag_block = 1
+            </when>
+            <otherwise>
+                <include refid="WorkStatusCase"/> = #{processingStatus}
+            </otherwise>
+        </choose>
+    </sql>
+
+    <sql id="WorkFilters">
+        <where>
+            <if test="sourceId != null">
+                EXISTS (
+                    SELECT 1 FROM work_source ws_filter
+                    WHERE ws_filter.work_id = w.work_id AND ws_filter.source_id = #{sourceId}
+                )
+            </if>
+            <if test="workId != null">
+                AND w.work_id = #{workId}
+            </if>
+            <if test="sourceName != null">
+                AND EXISTS (
+                    SELECT 1
+                    FROM work_source ws_name
+                    JOIN source s_name ON s_name.source_id = ws_name.source_id
+                    WHERE ws_name.work_id = w.work_id
+                    AND LOWER(s_name.source_name) LIKE CONCAT('%', LOWER(#{sourceName}), '%')
+                )
+            </if>
+            <if test="authorName != null">
+                AND EXISTS (
+                    SELECT 1 FROM work_author wa_filter
+                    WHERE wa_filter.work_id = w.work_id
+                    AND LOWER(wa_filter.author_name) LIKE CONCAT('%', LOWER(#{authorName}), '%')
+                )
+            </if>
+            <if test="title != null">
+                AND LOWER(w.title) LIKE CONCAT('%', LOWER(#{title}), '%')
+            </if>
+            <if test="doi != null">
+                AND LOWER(w.doi) = LOWER(#{doi})
+            </if>
+            <if test="yearFrom != null">
+                AND w.publication_year &gt;= #{yearFrom}
+            </if>
+            <if test="yearTo != null">
+                AND w.publication_year &lt;= #{yearTo}
+            </if>
+            <if test="processingStatus != null">
+                AND <include refid="WorkStatusFilter"/>
+            </if>
+            <if test="type != null">
+                AND LOWER(w.type) = LOWER(#{type})
+            </if>
+            <if test="language != null">
+                AND LOWER(w.language) = LOWER(#{language})
+            </if>
+            <if test="matchedFileId != null">
+                AND j.file_id = #{matchedFileId}
+            </if>
+        </where>
+    </sql>
+
+    <select id="countWorks" resultType="long">
+        SELECT COUNT(*)
+        FROM work w
+        LEFT JOIN original_file_job j ON j.matched_work_id = w.work_id
+        <include refid="WorkFilters"/>
+    </select>
+
+    <select id="listWorks" resultType="com.paperflow.admin.model.WorkRow">
+        SELECT
+            w.work_id,
+            w.title,
+            w.doi,
+            w.publication_year,
+            w.publication_date,
+            w.type,
+            w.language,
+            (
+                SELECT STRING_AGG(ws.source_id, ',' ORDER BY ws.source_id)
+                FROM work_source ws
+                WHERE ws.work_id = w.work_id
+            ) AS source_ids,
+            j.file_id AS matched_file_id,
+            j.flag_match,
+            j.flag_text,
+            j.flag_block
+        FROM work w
+        LEFT JOIN original_file_job j ON j.matched_work_id = w.work_id
+        <include refid="WorkFilters"/>
+        <choose>
+            <when test="sort == 'publicationYearAsc'">
+                ORDER BY w.publication_year ASC NULLS LAST, w.work_id ASC
+            </when>
+            <when test="sort == 'titleAsc'">
+                ORDER BY w.title ASC NULLS LAST, w.work_id ASC
+            </when>
+            <when test="sort == 'statusIssueFirst'">
+                ORDER BY
+                    CASE
+                        WHEN <include refid="WorkStatusCase"/> IN ('PARSE_FAILED', 'BLOCK_FAILED') THEN 0
+                        ELSE 1
+                    END,
+                    w.publication_year DESC NULLS LAST,
+                    w.work_id ASC
+            </when>
+            <when test="sort == 'statusReadyFirst'">
+                ORDER BY
+                    CASE WHEN <include refid="WorkStatusCase"/> = 'READY' THEN 0 ELSE 1 END,
+                    w.publication_year DESC NULLS LAST,
+                    w.work_id ASC
+            </when>
+            <otherwise>
+                ORDER BY w.publication_year DESC NULLS LAST, w.work_id ASC
+            </otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="findWork" resultType="com.paperflow.admin.model.WorkRow">
+        SELECT
+            w.work_id,
+            w.title,
+            w.doi,
+            w.publication_year,
+            w.publication_date,
+            w.type,
+            w.language,
+            (
+                SELECT STRING_AGG(ws.source_id, ',' ORDER BY ws.source_id)
+                FROM work_source ws
+                WHERE ws.work_id = w.work_id
+            ) AS source_ids,
+            j.file_id AS matched_file_id,
+            j.flag_match,
+            j.flag_text,
+            j.flag_block
+        FROM work w
+        LEFT JOIN original_file_job j ON j.matched_work_id = w.work_id
+        WHERE w.work_id = #{workId}
+    </select>
+
+    <select id="findWorkSources" resultType="com.paperflow.admin.model.SourceBriefRow">
+        SELECT s.source_id, s.source_name, s.provider
+        FROM work_source ws
+        JOIN source s ON s.source_id = ws.source_id
+        WHERE ws.work_id = #{workId}
+        ORDER BY s.source_id ASC
+    </select>
+
+    <select id="findWorkAuthors" resultType="com.paperflow.admin.model.AuthorRow">
+        SELECT author_id, author_name, author_position
+        FROM work_author
+        WHERE work_id = #{workId}
+        ORDER BY author_position NULLS LAST, author_id ASC
+    </select>
+
+    <select id="findMatchedFile" resultType="com.paperflow.admin.model.MatchedFileRow">
+        SELECT
+            f.file_id,
+            f.source_id,
+            f.year,
+            f.paper_title,
+            f.authors,
+            f.doi,
+            f.url,
+            f.provider,
+            f.original_file_name,
+            f.original_file_path,
+            f.original_file_type,
+            f.file_size,
+            j.flag_match,
+            j.matched_work_id,
+            j.flag_text,
+            j.flag_block
+        FROM original_file_job j
+        JOIN original_file f ON f.file_id = j.file_id
+        WHERE j.matched_work_id = #{workId}
+    </select>
+
+    <select id="findTextFiles" resultType="com.paperflow.admin.model.TextFileRow">
+        SELECT file_id, file_type, file_name, file_path, file_size
+        FROM text_file
+        WHERE file_id = #{fileId}
+        ORDER BY file_type ASC
+    </select>
+
+    <select id="findParsedDirectory" resultType="string">
+        SELECT REGEXP_REPLACE(file_path, '/[^/]*$', '')
+        FROM text_file
+        WHERE file_id = #{fileId}
+        ORDER BY CASE WHEN file_type = 'JSON' THEN 0 ELSE 1 END
+        LIMIT 1
+    </select>
+
+    <sql id="OriginalFileSelect">
+        f.file_id,
+        f.source_id,
+        f.year,
+        f.paper_title,
+        f.authors,
+        f.doi,
+        f.url,
+        f.provider,
+        f.original_file_name,
+        f.original_file_path,
+        f.original_file_type,
+        f.file_size,
+        j.flag_match,
+        j.matched_work_id,
+        j.flag_text,
+        j.flag_block
+    </sql>
+
+    <sql id="OriginalFileFilters">
+        <where>
+            <if test="sourceId != null">
+                f.source_id = #{sourceId}
+            </if>
+            <if test="fileId != null">
+                AND f.file_id = #{fileId}
+            </if>
+            <if test="sourceName != null">
+                AND EXISTS (
+                    SELECT 1 FROM source s_filter
+                    WHERE s_filter.source_id = f.source_id
+                    AND LOWER(s_filter.source_name) LIKE CONCAT('%', LOWER(#{sourceName}), '%')
+                )
+            </if>
+            <if test="provider != null">
+                AND LOWER(f.provider) LIKE CONCAT('%', LOWER(#{provider}), '%')
+            </if>
+            <if test="matchedWorkId != null">
+                AND j.matched_work_id = #{matchedWorkId}
+            </if>
+            <if test="flagMatch != null">
+                AND j.flag_match = #{flagMatch}
+            </if>
+            <if test="flagText != null">
+                AND j.flag_text = #{flagText}
+            </if>
+            <if test="flagBlock != null">
+                AND j.flag_block = #{flagBlock}
+            </if>
+            <if test="originalFileType != null">
+                AND LOWER(f.original_file_type) = LOWER(#{originalFileType})
+            </if>
+            <if test="yearFrom != null">
+                AND f.year &gt;= #{yearFrom}
+            </if>
+            <if test="yearTo != null">
+                AND f.year &lt;= #{yearTo}
+            </if>
+        </where>
+    </sql>
+
+    <select id="countOriginalFiles" resultType="long">
+        SELECT COUNT(*)
+        FROM original_file f
+        JOIN original_file_job j ON j.file_id = f.file_id
+        <include refid="OriginalFileFilters"/>
+    </select>
+
+    <select id="listOriginalFiles" resultType="com.paperflow.admin.model.MatchedFileRow">
+        SELECT <include refid="OriginalFileSelect"/>
+        FROM original_file f
+        JOIN original_file_job j ON j.file_id = f.file_id
+        <include refid="OriginalFileFilters"/>
+        <choose>
+            <when test="sort == 'yearDesc'">
+                ORDER BY f.year DESC NULLS LAST, f.file_id ASC
+            </when>
+            <when test="sort == 'fileSizeAsc'">
+                ORDER BY f.file_size ASC, f.file_id ASC
+            </when>
+            <when test="sort == 'providerAsc'">
+                ORDER BY f.provider ASC NULLS LAST, f.file_id ASC
+            </when>
+            <when test="sort == 'textStatusIssueFirst'">
+                ORDER BY
+                    CASE WHEN j.flag_text = -1 OR (j.flag_text = 2 AND j.flag_block = -1) THEN 0 ELSE 1 END,
+                    f.source_id ASC,
+                    f.file_id ASC
+            </when>
+            <otherwise>
+                ORDER BY f.source_id ASC, f.file_id ASC
+            </otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="findOriginalFile" resultType="com.paperflow.admin.model.MatchedFileRow">
+        SELECT <include refid="OriginalFileSelect"/>
+        FROM original_file f
+        JOIN original_file_job j ON j.file_id = f.file_id
+        WHERE f.file_id = #{fileId}
+    </select>
+
+    <select id="countWorkBlocks" resultType="long">
+        SELECT COUNT(*)
+        FROM work w
+        JOIN original_file_job j ON j.matched_work_id = w.work_id
+        JOIN block b ON b.file_id = j.file_id
+        WHERE w.work_id = #{workId}
+        <if test="!includeDiscarded">
+            AND b.block_type != 'discarded'
+        </if>
+    </select>
+
+    <select id="countOriginalFileBlocks" resultType="long">
+        SELECT COUNT(*)
+        FROM block b
+        WHERE b.file_id = #{fileId}
+        <if test="!includeDiscarded">
+            AND b.block_type != 'discarded'
+        </if>
+    </select>
+
+    <sql id="BlockSelect">
+        b.block_id,
+        b.file_id,
+        b.block_type,
+        b.block_text,
+        b.pdf_page,
+        b.pdf_bbox::text AS pdf_bbox_json,
+        b.block_seq,
+        b.parent_title_block_id,
+        b.title_level,
+        bi.image_path,
+        bi.image_caption,
+        bi.image_footnote,
+        bt.image_path AS table_image_path,
+        bt.table_caption,
+        bt.table_footnote,
+        be.image_path AS equation_image_path,
+        be.format AS equation_format,
+        bf.footnote_label,
+        bf.footnote_text,
+        (
+            SELECT REGEXP_REPLACE(tf.file_path, '/[^/]*$', '')
+            FROM text_file tf
+            WHERE tf.file_id = b.file_id
+            ORDER BY CASE WHEN tf.file_type = 'JSON' THEN 0 ELSE 1 END
+            LIMIT 1
+        ) AS parsed_directory,
+        STRING_AGG(br.reference_text, CHR(10) ORDER BY br.reference_seq)
+            FILTER (WHERE br.reference_text IS NOT NULL) AS references_text
+    </sql>
+
+    <sql id="BlockJoins">
+        LEFT JOIN block_image bi ON bi.block_id = b.block_id
+        LEFT JOIN block_table bt ON bt.block_id = b.block_id
+        LEFT JOIN block_equation be ON be.block_id = b.block_id
+        LEFT JOIN block_footnote bf ON bf.block_id = b.block_id
+        LEFT JOIN block_reference br ON br.block_id = b.block_id
+    </sql>
+
+    <sql id="BlockGroupBy">
+        b.block_id,
+        bi.block_id,
+        bt.block_id,
+        be.block_id,
+        bf.block_id
+    </sql>
+
+    <select id="listWorkBlocks" resultType="com.paperflow.admin.model.BlockRow">
+        SELECT <include refid="BlockSelect"/>
+        FROM work w
+        JOIN original_file_job j ON j.matched_work_id = w.work_id
+        JOIN block b ON b.file_id = j.file_id
+        <include refid="BlockJoins"/>
+        WHERE w.work_id = #{workId}
+        <if test="!includeDiscarded">
+            AND b.block_type != 'discarded'
+        </if>
+        GROUP BY <include refid="BlockGroupBy"/>
+        ORDER BY b.block_seq ASC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="listOriginalFileBlocks" resultType="com.paperflow.admin.model.BlockRow">
+        SELECT <include refid="BlockSelect"/>
+        FROM block b
+        <include refid="BlockJoins"/>
+        WHERE b.file_id = #{fileId}
+        <if test="!includeDiscarded">
+            AND b.block_type != 'discarded'
+        </if>
+        GROUP BY <include refid="BlockGroupBy"/>
+        ORDER BY b.block_seq ASC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+</mapper>

@@ -1,0 +1,28 @@
+spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
+  datasource:
+    url: "jdbc:postgresql://${PAPERFLOW_DB_HOST:localhost}:${PAPERFLOW_DB_PORT:5432}/${PAPERFLOW_DB_NAME:paperflow}?currentSchema=${PAPERFLOW_DB_SCHEMA:widi_chengyan}"
+    username: ${PAPERFLOW_DB_USER:paperflow}
+    password: ${PAPERFLOW_DB_PASSWORD:password}
+    hikari:
+      maximum-pool-size: 10
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+springdoc:
+  enable-default-api-docs: false
+  swagger-ui:
+    url: /api.yaml
+paperflow:
+  database:
+    schema: paperflow
+  api:
+    default-page-size: 20
+    max-page-size: 100
+    default-block-page-size: 100
+    max-block-page-size: 500
+    data-root: ${DATA_ROOT:data}

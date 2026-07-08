@@ -1,17 +1,18 @@
 # Paperflow Java Admin Overview
 
-本文定义 Paperflow Java 后端管理服务的第一版边界。该服务是
-PostgreSQL 数据库的只读消费层，不替代 Python pipeline。
+本文定义 Paperflow Java 后端管理服务的第一版边界。该服务对 Paperflow 业务
+表保持只读，只为登录和用户管理写入 `admin_user` 表，不替代 Python pipeline。
 
 ## 目标
 
-Java 后端只做三件事：
+Java 后端只做四件事：
 
 1. 从 Paperflow 项目库读取 `source`、`work`、`original_file`、
    `original_file_job`、`text_file`、`block*` 表。
 2. 将数据库行组织成前端或 Swagger UI 需要的 JSON DTO。
 3. 通过 REST API 暴露 Source 概览、Work 搜索、Work 详情、Original File
    blocks 和 `DATA_ROOT` 下只读文件资产。
+4. 通过本地 Admin User 账号提供后台登录、退出、当前用户和用户管理接口。
 
 Python 项目继续负责所有数据生产：
 
@@ -30,16 +31,25 @@ Python 项目继续负责所有数据生产：
 - 触发 Python CLI 或 MinerU。
 - 读取配置的 `DATA_ROOT` 之外的磁盘文件、下载远程 PDF、生成或修改 parsed
   图片。
-- 应用登录鉴权、角色权限、CORS、缓存。
+- JWT、SSO、自注册、动态权限矩阵、CORS、缓存。
 - 前端页面。
 
-这些能力只有在只读 API 稳定后再单独设计。
+Paperflow 业务数据仍然不通过 Java 后端写入。
 
 ## 第一版功能
 
-只提供只读 REST JSON 端点：
+提供登录、用户管理和只读业务 REST JSON 端点：
 
 ```text
+GET /api/auth/csrf
+POST /api/auth/login
+POST /api/auth/logout
+GET /api/auth/me
+POST /api/auth/change-password
+GET /api/admin-users
+POST /api/admin-users
+PATCH /api/admin-users/{id}
+POST /api/admin-users/{id}/reset-password
 GET /api/task-status
 GET /api/sources
 GET /api/sources/{sourceId}
@@ -62,13 +72,14 @@ API 契约见 `docs_java/api.yaml`。
 - Spring Boot 3.x
 - Maven
 - Spring Web
+- Spring Security
 - MyBatis XML mapper
 - PostgreSQL JDBC driver
 - Bean Validation
 - springdoc-openapi Swagger UI
 - JUnit/Spring Boot Test
 
-不引入 JPA、Spring Security、Redis、Lombok、GraphQL、jOOQ 或 Docker。
+不引入 JPA、Redis、Lombok、GraphQL、jOOQ 或 Docker。
 
 ## 项目位置
 
@@ -104,8 +115,8 @@ com.paperflow.admin
 ## 数据库访问
 
 Java 后端默认复用 `.env` 中的 `PAPERFLOW_DB_*` 连接配置。部署时建议让这些
-变量指向只读账号；Java 代码和 MyBatis SQL 仍只允许读取 Paperflow schema
-中的表，不能 `INSERT`、`UPDATE` 或 `DELETE`。
+变量指向最小权限账号：允许读取 Paperflow 业务表，只允许写当前 schema 中的
+`admin_user` 表。
 
 schema 通过 JDBC URL 的 `currentSchema` 指定：
 
@@ -114,6 +125,70 @@ jdbc:postgresql://${PAPERFLOW_DB_HOST}:${PAPERFLOW_DB_PORT}/${PAPERFLOW_DB_NAME}
 ```
 
 MyBatis SQL 使用裸表名，不动态拼接 schema。
+
+## Admin User
+
+`admin_user` 位于当前 schema，不单独创建 schema。用户名大小写不敏感，使用
+`username_normalized` 做唯一约束；用户名只允许 ASCII 字母、数字、下划线、
+点和短横线，长度 3-50。密码只保存 BCrypt hash。每个 Admin User 只有一个
+角色：`ADMIN` 或 `VIEWER`。用户名创建后不可修改；需要更换登录名时新建账号
+并禁用旧账号。
+
+`ADMIN` 可以访问用户管理接口；`VIEWER` 只能访问现有只读业务页面。管理员可以
+修改自己的显示名和密码，但不能禁用自己或把自己降级为 `VIEWER`。用户离职或
+不再使用时禁用账号，不物理删除。系统必须始终至少保留一个启用状态的
+`ADMIN`。
+
+首个 `ADMIN` 由部署者手动 SQL 初始化；应用启动时不自动创建默认管理员。
+
+登录态使用同源 HttpOnly Session Cookie。所有写请求启用 Spring Security CSRF
+防护，前端先调用 `GET /api/auth/csrf` 初始化 token，再从 `XSRF-TOKEN` cookie
+读取 token，并通过 `X-XSRF-TOKEN` header 提交。
+
+账号规则：
+
+- 用户名创建和登录时先 trim，再按 `Locale.ROOT` 小写写入
+  `username_normalized`；密码不 trim。
+- `display_name` trim 后为空则存 `NULL`。
+- `role` 只接受大写 `ADMIN` 或 `VIEWER`。
+- 创建用户默认 `enabled=true`，禁用账号登录时仍返回统一 401。
+- 用户列表不分页、不搜索、不筛选，按 `created_at DESC, id DESC` 排序。
+- `last_login_at` 登录成功时使用数据库 `now()` 更新；更新失败则登录失败。
+- `created_at`、`updated_at`、`last_login_at` 使用数据库时间；不使用 trigger，
+  更新 SQL 显式设置 `updated_at = now()`。
+- 允许同账号多端同时登录；改密码或重置密码不主动踢掉已有会话。
+- 生产环境必须使用 HTTPS，Session Cookie 使用 `SameSite=Lax`，生产启用
+  `Secure`。
+- 匿名 API 只开放 `GET /api/auth/csrf` 和 `POST /api/auth/login`；`/api.yaml`、
+  `/v3/api-docs` 和 Swagger UI 需要登录。
+- 未登录和无权限 API 返回 JSON `ErrorResponse`，不返回 HTML 登录页或重定向。
+- 不做失败锁定、登录限流、忘记密码、头像、邮箱、手机号、备注、
+  `created_by`、`updated_by`、`deleted_at`、审计表、逻辑删除、角色/启用状态
+  索引或迁移框架。
+
+推荐表结构：
+
+```sql
+CREATE TABLE admin_user (
+  id BIGSERIAL PRIMARY KEY,
+  username VARCHAR(50) NOT NULL CHECK (username ~ '^[A-Za-z0-9_.-]{3,50}$'),
+  username_normalized VARCHAR(50) NOT NULL UNIQUE,
+  password_hash VARCHAR(100) NOT NULL,
+  display_name VARCHAR(100),
+  role VARCHAR(20) NOT NULL CHECK (role IN ('ADMIN', 'VIEWER')),
+  enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  last_login_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+实现顺序：
+
+1. 增加 `admin_user` 建表 SQL 和 Spring Security Session/CSRF 配置。
+2. 实现 `auth` 和 `admin-users` API。
+3. 前端实现 `/login`、路由保护和 CSRF header。
+4. 前端实现 `/users`，删除 `/roles` 占位。
 
 ## 配置
 
@@ -167,7 +242,7 @@ springdoc UI，但只加载 `/api.yaml`：
 
 `/v3/api-docs` 由 Java controller 返回同一份 classpath YAML。springdoc 默认
 生成式 api-docs 关闭，避免运行时 Swagger/OpenAPI 与 `docs_java/api.yaml`
-产生第二份契约。
+产生第二份契约。`/api.yaml`、`/v3/api-docs` 和 Swagger UI 需要登录后访问。
 
 ## 运行方式
 

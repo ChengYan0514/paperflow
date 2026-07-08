@@ -12,6 +12,9 @@ springdoc:
   enable-default-api-docs: false
   swagger-ui:
     url: /api.yaml
+logging:
+  file:
+    name: target/test-logs/paperflow-admin-test.log
 paperflow:
   api:
     default-page-size: 20

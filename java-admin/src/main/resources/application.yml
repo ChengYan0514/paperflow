@@ -17,6 +17,12 @@ springdoc:
   enable-default-api-docs: false
   swagger-ui:
     url: /api.yaml
+logging:
+  file:
+    name: ${LOG_FILE:logs/paperflow-admin.log}
+  level:
+    root: INFO
+    com.paperflow.admin: INFO
 paperflow:
   database:
     schema: paperflow

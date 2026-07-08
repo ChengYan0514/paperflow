@@ -1,6 +1,7 @@
 package com.paperflow.admin.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,8 +31,15 @@ class OpenApiContractTest {
     private AdminMapper adminMapper;
 
     @Test
+    void openApiAndSwaggerRequireLogin() throws Exception {
+        mockMvc.perform(get("/api.yaml")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/v3/api-docs")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/swagger-ui/index.html")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void servesDocsJavaApiYamlAsRuntimeOpenApiContract() throws Exception {
-        String served = mockMvc.perform(get("/api.yaml"))
+        String served = mockMvc.perform(get("/api.yaml").with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -43,14 +51,14 @@ class OpenApiContractTest {
 
     @Test
     void swaggerUiUsesRuntimeOpenApiContract() throws Exception {
-        mockMvc.perform(get("/swagger-ui/index.html")).andExpect(status().isOk());
+        mockMvc.perform(get("/swagger-ui/index.html").with(user("admin").roles("ADMIN"))).andExpect(status().isOk());
         assertThat(environment.getProperty("springdoc.swagger-ui.url")).isEqualTo("/api.yaml");
         assertThat(environment.getProperty("springdoc.enable-default-api-docs", Boolean.class)).isFalse();
     }
 
     @Test
     void v3ApiDocsServesSameRuntimeOpenApiContract() throws Exception {
-        String served = mockMvc.perform(get("/v3/api-docs"))
+        String served = mockMvc.perform(get("/v3/api-docs").with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()

@@ -1,6 +1,10 @@
 package com.paperflow.admin.dto;
 
 public enum ErrorCode {
+    UNAUTHORIZED,
+    FORBIDDEN,
+    ADMIN_USER_NOT_FOUND,
+    ADMIN_USER_CONFLICT,
     VALIDATION_ERROR,
     SOURCE_NOT_FOUND,
     WORK_NOT_FOUND,

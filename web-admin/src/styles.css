@@ -120,6 +120,65 @@ th,
   font-weight: 500;
 }
 
+.session {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 0 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.session span {
+  color: var(--text);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.session button {
+  width: 100%;
+}
+
+.session small {
+  color: var(--red);
+}
+
+.session .success-text {
+  color: #047857;
+}
+
+.session-form {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.session-form label,
+.editor-form label {
+  display: grid;
+  gap: 5px;
+}
+
+.session-form label span,
+.editor-form label span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.session-form input,
+.editor-form input,
+.editor-form select,
+.users-table select {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  padding: 5px 9px;
+  color: var(--text);
+}
+
 .nav-section {
   display: grid;
   gap: 4px;
@@ -245,6 +304,49 @@ h2 {
   color: var(--muted);
 }
 
+.login-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-form {
+  display: grid;
+  width: min(100%, 380px);
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.login-form label {
+  display: grid;
+  gap: 5px;
+}
+
+.login-form label span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.login-form input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  padding: 6px 10px;
+  color: var(--text);
+}
+
+.login-form button {
+  min-height: 38px;
+}
+
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -290,6 +392,58 @@ h2 {
 
 .filters .check input {
   width: auto;
+}
+
+.editor-form {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.editor-form h2,
+.editor-form .error {
+  grid-column: 1 / -1;
+}
+
+.editor-form .check {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 8px;
+}
+
+.editor-form .check input {
+  width: auto;
+}
+
+.form-actions,
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.success-state {
+  margin-bottom: 12px;
+  border-color: rgb(16 185 129 / 0.22);
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.sr-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 .table-wrap {
@@ -345,6 +499,18 @@ tr:last-child td {
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.badge-enabled {
+  border-color: rgb(16 185 129 / 0.22);
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.badge-disabled {
+  border-color: rgb(100 116 139 / 0.18);
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .badge-ready,

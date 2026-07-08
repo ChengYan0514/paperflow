@@ -79,6 +79,18 @@ _Avoid_: Parsing failure.
 **Vectorization**:
 A later processing stage outside the current version. Current-version processing jobs do not track vectorization status.
 
+**Admin User**:
+A person who can sign in to the Paperflow Admin Platform. An **Admin User** is
+separate from OpenAlex authors and does not represent a Work, Source, or
+Original File actor.
+_Avoid_: User when it could mean an author, reader, or external account.
+
+**Admin Role**:
+A fixed authorization category assigned to an **Admin User**. Each **Admin
+User** has one **Admin Role**; the current roles are Admin and Viewer.
+_Avoid_: Permission matrix, dynamic role when referring to the current admin
+platform roles.
+
 ## Example Dialogue
 
 Developer: "After OpenAlex Metadata Import, do all target Works already have Original File Jobs?"
@@ -120,3 +132,11 @@ Domain expert: "No. Original File Import always registers unmatched records; Dir
 Developer: "Does Original File Collection happen inside Paperflow?"
 
 Domain expert: "No. Paperflow imports externally collected files and CSV metadata, but does not collect files itself."
+
+Developer: "When we say user management in the admin platform, do we mean OpenAlex authors?"
+
+Domain expert: "No. User management is for Admin Users who sign in to the admin platform; authors remain Work metadata."
+
+Developer: "Can each admin define custom permission groups?"
+
+Domain expert: "No. Each Admin User receives one fixed Admin Role."

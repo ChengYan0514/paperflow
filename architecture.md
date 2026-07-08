@@ -1,8 +1,10 @@
 # Paperflow Admin Platform Architecture
 
-This repository is the standalone read-only management platform for Paperflow.
-It is split into a Java backend, a React frontend, and documentation copied from
-the Paperflow project where the database and domain terms are defined.
+This repository is the standalone management platform for Paperflow. It keeps
+Paperflow business data read-only, and only writes Admin User records for
+login and user management. It is split into a Java backend, a React frontend,
+and documentation copied from the Paperflow project where the database and
+domain terms are defined.
 
 ## Layout
 
@@ -32,10 +34,21 @@ paperflow-admin-platform/
 
 ## Java Backend
 
-`java-admin/` is a Spring Boot 3.x, Java 17, Maven project. It exposes read-only
-REST JSON endpoints over the Paperflow PostgreSQL database:
+`java-admin/` is a Spring Boot 3.x, Java 17, Maven project. It exposes REST
+JSON endpoints over the Paperflow PostgreSQL database. Paperflow business
+tables remain read-only; user management writes only the `admin_user` table in
+the configured schema.
 
 ```text
+GET /api/auth/csrf
+POST /api/auth/login
+POST /api/auth/logout
+GET /api/auth/me
+POST /api/auth/change-password
+GET /api/admin-users
+POST /api/admin-users
+PATCH /api/admin-users/{id}
+POST /api/admin-users/{id}/reset-password
 GET /api/task-status
 GET /api/sources
 GET /api/sources/{sourceId}
@@ -50,7 +63,8 @@ GET /api/assets/**
 
 `docs_java/api.yaml` is packaged by `java-admin/pom.xml` as the runtime
 `/api.yaml` static resource. `/v3/api-docs` returns the same YAML resource, and
-generated springdoc API docs are disabled.
+generated springdoc API docs are disabled. `/api.yaml`, `/v3/api-docs`, and
+Swagger UI require login in production.
 
 `src/main/resources/application.yml` loads `.env` from `java-admin/.env` or the
 project root `../.env`. Database schema selection is controlled by PostgreSQL
@@ -62,6 +76,12 @@ JDBC `currentSchema`.
 API only. During local development, `vite.config.ts` proxies same-origin `/api`
 and `/v3` requests to `VITE_API_BASE_URL` or `http://localhost:8080`.
 
+Production deployment is same-origin: the React app and Java API are served
+under the same site, and login state uses an HttpOnly session cookie. Unsafe
+requests use Spring Security CSRF protection with `XSRF-TOKEN` and the
+`X-XSRF-TOKEN` header. Production requires HTTPS; the session cookie uses
+`SameSite=Lax` and `Secure` in production.
+
 ## Boundaries
 
 This project does not:
@@ -71,4 +91,5 @@ This project does not:
 - trigger Python CLI commands or MinerU;
 - write Paperflow database tables;
 - read files outside configured `DATA_ROOT`;
-- implement login, roles, write actions, scheduling, queues, or caching.
+- implement dynamic permission matrices, self-registration, JWT, SSO,
+  scheduling, queues, or caching.

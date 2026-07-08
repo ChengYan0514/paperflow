@@ -13,12 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(
         classes = PaperflowAdminApplication.class,
         properties = "paperflow.api.data-root=/tmp/paperflow-admin-asset-test")
 @AutoConfigureMockMvc
+@WithMockUser(username = "admin", roles = "ADMIN")
 class AssetControllerTest {
     private static final Path DATA_ROOT = Path.of("/tmp/paperflow-admin-asset-test");
 

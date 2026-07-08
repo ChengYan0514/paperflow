@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseQueryResult } from "@tanstack/react-query";
 import katex from "katex";
 import React from "react";
@@ -10,7 +10,10 @@ import {
   Outlet,
   RouterProvider,
   createBrowserRouter,
+  createMemoryRouter,
   useLocation,
+  useNavigate,
+  useOutletContext,
   useParams,
   useSearchParams,
 } from "react-router-dom";
@@ -169,6 +172,15 @@ type ProcessingStatus =
   | "READY";
 
 type ApiError = { code: string; message: string; requestId: string };
+type AdminRole = "ADMIN" | "VIEWER";
+type AuthUser = { id: number; username: string; displayName: string | null; role: AdminRole };
+type AdminUser = AuthUser & {
+  enabled: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+type CsrfToken = { token: string; headerName: string; parameterName: string };
 type Page<T> = { items: T[]; page: number; size: number; total: number };
 type SourceStats = {
   workCount: number;
@@ -284,9 +296,11 @@ class HttpError extends Error {
   }
 }
 
+const authQueryKey = ["auth", "me"] as const;
+
 async function getJson<T>(path: string, params?: URLSearchParams): Promise<T> {
   const query = params?.toString();
-  const response = await fetch(`${apiBaseUrl}${path}${query ? `?${query}` : ""}`);
+  const response = await fetch(`${apiBaseUrl}${path}${query ? `?${query}` : ""}`, { credentials: "same-origin" });
   if (!response.ok) {
     let error: ApiError = { code: "HTTP_ERROR", message: response.statusText, requestId: "-" };
     try {
@@ -297,6 +311,54 @@ async function getJson<T>(path: string, params?: URLSearchParams): Promise<T> {
     throw new HttpError(error, response.status);
   }
   return (await response.json()) as T;
+}
+
+async function postJson<T>(path: string, body?: unknown): Promise<T> {
+  return writeJson<T>("POST", path, body);
+}
+
+async function patchJson<T>(path: string, body: unknown): Promise<T> {
+  return writeJson<T>("PATCH", path, body);
+}
+
+async function writeJson<T>(method: "POST" | "PATCH", path: string, body?: unknown): Promise<T> {
+  const csrfToken = cookieValue("XSRF-TOKEN") ?? (await getCsrfToken());
+  const headers = new Headers({ "X-XSRF-TOKEN": csrfToken });
+  if (body !== undefined) headers.set("Content-Type", "application/json");
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    method,
+    credentials: "same-origin",
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!response.ok) {
+    let error: ApiError = { code: "HTTP_ERROR", message: response.statusText, requestId: "-" };
+    try {
+      error = (await response.json()) as ApiError;
+    } catch {
+      // keep fallback
+    }
+    throw new HttpError(error, response.status);
+  }
+  if (response.status === 204) return undefined as T;
+  return (await response.json()) as T;
+}
+
+async function getCsrfToken() {
+  const csrf = await getJson<CsrfToken>("/api/auth/csrf");
+  return cookieValue("XSRF-TOKEN") ?? csrf.token;
+}
+
+function cookieValue(name: string) {
+  if (typeof document === "undefined") return null;
+  return document.cookie
+    .split("; ")
+    .find((part) => part.startsWith(`${name}=`))
+    ?.slice(name.length + 1) ?? null;
+}
+
+function useAuthQuery() {
+  return useQuery({ queryKey: authQueryKey, queryFn: () => getJson<AuthUser>("/api/auth/me"), retry: false, staleTime: 30_000 });
 }
 
 function assetUrl(path: string | null | undefined) {
@@ -315,7 +377,62 @@ function paramsFrom(searchParams: URLSearchParams, keys: string[]): URLSearchPar
   return params;
 }
 
-function Layout() {
+function ProtectedLayout() {
+  const location = useLocation();
+  const query = useAuthQuery();
+  if (query.isLoading) return <main className="main"><Loading /></main>;
+  if (query.isError) {
+    if (query.error instanceof HttpError && query.error.status === 401) {
+      const redirect = `${location.pathname}${location.search}`;
+      return <Navigate to={`/login?redirect=${encodeURIComponent(redirect)}`} replace />;
+    }
+    return <main className="main"><ErrorState error={query.error} /></main>;
+  }
+  return <Layout user={query.data as AuthUser} />;
+}
+
+function Layout({ user }: { user: AuthUser }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [logoutError, setLogoutError] = React.useState<unknown>(null);
+  const [passwordOpen, setPasswordOpen] = React.useState(false);
+  const [passwordError, setPasswordError] = React.useState<string | unknown>(null);
+  const [passwordMessage, setPasswordMessage] = React.useState("");
+  const [passwordSubmitting, setPasswordSubmitting] = React.useState(false);
+  const logout = async () => {
+    setLogoutError(null);
+    try {
+      await postJson<void>("/api/auth/logout");
+      queryClient.removeQueries({ queryKey: authQueryKey });
+      navigate("/login", { replace: true });
+    } catch (error) {
+      setLogoutError(error);
+    }
+  };
+  const changePassword = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    setPasswordError(null);
+    setPasswordMessage("");
+    const formData = new FormData(form);
+    const oldPassword = String(formData.get("oldPassword") ?? "");
+    const newPassword = String(formData.get("newPassword") ?? "");
+    const confirmNewPassword = String(formData.get("confirmNewPassword") ?? "");
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError("两次输入的新密码不一致");
+      return;
+    }
+    setPasswordSubmitting(true);
+    try {
+      await postJson<void>("/api/auth/change-password", { oldPassword, newPassword });
+      form.reset();
+      setPasswordMessage("密码已修改");
+    } catch (error) {
+      setPasswordError(error);
+    } finally {
+      setPasswordSubmitting(false);
+    }
+  };
   return (
     <div className="shell">
       <aside className="nav">
@@ -323,16 +440,42 @@ function Layout() {
           <span>Paperflow</span>
           <small>只读处理台</small>
         </div>
+        <div className="session">
+          <span>{user.displayName ?? user.username}</span>
+          <button type="button" onClick={() => setPasswordOpen((open) => !open)}>修改密码</button>
+          <button type="button" onClick={logout}>退出</button>
+          {logoutError ? <small>退出失败</small> : null}
+          {passwordOpen ? (
+            <form className="session-form" onSubmit={changePassword}>
+              <label>
+                <span>当前密码</span>
+                <input name="oldPassword" type="password" autoComplete="current-password" required maxLength={200} />
+              </label>
+              <label>
+                <span>新密码</span>
+                <input name="newPassword" type="password" autoComplete="new-password" required minLength={12} maxLength={200} />
+              </label>
+              <label>
+                <span>确认新密码</span>
+                <input name="confirmNewPassword" type="password" autoComplete="new-password" required minLength={12} maxLength={200} />
+              </label>
+              {passwordError ? <small>{errorText(passwordError)}</small> : null}
+              {passwordMessage ? <small className="success-text">{passwordMessage}</small> : null}
+              <button type="submit" disabled={passwordSubmitting}>{passwordSubmitting ? "保存中" : "保存密码"}</button>
+            </form>
+          ) : null}
+        </div>
         <NavGroup title="文献资源" paths={["/task-status", "/sources", "/works", "/original-files"]}>
           <NavLink to="/task-status">工作台</NavLink>
           <NavLink to="/sources">来源期刊</NavLink>
           <NavLink to="/works">论文</NavLink>
           <NavLink to="/original-files">原始文件</NavLink>
         </NavGroup>
-        <NavGroup title="用户管理" paths={["/users", "/roles"]}>
-          <NavLink to="/users">用户列表</NavLink>
-          <NavLink to="/roles">角色权限</NavLink>
-        </NavGroup>
+        {user.role === "ADMIN" ? (
+          <NavGroup title="用户管理" paths={["/users"]}>
+            <NavLink to="/users">用户列表</NavLink>
+          </NavGroup>
+        ) : null}
         <NavGroup title="服务管理" paths={["/service-status"]}>
           <NavLink to="/service-status">服务状态</NavLink>
           <a href={`${apiBaseUrl}/swagger-ui/index.html`} target="_blank" rel="noreferrer">
@@ -345,7 +488,7 @@ function Layout() {
         </NavGroup>
       </aside>
       <main className="main">
-        <Outlet />
+        <Outlet context={user} />
       </main>
     </div>
   );
@@ -402,10 +545,89 @@ function ErrorState({ error }: { error: unknown }) {
   return <div className="error">请求失败</div>;
 }
 
+function errorText(error: unknown) {
+  if (error instanceof HttpError) return error.error.message;
+  return String(error || "请求失败");
+}
+
 function QueryView<T>({ query, children }: { query: UseQueryResult<T, Error>; children: (data: T) => React.ReactNode }) {
   if (query.isLoading) return <Loading />;
   if (query.isError) return <ErrorState error={query.error} />;
   return <>{children(query.data as T)}</>;
+}
+
+function LoginPage() {
+  const authQuery = useAuthQuery();
+  const csrfQuery = useQuery({
+    queryKey: ["auth", "csrf"],
+    queryFn: getCsrfToken,
+    enabled: authQuery.isError && authQuery.error instanceof HttpError && authQuery.error.status === 401,
+    retry: false,
+  });
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [loginError, setLoginError] = React.useState<unknown>(null);
+  const [submitting, setSubmitting] = React.useState(false);
+  const redirect = safeRedirect(searchParams.get("redirect"));
+
+  if (authQuery.isLoading) return <LoginShell><Loading /></LoginShell>;
+  if (authQuery.isSuccess) return <Navigate to="/task-status" replace />;
+  if (authQuery.error instanceof HttpError && authQuery.error.status !== 401) {
+    return <LoginShell><ErrorState error={authQuery.error} /></LoginShell>;
+  }
+
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setLoginError(null);
+    const formData = new FormData(event.currentTarget);
+    try {
+      const user = await postJson<AuthUser>("/api/auth/login", {
+        username: String(formData.get("username") ?? ""),
+        password: String(formData.get("password") ?? ""),
+      });
+      queryClient.setQueryData(authQueryKey, user);
+      navigate(redirect, { replace: true });
+    } catch (error) {
+      setLoginError(error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <LoginShell>
+      <form className="login-form" onSubmit={submit}>
+        <div>
+          <span className="page-kicker">Paperflow Admin</span>
+          <h1>登录 Paperflow</h1>
+        </div>
+        {loginError ? <ErrorState error={loginError} /> : null}
+        <label>
+          <span>用户名</span>
+          <input name="username" autoComplete="username" required minLength={3} maxLength={50} />
+        </label>
+        <label>
+          <span>密码</span>
+          <input name="password" type="password" autoComplete="current-password" required minLength={12} maxLength={200} />
+        </label>
+        {csrfQuery.isError ? <ErrorState error={csrfQuery.error} /> : null}
+        <button type="submit" disabled={submitting || csrfQuery.isLoading}>
+          {submitting ? "登录中" : "登录"}
+        </button>
+      </form>
+    </LoginShell>
+  );
+}
+
+function LoginShell({ children }: { children: React.ReactNode }) {
+  return <main className="login-page">{children}</main>;
+}
+
+function safeRedirect(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/task-status";
+  return value;
 }
 
 function Pager({ page, size, total }: { page: number; size: number; total: number }) {
@@ -509,6 +731,11 @@ function StatusBadge({ value, kind }: { value: string | number | null; kind?: st
 
 function text(value: React.ReactNode) {
   return value === null || value === undefined || value === "" ? "-" : value;
+}
+
+function dateTime(value: string | null | undefined) {
+  if (!value) return "-";
+  return value.replace("T", " ").slice(0, 16);
 }
 
 function bytes(value: number | null | undefined) {
@@ -741,6 +968,197 @@ function SourceDetailPage() {
       </QueryView>
     </>
   );
+}
+
+function UsersPage() {
+  const user = useOutletContext<AuthUser>();
+  const queryClient = useQueryClient();
+  const [createOpen, setCreateOpen] = React.useState(false);
+  const [createError, setCreateError] = React.useState<unknown>(null);
+  const [actionError, setActionError] = React.useState<unknown>(null);
+  const [resetUser, setResetUser] = React.useState<AdminUser | null>(null);
+  const [resetError, setResetError] = React.useState<unknown>(null);
+  const [message, setMessage] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const query = useQuery({ queryKey: ["admin-users"], queryFn: () => getJson<AdminUser[]>("/api/admin-users"), enabled: user.role === "ADMIN" });
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+
+  if (user.role !== "ADMIN") return <ForbiddenPage />;
+
+  const createUser = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    setCreateError(null);
+    setMessage("");
+    setSubmitting(true);
+    const formData = new FormData(form);
+    try {
+      await postJson<AdminUser>("/api/admin-users", {
+        username: String(formData.get("username") ?? ""),
+        displayName: String(formData.get("displayName") ?? "").trim(),
+        role: formData.get("role") as AdminRole,
+        password: String(formData.get("password") ?? ""),
+        enabled: formData.get("enabled") === "on",
+      });
+      form.reset();
+      setCreateOpen(false);
+      setMessage("用户已创建");
+      refresh();
+    } catch (error) {
+      setCreateError(error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  const patchUser = async (target: AdminUser, body: Partial<Pick<AdminUser, "role" | "enabled" | "displayName">>) => {
+    setActionError(null);
+    setMessage("");
+    try {
+      await patchJson<AdminUser>(`/api/admin-users/${target.id}`, body);
+      refresh();
+    } catch (error) {
+      setActionError(error);
+    }
+  };
+  const resetPassword = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!resetUser) return;
+    const form = event.currentTarget;
+    setResetError(null);
+    setMessage("");
+    setSubmitting(true);
+    const formData = new FormData(form);
+    try {
+      await postJson<void>(`/api/admin-users/${resetUser.id}/reset-password`, {
+        newPassword: String(formData.get("newPassword") ?? ""),
+      });
+      setResetUser(null);
+      setMessage("密码已重置");
+    } catch (error) {
+      setResetError(error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <PageHeader title="用户列表" meta={<button type="button" onClick={() => setCreateOpen((open) => !open)}>创建用户</button>} />
+      {message ? <div className="state success-state">{message}</div> : null}
+      {actionError ? <ErrorState error={actionError} /> : null}
+      {createOpen ? (
+        <form className="editor-form" onSubmit={createUser}>
+          <label>
+            <span>用户名</span>
+            <input name="username" required minLength={3} maxLength={50} pattern="^[A-Za-z0-9_.-]{3,50}$" />
+          </label>
+          <label>
+            <span>显示名</span>
+            <input name="displayName" maxLength={100} />
+          </label>
+          <label>
+            <span>角色</span>
+            <select name="role" defaultValue="VIEWER" required>
+              <option value="ADMIN">ADMIN</option>
+              <option value="VIEWER">VIEWER</option>
+            </select>
+          </label>
+          <label>
+            <span>密码</span>
+            <input name="password" type="password" autoComplete="new-password" required minLength={12} maxLength={200} />
+          </label>
+          <label className="check">
+            <input name="enabled" type="checkbox" defaultChecked />
+            <span>启用账号</span>
+          </label>
+          {createError ? <ErrorState error={createError} /> : null}
+          <div className="form-actions">
+            <button type="submit" disabled={submitting}>{submitting ? "保存中" : "保存用户"}</button>
+            <button type="button" onClick={() => setCreateOpen(false)}>取消</button>
+          </div>
+        </form>
+      ) : null}
+      {resetUser ? (
+        <form className="editor-form" onSubmit={resetPassword}>
+          <h2>重置密码：{resetUser.username}</h2>
+          <label>
+            <span>新密码</span>
+            <input name="newPassword" type="password" autoComplete="new-password" required minLength={12} maxLength={200} />
+          </label>
+          {resetError ? <ErrorState error={resetError} /> : null}
+          <div className="form-actions">
+            <button type="submit" disabled={submitting}>{submitting ? "保存中" : "保存新密码"}</button>
+            <button type="button" onClick={() => setResetUser(null)}>取消</button>
+          </div>
+        </form>
+      ) : null}
+      <QueryView query={query}>
+        {(users) => (
+          users.length ? (
+            <div className="table-wrap">
+              <table className="users-table">
+                <thead>
+                  <tr>
+                    <th>用户名</th>
+                    <th>显示名</th>
+                    <th>角色</th>
+                    <th>状态</th>
+                    <th>最近登录</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((item) => (
+                    <tr key={item.id}>
+                      <td>{item.username}</td>
+                      <td>{text(item.displayName)}</td>
+                      <td>
+                        <label className="sr-label" htmlFor={`role-${item.id}`}>{item.username} 的角色</label>
+                        <select id={`role-${item.id}`} value={item.role} onChange={(event) => patchUser(item, { role: event.target.value as AdminRole })}>
+                          <option value="ADMIN">ADMIN</option>
+                          <option value="VIEWER">VIEWER</option>
+                        </select>
+                      </td>
+                      <td><UserStatusBadge enabled={item.enabled} /></td>
+                      <td>{dateTime(item.lastLoginAt)}</td>
+                      <td>{dateTime(item.createdAt)}</td>
+                      <td>
+                        <div className="row-actions">
+                          <button type="button" onClick={() => patchUser(item, { enabled: !item.enabled })}>
+                            {item.enabled ? "禁用" : "启用"}
+                          </button>
+                          <button type="button" onClick={() => setResetUser(item)}>重置密码</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <Empty />
+          )
+        )}
+      </QueryView>
+    </>
+  );
+}
+
+function ForbiddenPage() {
+  return (
+    <>
+      <PageHeader title="403" />
+      <div className="error">
+        <strong>FORBIDDEN</strong>
+        <span>当前账号无权访问此页面</span>
+      </div>
+    </>
+  );
+}
+
+function UserStatusBadge({ enabled }: { enabled: boolean }) {
+  return <span className={`badge ${enabled ? "badge-enabled" : "badge-disabled"}`}>{enabled ? "启用" : "禁用"}</span>;
 }
 
 function WorksPage() {
@@ -1353,35 +1771,54 @@ function PlaceholderPage({ title }: { title: string }) {
   );
 }
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Layout />,
-    children: [
-      { index: true, element: <Navigate to="/task-status" replace /> },
-      { path: "task-status", element: <TaskStatusPage /> },
-      { path: "sources", element: <SourcesPage /> },
-      { path: "sources/:sourceId", element: <SourceDetailPage /> },
-      { path: "works", element: <WorksPage /> },
-      { path: "works/:workId", element: <WorkDetailPage /> },
-      { path: "works/:workId/blocks", element: <WorkBlocksPage /> },
-      { path: "original-files", element: <OriginalFilesPage /> },
-      { path: "original-files/:fileId", element: <OriginalFileDetailPage /> },
-      { path: "users", element: <PlaceholderPage title="用户列表" /> },
-      { path: "roles", element: <PlaceholderPage title="角色权限" /> },
-      { path: "service-status", element: <PlaceholderPage title="服务状态" /> },
-      { path: "knowledge-base", element: <PlaceholderPage title="知识库" /> },
-      { path: "block-search", element: <PlaceholderPage title="内容块检索" /> },
-    ],
-  },
-]);
+function routes() {
+  return [
+    { path: "/login", element: <LoginPage /> },
+    {
+      path: "/",
+      element: <ProtectedLayout />,
+      children: [
+        { index: true, element: <Navigate to="/task-status" replace /> },
+        { path: "task-status", element: <TaskStatusPage /> },
+        { path: "sources", element: <SourcesPage /> },
+        { path: "sources/:sourceId", element: <SourceDetailPage /> },
+        { path: "works", element: <WorksPage /> },
+        { path: "works/:workId", element: <WorkDetailPage /> },
+        { path: "works/:workId/blocks", element: <WorkBlocksPage /> },
+        { path: "original-files", element: <OriginalFilesPage /> },
+        { path: "original-files/:fileId", element: <OriginalFileDetailPage /> },
+        { path: "users", element: <UsersPage /> },
+        { path: "roles", element: <Navigate to="/users" replace /> },
+        { path: "service-status", element: <PlaceholderPage title="服务状态" /> },
+        { path: "knowledge-base", element: <PlaceholderPage title="知识库" /> },
+        { path: "block-search", element: <PlaceholderPage title="内容块检索" /> },
+      ],
+    },
+  ];
+}
 
-const queryClient = new QueryClient();
+const router = createBrowserRouter(routes());
 
-createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+export function createTestRouter(initialEntries = ["/"]) {
+  return createMemoryRouter(routes(), { initialEntries });
+}
+
+export function App({ router }: { router?: ReturnType<typeof createMemoryRouter> }) {
+  const [queryClient] = React.useState(() => new QueryClient());
+  return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <RouterProvider router={router ?? createBrowserRouter(routes())} />
     </QueryClientProvider>
-  </React.StrictMode>,
-);
+  );
+}
+
+const root = document.getElementById("root");
+if (root) {
+  createRoot(root).render(
+    <React.StrictMode>
+      <QueryClientProvider client={new QueryClient()}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </React.StrictMode>,
+  );
+}

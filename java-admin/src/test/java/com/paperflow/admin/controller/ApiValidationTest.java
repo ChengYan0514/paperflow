@@ -1,29 +1,43 @@
 package com.paperflow.admin.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paperflow.admin.PaperflowAdminApplication;
 import com.paperflow.admin.mapper.AdminMapper;
 import com.paperflow.admin.model.SourceRow;
 import com.paperflow.admin.model.WorkRow;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest(classes = PaperflowAdminApplication.class)
 @AutoConfigureMockMvc
+@ExtendWith(OutputCaptureExtension.class)
+@WithMockUser(username = "admin", roles = "ADMIN")
 class ApiValidationTest {
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private AdminMapper adminMapper;
@@ -72,6 +86,32 @@ class ApiValidationTest {
                 .andExpect(jsonPath("$.code").value("SOURCE_NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value("Source not found"))
                 .andExpect(jsonPath("$.requestId").isString());
+    }
+
+    @Test
+    void logsInternalServerErrorsWithRequestContext(CapturedOutput output) throws Exception {
+        when(adminMapper.listSources(any(), any(), any(), any(), any(), any(), anyInt(), anyInt()))
+                .thenThrow(new RuntimeException("database unavailable"));
+
+        MvcResult result = mockMvc.perform(get("/api/sources"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.requestId").isString())
+                .andReturn();
+
+        String requestId = objectMapper
+                .readTree(result.getResponse().getContentAsString())
+                .get("requestId")
+                .asText();
+        assertThat(output)
+                .contains("Unhandled API exception")
+                .contains("GET")
+                .contains("/api/sources")
+                .contains(requestId)
+                .contains("database unavailable");
+        assertThat(Files.readString(Path.of("target/test-logs/paperflow-admin-test.log")))
+                .contains("Unhandled API exception")
+                .contains(requestId);
     }
 
     @Test

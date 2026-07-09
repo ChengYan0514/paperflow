@@ -148,6 +148,12 @@ class WorkControllerIntegrationTest {
                 .andExpect(jsonPath("$.items[1].workId").value("W2"))
                 .andExpect(jsonPath("$.items[2].workId").value("W3"));
 
+        mockMvc.perform(get("/api/works").param("sort", "workIdAsc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].workId").value("W1"))
+                .andExpect(jsonPath("$.items[1].workId").value("W2"))
+                .andExpect(jsonPath("$.items[2].workId").value("W3"));
+
         mockMvc.perform(get("/api/works").param("sort", "statusIssueFirst"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].workId").value("W2"));

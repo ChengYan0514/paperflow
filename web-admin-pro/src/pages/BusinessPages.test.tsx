@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import OriginalFileDetailPage from './OriginalFileDetail';
 import OriginalFilesPage from './OriginalFiles';
@@ -16,11 +16,12 @@ import {
 } from '@/services/business';
 
 let searchParams = new URLSearchParams();
+let setSearchParams = vi.fn();
 let params = { sourceId: 'S1', workId: 'W1', fileId: 'F1' };
 
 vi.mock('@umijs/max', () => ({
   Link: ({ children, to }: any) => <a href={to}>{children}</a>,
-  useSearchParams: () => [searchParams],
+  useSearchParams: () => [searchParams, setSearchParams],
   useParams: () => params,
 }));
 
@@ -31,31 +32,41 @@ vi.mock('@ant-design/pro-components', () => ({
       {children}
     </main>
   ),
-  ProTable: ({ dataSource = [], columns = [], rowKey }: any) => (
-    <table>
-      <thead>
-        <tr>
-          {columns.map((column: any) => (
-            <th key={String(column.title)}>{column.title}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {dataSource.map((row: any) => (
-          <tr key={typeof rowKey === 'function' ? rowKey(row) : row[rowKey]}>
+  ProTable: ({ dataSource = [], columns = [], rowKey, pagination }: any) => (
+    <>
+      <table>
+        <thead>
+          <tr>
             {columns.map((column: any) => (
-              <td key={String(column.title)}>
-                {column.render
-                  ? column.render(undefined, row)
-                  : Array.isArray(column.dataIndex)
-                    ? column.dataIndex.reduce((value: any, key: string) => value?.[key], row)
-                    : row[column.dataIndex]}
-              </td>
+              <th key={String(column.title)}>{column.title}</th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {dataSource.map((row: any) => (
+            <tr key={typeof rowKey === 'function' ? rowKey(row) : row[rowKey]}>
+              {columns.map((column: any) => (
+                <td key={String(column.title)}>
+                  {column.render
+                    ? column.render(undefined, row)
+                    : Array.isArray(column.dataIndex)
+                      ? column.dataIndex.reduce((value: any, key: string) => value?.[key], row)
+                      : row[column.dataIndex]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {pagination ? (
+        <button
+          type="button"
+          onClick={() => pagination.onChange(pagination.current + 1, pagination.pageSize)}
+        >
+          下一页
+        </button>
+      ) : null}
+    </>
   ),
 }));
 
@@ -141,6 +152,7 @@ describe('business pages', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     searchParams = new URLSearchParams('sourceId=S1&sort=sourceIdAsc');
+    setSearchParams = vi.fn();
     params = { sourceId: 'S1', workId: 'W1', fileId: 'F1' };
   });
 
@@ -150,6 +162,43 @@ describe('business pages', () => {
     expect(await screen.findByText('S1')).toBeInTheDocument();
     expect(listSources).toHaveBeenCalledWith(searchParams);
     expect(screen.getByText('Nature')).toBeInTheDocument();
+  });
+
+  it('updates URL query when changing pages', async () => {
+    render(<SourcesPage />);
+
+    expect(await screen.findByText('S1')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '下一页' }));
+
+    await waitFor(() => expect(setSearchParams).toHaveBeenCalled());
+
+    const next = setSearchParams.mock.calls[0][0] as URLSearchParams;
+    expect(next.toString()).toBe('sourceId=S1&sort=sourceIdAsc&page=2&size=20');
+  });
+
+  it('updates URL query from list filters', async () => {
+    render(<SourcesPage />);
+
+    fireEvent.change(screen.getByLabelText('来源期刊名称'), {
+      target: { value: 'Nature' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /查\s*询/ }));
+
+    await waitFor(() => expect(setSearchParams).toHaveBeenCalled());
+
+    const next = setSearchParams.mock.calls[0][0] as URLSearchParams;
+    expect(next.toString()).toBe('sourceId=S1&sort=sourceIdAsc&sourceName=Nature');
+  });
+
+  it('renders advanced filters separately from the primary search', async () => {
+    searchParams = new URLSearchParams('title=AI&yearFrom=2020&yearTo=2024');
+    render(<WorksPage />);
+
+    expect(await screen.findByDisplayValue('AI')).toBeInTheDocument();
+    expect(screen.getByText('年份范围: 2020-2024')).toBeInTheDocument();
+    expect(screen.queryByLabelText('类型')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('语言')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('匹配文件 ID')).not.toBeInTheDocument();
   });
 
   it('shows source detail actions', async () => {

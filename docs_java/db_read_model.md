@@ -129,6 +129,7 @@ Work 列表排序只接受白名单值：
 | `publicationYearDesc` 或空 | `publication_year DESC NULLS LAST, work_id ASC` |
 | `publicationYearAsc` | `publication_year ASC NULLS LAST, work_id ASC` |
 | `titleAsc` | `title ASC NULLS LAST, work_id ASC` |
+| `workIdAsc` | `work_id ASC` |
 | `statusIssueFirst` | 失败状态优先，再按默认排序 |
 | `statusReadyFirst` | `READY` 优先，再按默认排序 |
 

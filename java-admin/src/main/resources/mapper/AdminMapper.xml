@@ -290,6 +290,9 @@
             <when test="sort == 'titleAsc'">
                 ORDER BY w.title ASC NULLS LAST, w.work_id ASC
             </when>
+            <when test="sort == 'workIdAsc'">
+                ORDER BY w.work_id ASC
+            </when>
             <when test="sort == 'statusIssueFirst'">
                 ORDER BY
                     CASE

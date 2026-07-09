@@ -453,6 +453,7 @@ paths:
               - publicationYearDesc
               - publicationYearAsc
               - titleAsc
+              - workIdAsc
               - statusIssueFirst
               - statusReadyFirst
             default: publicationYearDesc

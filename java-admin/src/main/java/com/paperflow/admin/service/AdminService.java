@@ -510,6 +510,7 @@ public class AdminService {
             case "publicationYearDesc",
                     "publicationYearAsc",
                     "titleAsc",
+                    "workIdAsc",
                     "statusIssueFirst",
                     "statusReadyFirst" -> sort;
             default -> throw new IllegalArgumentException("Invalid request");

@@ -1,7 +1,20 @@
 import { Link } from '@umijs/max';
-import { Descriptions, Empty, Tag } from 'antd';
-import type { ReactNode } from 'react';
-import { assetUrl } from '@/services/business';
+import {
+  Button,
+  Card,
+  DatePicker,
+  Descriptions,
+  Empty,
+  Form,
+  Input,
+  Select,
+  Space,
+  Tag,
+} from 'antd';
+import type { TablePaginationConfig } from 'antd';
+import dayjs from 'dayjs';
+import { useState, type ReactNode } from 'react';
+import { assetUrl, type Page } from '@/services/business';
 
 export const fieldLabels: Record<string, string> = {
   sourceId: '来源期刊 ID',
@@ -33,6 +46,7 @@ export const fieldLabels: Record<string, string> = {
   hasFailures: '有失败',
   stage: '阶段',
   sort: '排序',
+  yearRange: '年份范围',
   yearFrom: '起始年份',
   yearTo: '结束年份',
   authorId: '作者 ID',
@@ -75,6 +89,7 @@ const valueLabels: Record<string, string> = {
   publicationYearDesc: '发表年份降序',
   publicationYearAsc: '发表年份升序',
   titleAsc: '标题升序',
+  workIdAsc: '论文 ID 升序',
   statusIssueFirst: '异常优先',
   statusReadyFirst: '就绪优先',
   yearDesc: '年份降序',
@@ -107,7 +122,7 @@ export function fieldLabel(value: string) {
   return fieldLabels[value] ?? value;
 }
 
-export function valueLabel(value: string | number | null | undefined) {
+export function valueLabel(value: string | number | boolean | null | undefined) {
   if (value === null || value === undefined || value === '') {
     return '-';
   }
@@ -123,6 +138,234 @@ export function bytes(value?: number | null) {
     return '-';
   }
   return `${value.toLocaleString()} B`;
+}
+
+export function tablePagination<T>(
+  page: Page<T>,
+  searchParams: URLSearchParams,
+  setSearchParams: (params: URLSearchParams) => void,
+): TablePaginationConfig {
+  return {
+    current: page.page,
+    pageSize: page.size,
+    total: page.total,
+    showSizeChanger: true,
+    showTotal: (total) => `共 ${total} 条`,
+    onChange: (current, pageSize) => {
+      const next = new URLSearchParams(searchParams);
+      const size = pageSize ?? page.size;
+      next.set('page', String(size === page.size ? current : 1));
+      next.set('size', String(size));
+      setSearchParams(next);
+    },
+  };
+}
+
+export type QueryField = {
+  name: string;
+  type?: 'input' | 'select' | 'yearRange';
+  placeholder?: string;
+  options?: { label: string; value: string | number | boolean }[];
+};
+
+function fieldValue(searchParams: URLSearchParams, field: QueryField) {
+  if (field.type === 'yearRange') {
+    const yearFrom = searchParams.get('yearFrom');
+    const yearTo = searchParams.get('yearTo');
+    return yearFrom || yearTo
+      ? [yearFrom ? dayjs(yearFrom, 'YYYY') : null, yearTo ? dayjs(yearTo, 'YYYY') : null]
+      : undefined;
+  }
+  return searchParams.get(field.name) ?? undefined;
+}
+
+function activeQueryFields(fields: QueryField[], searchParams: URLSearchParams) {
+  return fields.filter((field) =>
+    field.type === 'yearRange'
+      ? searchParams.has('yearFrom') || searchParams.has('yearTo')
+      : searchParams.has(field.name),
+  );
+}
+
+function queryFieldLabel(field: QueryField, searchParams: URLSearchParams) {
+  if (field.type === 'yearRange') {
+    const from = searchParams.get('yearFrom') ?? '';
+    const to = searchParams.get('yearTo') ?? '';
+    return `${fieldLabel(field.name)}: ${from || '不限'}-${to || '不限'}`;
+  }
+  const raw = searchParams.get(field.name);
+  const option = field.options?.find((item) => String(item.value) === raw);
+  return `${fieldLabel(field.name)}: ${option?.label ?? valueLabel(raw)}`;
+}
+
+function removeQueryField(
+  field: QueryField,
+  searchParams: URLSearchParams,
+  setSearchParams: (params: URLSearchParams) => void,
+) {
+  const next = new URLSearchParams(searchParams);
+  next.delete('page');
+  if (field.type === 'yearRange') {
+    next.delete('yearFrom');
+    next.delete('yearTo');
+  } else {
+    next.delete(field.name);
+  }
+  setSearchParams(next);
+}
+
+function queryInput(field: QueryField) {
+  if (field.type === 'select') {
+    return (
+      <Select
+        allowClear
+        placeholder={field.placeholder ?? `选择${fieldLabel(field.name)}`}
+        style={{ width: 180 }}
+        options={field.options?.map((option) => ({
+          label: option.label,
+          value: String(option.value),
+        }))}
+      />
+    );
+  }
+  if (field.type === 'yearRange') {
+    return (
+      <DatePicker.RangePicker
+        allowEmpty={[true, true]}
+        picker="year"
+        format="YYYY"
+        placeholder={['起始年份', '结束年份']}
+        style={{ width: 240 }}
+      />
+    );
+  }
+  return (
+    <Input
+      allowClear
+      placeholder={field.placeholder ?? `输入${fieldLabel(field.name)}`}
+      style={{ width: 220 }}
+    />
+  );
+}
+
+export function QueryBar({
+  primaryField,
+  advancedFields,
+  sortOptions,
+  searchParams,
+  setSearchParams,
+}: {
+  primaryField: QueryField;
+  advancedFields?: QueryField[];
+  sortOptions?: { label: string; value: string }[];
+  searchParams: URLSearchParams;
+  setSearchParams: (params: URLSearchParams) => void;
+}) {
+  const fields = [primaryField, ...(advancedFields ?? []), { name: 'sort', type: 'select' as const }];
+  const advanced = advancedFields ?? [];
+  const activeFields = activeQueryFields([...advanced, primaryField], searchParams);
+  const [advancedOpen, setAdvancedOpen] = useState(activeFields.length > 0);
+  const initialValues = Object.fromEntries(
+    fields.map((field) => [
+      field.name,
+      field.name === 'sort' ? (searchParams.get('sort') ?? undefined) : fieldValue(searchParams, field),
+    ]),
+  );
+
+  return (
+    <Card size="small" style={{ marginBottom: 16 }} bodyStyle={{ padding: 12 }}>
+      <Form
+        key={searchParams.toString()}
+        layout="vertical"
+        initialValues={initialValues}
+        onFinish={(values) => {
+          const next = new URLSearchParams(searchParams);
+          next.delete('page');
+          for (const field of fields) {
+            const value = values[field.name];
+            if (field.type === 'yearRange') {
+              next.delete('yearFrom');
+              next.delete('yearTo');
+              const [from, to] = value ?? [];
+              if (from) {
+                next.set('yearFrom', from.format('YYYY'));
+              }
+              if (to) {
+                next.set('yearTo', to.format('YYYY'));
+              }
+            } else if (value === undefined || value === null || String(value).trim() === '') {
+              next.delete(field.name);
+            } else {
+              next.set(field.name, String(value).trim());
+            }
+          }
+          setSearchParams(next);
+        }}
+      >
+        <Space wrap align="end" size={12} style={{ width: '100%' }}>
+          <Form.Item label={fieldLabel(primaryField.name)} name={primaryField.name} style={{ marginBottom: 0 }}>
+            {queryInput(primaryField)}
+          </Form.Item>
+          <Form.Item label={fieldLabel('sort')} name="sort" style={{ marginBottom: 0 }}>
+            <Select
+              allowClear
+              placeholder="选择排序"
+              style={{ width: 180 }}
+              options={sortOptions}
+            />
+          </Form.Item>
+          {advanced.length ? (
+            <Button onClick={() => setAdvancedOpen((open) => !open)}>
+              筛选{activeFields.length ? ` ${activeFields.length}` : ''}
+            </Button>
+          ) : null}
+          <Form.Item style={{ marginBottom: 0 }}>
+            <Button type="primary" htmlType="submit">
+              查询
+            </Button>
+          </Form.Item>
+        </Space>
+        {advancedOpen ? (
+          <div
+            style={{
+              borderTop: '1px solid #f0f0f0',
+              display: 'grid',
+              gap: 12,
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              marginTop: 12,
+              paddingTop: 12,
+            }}
+          >
+            {advanced.map((field) => (
+              <Form.Item key={field.name} label={fieldLabel(field.name)} name={field.name} style={{ marginBottom: 0 }}>
+                {queryInput(field)}
+              </Form.Item>
+            ))}
+          </div>
+        ) : null}
+      </Form>
+      {activeFields.length ? (
+        <Space wrap size={[8, 8]} style={{ marginTop: 12 }}>
+          <span style={{ color: '#6b7280', fontSize: 12 }}>已筛选：</span>
+          {activeFields.map((field) => (
+            <Tag
+              key={field.name}
+              closable
+              onClose={(event) => {
+                event.preventDefault();
+                removeQueryField(field, searchParams, setSearchParams);
+              }}
+            >
+              {queryFieldLabel(field, searchParams)}
+            </Tag>
+          ))}
+          <Button type="link" size="small" onClick={() => setSearchParams(new URLSearchParams())}>
+            清空
+          </Button>
+        </Space>
+      ) : null}
+    </Card>
+  );
 }
 
 export function dateText(value?: string | null) {

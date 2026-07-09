@@ -4,7 +4,22 @@ import { Card, Col, Progress, Row, Statistic } from 'antd';
 import { useEffect, useState } from 'react';
 import type { TaskStatus, TaskStatusSource } from '@/services/business';
 import { listTaskStatus } from '@/services/business';
-import { fieldLabel, QueryState } from './businessUtils';
+import { fieldLabel, QueryBar, QueryState, valueLabel } from './businessUtils';
+
+const primaryField = { name: 'sourceName', placeholder: '按来源期刊名称检索' };
+const advancedFields = [
+  { name: 'sourceId' },
+  { name: 'provider' },
+];
+const sortOptions = [
+  'sourceIdAsc',
+  'workCountDesc',
+  'originalFileCountDesc',
+  'matchedProgressAsc',
+  'parsedProgressAsc',
+  'blockImportedProgressAsc',
+  'abnormalCountDesc',
+].map((value) => ({ label: valueLabel(value), value }));
 
 function progress(value: number, total: number) {
   return total > 0 ? value / total : 1;
@@ -74,7 +89,7 @@ export function filterTaskStatusSources(
 }
 
 export default function TaskStatusPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<TaskStatus>();
   const [error, setError] = useState<unknown>();
   const [loading, setLoading] = useState(true);
@@ -88,6 +103,13 @@ export default function TaskStatusPage() {
 
   return (
     <PageContainer title="工作台">
+      <QueryBar
+        primaryField={primaryField}
+        advancedFields={advancedFields}
+        sortOptions={sortOptions}
+        searchParams={searchParams}
+        setSearchParams={setSearchParams}
+      />
       <QueryState loading={loading} error={error} data={data}>
         {(taskStatus) => {
           const sources = filterTaskStatusSources(taskStatus.sources, searchParams);

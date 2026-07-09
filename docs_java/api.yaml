@@ -175,7 +175,7 @@ paths:
       tags: [Admin Users]
       operationId: updateAdminUser
       summary: Update an Admin User profile, role, or enabled state.
-      description: Admin Users cannot disable themselves, demote themselves from ADMIN to VIEWER, disable the last enabled ADMIN, or demote the last enabled ADMIN.
+      description: Admin Users cannot disable themselves, demote themselves, disable the last enabled SUPER_ADMIN, or demote the last enabled SUPER_ADMIN. SUPER_ADMIN can manage all users; ADMIN can manage only USER.
       security:
         - sessionCookie: []
       parameters:
@@ -233,6 +233,28 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/AdminUserNotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/admin-roles:
+    get:
+      tags: [Admin Users]
+      operationId: listAdminRoles
+      summary: List the fixed Admin User role matrix.
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Fixed Admin User roles and permission summary.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminRoleInfo"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "500":
           $ref: "#/components/responses/InternalError"
   /api/task-status:
@@ -875,7 +897,7 @@ components:
           type: string
     AdminRole:
       type: string
-      enum: [ADMIN, VIEWER]
+      enum: [SUPER_ADMIN, ADMIN, USER]
     LoginRequest:
       type: object
       required: [username, password]
@@ -911,7 +933,7 @@ components:
           maxLength: 200
         newPassword:
           type: string
-          minLength: 12
+          minLength: 5
           maxLength: 200
     ResetPasswordRequest:
       type: object
@@ -919,7 +941,7 @@ components:
       properties:
         newPassword:
           type: string
-          minLength: 12
+          minLength: 5
           maxLength: 200
     CreateAdminUserRequest:
       type: object
@@ -932,7 +954,7 @@ components:
           pattern: "^[A-Za-z0-9_.-]{3,50}$"
         password:
           type: string
-          minLength: 12
+          minLength: 5
           maxLength: 200
         displayName:
           type: string
@@ -994,6 +1016,14 @@ components:
           nullable: true
         role:
           $ref: "#/components/schemas/AdminRole"
+    AdminRoleInfo:
+      type: object
+      required: [role, description]
+      properties:
+        role:
+          $ref: "#/components/schemas/AdminRole"
+        description:
+          type: string
     ProcessingStatus:
       type: string
       enum:

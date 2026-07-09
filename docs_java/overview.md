@@ -131,15 +131,16 @@ MyBatis SQL 使用裸表名，不动态拼接 schema。
 `admin_user` 位于当前 schema，不单独创建 schema。用户名大小写不敏感，使用
 `username_normalized` 做唯一约束；用户名只允许 ASCII 字母、数字、下划线、
 点和短横线，长度 3-50。密码只保存 BCrypt hash。每个 Admin User 只有一个
-角色：`ADMIN` 或 `VIEWER`。用户名创建后不可修改；需要更换登录名时新建账号
+固定角色：`SUPER_ADMIN`、`ADMIN` 或 `USER`。用户名创建后不可修改；需要更换登录名时新建账号
 并禁用旧账号。
 
-`ADMIN` 可以访问用户管理接口；`VIEWER` 只能访问现有只读业务页面。管理员可以
-修改自己的显示名和密码，但不能禁用自己或把自己降级为 `VIEWER`。用户离职或
-不再使用时禁用账号，不物理删除。系统必须始终至少保留一个启用状态的
-`ADMIN`。
+`SUPER_ADMIN` 可以管理所有用户并访问角色管理；`ADMIN` 只能管理 `USER`；
+`USER` 只能访问现有只读业务页面。管理员可以修改自己的密码，但不能禁用自己
+或把自己降级。用户离职或不再使用时禁用账号，不物理删除。系统必须始终至少
+保留一个启用状态的 `SUPER_ADMIN`。
 
-首个 `ADMIN` 由部署者手动 SQL 初始化；应用启动时不自动创建默认管理员。
+首个 `SUPER_ADMIN` 由 `docs/admin_user_init.sql` 初始化；应用启动时不自动创建
+默认管理员。默认账号为 `admin`，默认密码为 `admin`，首次登录后应立即修改。
 
 登录态使用同源 HttpOnly Session Cookie。所有写请求启用 Spring Security CSRF
 防护，前端先调用 `GET /api/auth/csrf` 初始化 token，再从 `XSRF-TOKEN` cookie
@@ -150,7 +151,7 @@ MyBatis SQL 使用裸表名，不动态拼接 schema。
 - 用户名创建和登录时先 trim，再按 `Locale.ROOT` 小写写入
   `username_normalized`；密码不 trim。
 - `display_name` trim 后为空则存 `NULL`。
-- `role` 只接受大写 `ADMIN` 或 `VIEWER`。
+- `role` 只接受大写 `SUPER_ADMIN`、`ADMIN` 或 `USER`。
 - 创建用户默认 `enabled=true`，禁用账号登录时仍返回统一 401。
 - 用户列表不分页、不搜索、不筛选，按 `created_at DESC, id DESC` 排序。
 - `last_login_at` 登录成功时使用数据库 `now()` 更新；更新失败则登录失败。
@@ -175,7 +176,7 @@ CREATE TABLE admin_user (
   username_normalized VARCHAR(50) NOT NULL UNIQUE,
   password_hash VARCHAR(100) NOT NULL,
   display_name VARCHAR(100),
-  role VARCHAR(20) NOT NULL CHECK (role IN ('ADMIN', 'VIEWER')),
+  role VARCHAR(20) NOT NULL CHECK (role IN ('SUPER_ADMIN', 'ADMIN', 'USER')),
   enabled BOOLEAN NOT NULL DEFAULT TRUE,
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

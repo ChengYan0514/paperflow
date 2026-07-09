@@ -1,5 +1,9 @@
 # Admin Auth TDD 02: Auth and Admin User APIs
 
+> 历史文档：本文对应旧 `web-admin/` 与 `ADMIN` / `VIEWER` 两角色方案。
+> 当前实现以 `docs/ant_design_pro_tdd_01_roles_backend.md` 的
+> `SUPER_ADMIN` / `ADMIN` / `USER` 三角色方案为准。
+
 本文件对应实现计划第 2 步：实现 `auth` 和 `admin-users` API。所有测试走
 `MockMvc` 公共 HTTP 接口，数据库用 H2，不 mock 自己的 service/mapper。
 

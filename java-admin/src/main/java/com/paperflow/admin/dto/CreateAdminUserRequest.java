@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 
 public record CreateAdminUserRequest(
         @NotBlank @Size(min = 3, max = 50) @Pattern(regexp = "^[A-Za-z0-9_.-]{3,50}$") String username,
-        @NotBlank @Size(min = 12, max = 200) String password,
+        @NotBlank @Size(min = 5, max = 200) String password,
         @Size(max = 100) String displayName,
         @NotNull AdminRole role,
         Boolean enabled) {}

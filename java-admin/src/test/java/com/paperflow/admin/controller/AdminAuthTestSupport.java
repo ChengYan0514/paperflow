@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 abstract class AdminAuthTestSupport {
     static final String ADMIN_PASSWORD_HASH = "$2a$10$nL.EwMm9Y5qmsn1vf.tHBuQfH3uEWcc6vqTc.YiTue3qdQCkh02Ke";
-    static final String VIEWER_PASSWORD_HASH = "$2a$10$d9LJngHjSIGiSGyN2s.N8e.G08M/QwWnqaklBYVLNiJl53wMzlubK";
+    static final String USER_PASSWORD_HASH = "$2a$10$d9LJngHjSIGiSGyN2s.N8e.G08M/QwWnqaklBYVLNiJl53wMzlubK";
     static final String OLD_PASSWORD_HASH = "$2a$10$bjCtpqKONEq5z0ftG2BTweAMZRw7qLG15fCwhESZSs85tNSmRzQVu";
 
     static final String DROP_ADMIN_USER_TABLE = "DROP TABLE IF EXISTS admin_user";
@@ -24,7 +24,7 @@ abstract class AdminAuthTestSupport {
                     + "username_normalized VARCHAR(50) NOT NULL UNIQUE,"
                     + "password_hash VARCHAR(100) NOT NULL,"
                     + "display_name VARCHAR(100),"
-                    + "role VARCHAR(20) NOT NULL CHECK (role IN ('ADMIN', 'VIEWER')),"
+                    + "role VARCHAR(20) NOT NULL CHECK (role IN ('SUPER_ADMIN', 'ADMIN', 'USER')),"
                     + "enabled BOOLEAN NOT NULL DEFAULT TRUE,"
                     + "last_login_at TIMESTAMP WITH TIME ZONE,"
                     + "created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),"

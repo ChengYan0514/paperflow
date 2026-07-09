@@ -54,7 +54,7 @@ public class AdminUserService {
     }
 
     public List<AdminUserDto> listUsers(AdminUserPrincipal principal) {
-        requireAdmin(principal);
+        requireUserManager(principal);
         return jdbcTemplate
                 .query(
                         """
@@ -77,7 +77,7 @@ public class AdminUserService {
             String displayName,
             AdminRole role,
             Boolean enabled) {
-        requireAdmin(principal);
+        requireCanManageRole(principal, role);
         String trimmedUsername = username.trim();
         String normalizedUsername = normalizeUsername(username);
         if (findByNormalizedUsername(normalizedUsername) != null) {
@@ -101,9 +101,11 @@ public class AdminUserService {
     @Transactional
     public AdminUserDto updateUser(
             AdminUserPrincipal principal, Long id, String displayName, AdminRole role, Boolean enabled) {
-        requireAdmin(principal);
+        requireUserManager(principal);
         AdminUserRow user = requireExistingUser(id);
+        requireCanManageRole(principal, user.role());
         AdminRole nextRole = role == null ? user.role() : role;
+        requireCanManageRole(principal, nextRole);
         boolean nextEnabled = enabled == null ? user.enabled() : enabled;
         ensureUserCanChange(principal, user, nextRole, nextEnabled);
         jdbcTemplate.update(
@@ -121,8 +123,9 @@ public class AdminUserService {
 
     @Transactional
     public void resetPassword(AdminUserPrincipal principal, Long id, String newPassword) {
-        requireAdmin(principal);
-        requireExistingUser(id);
+        requireUserManager(principal);
+        AdminUserRow user = requireExistingUser(id);
+        requireCanManageRole(principal, user.role());
         jdbcTemplate.update(
                 "UPDATE admin_user SET password_hash = ?, updated_at = now() WHERE id = ?",
                 passwordEncoder.encode(newPassword),
@@ -205,8 +208,15 @@ public class AdminUserService {
                 user.updatedAt());
     }
 
-    private void requireAdmin(AdminUserPrincipal principal) {
-        if (principal.role() != AdminRole.ADMIN) {
+    private void requireUserManager(AdminUserPrincipal principal) {
+        if (principal.role() == AdminRole.USER) {
+            throw new ApiException(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Forbidden");
+        }
+    }
+
+    private void requireCanManageRole(AdminUserPrincipal principal, AdminRole role) {
+        requireUserManager(principal);
+        if (principal.role() == AdminRole.ADMIN && role != AdminRole.USER) {
             throw new ApiException(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Forbidden");
         }
     }
@@ -217,20 +227,20 @@ public class AdminUserService {
 
     private void ensureUserCanChange(
             AdminUserPrincipal principal, AdminUserRow user, AdminRole nextRole, boolean nextEnabled) {
-        boolean removingEnabledAdmin = user.enabled()
-                && user.role() == AdminRole.ADMIN
-                && (!nextEnabled || nextRole != AdminRole.ADMIN);
-        if (principal.id().equals(user.id()) && (!nextEnabled || nextRole != AdminRole.ADMIN)) {
+        boolean removingEnabledSuperAdmin = user.enabled()
+                && user.role() == AdminRole.SUPER_ADMIN
+                && (!nextEnabled || nextRole != AdminRole.SUPER_ADMIN);
+        if (principal.id().equals(user.id()) && (!nextEnabled || nextRole != user.role())) {
             throw adminUserConflict();
         }
-        if (removingEnabledAdmin && enabledAdminCount() <= 1) {
+        if (removingEnabledSuperAdmin && enabledSuperAdminCount() <= 1) {
             throw adminUserConflict();
         }
     }
 
-    private Integer enabledAdminCount() {
+    private Integer enabledSuperAdminCount() {
         return jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM admin_user WHERE enabled = TRUE AND role = 'ADMIN'", Integer.class);
+                "SELECT COUNT(*) FROM admin_user WHERE enabled = TRUE AND role = 'SUPER_ADMIN'", Integer.class);
     }
 
     private ApiException adminUserConflict() {

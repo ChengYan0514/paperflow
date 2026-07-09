@@ -1,5 +1,10 @@
 # Paperflow Admin UI Plan
 
+> 历史文档：本文描述旧 `web-admin/` Vite 前端的一版实现计划，其中
+> `ADMIN` / `VIEWER` 权限模型已被 `docs/ant_design_pro_migration_plan.md`
+> 的 `SUPER_ADMIN` / `ADMIN` / `USER` 三角色方案替代。新前端以
+> `web-admin-pro/` 和 `API_BASE_URL` 为准。
+
 本文定义前端管理页面的制作计划。前端只消费 Java Admin REST API，
 不直接访问数据库，不直接读取本地文件，不触发 Python pipeline 或 MinerU。
 

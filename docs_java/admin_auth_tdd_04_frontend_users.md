@@ -1,5 +1,9 @@
 # Admin Auth TDD 04: Frontend Admin Users Page
 
+> 历史文档：本文对应旧 `web-admin/` 与 `ADMIN` / `VIEWER` 两角色方案。
+> 当前用户管理与角色管理以 `web-admin-pro/` 和
+> `docs/ant_design_pro_tdd_04_system_management.md` 为准。
+
 本文件对应实现计划第 4 步：前端实现 `/users`，删除 `/roles` 占位。
 
 ## Public Interface

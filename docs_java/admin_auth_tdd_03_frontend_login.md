@@ -1,5 +1,9 @@
 # Admin Auth TDD 03: Frontend Login, Route Guard, and CSRF
 
+> 历史文档：本文对应旧 `web-admin/` Vite 前端。当前新前端以
+> `web-admin-pro/`、`API_BASE_URL` 和
+> `docs/ant_design_pro_tdd_03_auth_shell.md` 为准。
+
 本文件对应实现计划第 3 步：前端实现 `/login`、路由保护和 CSRF header。
 
 当前 `web-admin` 没有前端测试框架。第一步先加最小测试工具，只测公共 UI 行为

@@ -25,15 +25,19 @@ import org.springframework.test.web.servlet.MockMvc;
     "INSERT INTO admin_user (id, username, username_normalized, password_hash, display_name, role, enabled) "
             + "VALUES (1, 'Admin', 'admin', '"
             + AdminAuthTestSupport.ADMIN_PASSWORD_HASH
-            + "', 'Root Admin', 'ADMIN', TRUE)",
+            + "', 'Root Admin', 'SUPER_ADMIN', TRUE)",
     "INSERT INTO admin_user (id, username, username_normalized, password_hash, display_name, role, enabled) "
             + "VALUES (2, 'Disabled', 'disabled', '"
             + AdminAuthTestSupport.ADMIN_PASSWORD_HASH
-            + "', 'Disabled User', 'VIEWER', FALSE)",
+            + "', 'Disabled User', 'USER', FALSE)",
     "INSERT INTO admin_user (id, username, username_normalized, password_hash, display_name, role, enabled) "
-            + "VALUES (3, 'Viewer', 'viewer', '"
+            + "VALUES (3, 'User', 'user', '"
             + AdminAuthTestSupport.OLD_PASSWORD_HASH
-            + "', 'Viewer User', 'VIEWER', TRUE)"
+            + "', 'Basic User', 'USER', TRUE)",
+    "INSERT INTO admin_user (id, username, username_normalized, password_hash, display_name, role, enabled) "
+            + "VALUES (4, 'Manager', 'manager', '"
+            + AdminAuthTestSupport.ADMIN_PASSWORD_HASH
+            + "', 'Admin User', 'ADMIN', TRUE)"
 })
 class AuthControllerIntegrationTest extends AdminAuthTestSupport {
     @Autowired
@@ -48,14 +52,28 @@ class AuthControllerIntegrationTest extends AdminAuthTestSupport {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.username").value("Admin"))
                 .andExpect(jsonPath("$.displayName").value("Root Admin"))
-                .andExpect(jsonPath("$.role").value("ADMIN"))
+                .andExpect(jsonPath("$.role").value("SUPER_ADMIN"))
                 .andExpect(jsonPath("$", not(hasKey("enabled"))))
                 .andExpect(jsonPath("$", not(hasKey("passwordHash"))))
                 .andExpect(jsonPath("$", not(hasKey("lastLoginAt"))));
 
-        mockMvc.perform(get("/api/admin-users").session(login.session()))
+        LoginSession manager = login(mockMvc, "manager", "correct-password-1");
+        mockMvc.perform(get("/api/admin-users").session(manager.session()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.username == 'Admin')].lastLoginAt[0]", not(blankOrNullString())));
+    }
+
+    @Test
+    void loginReturnsAdminAndUserRoles() throws Exception {
+        LoginSession admin = login(mockMvc, "manager", "correct-password-1");
+        mockMvc.perform(get("/api/auth/me").session(admin.session()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("ADMIN"));
+
+        LoginSession user = login(mockMvc, "user", "old-password-1");
+        mockMvc.perform(get("/api/auth/me").session(user.session()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("USER"));
     }
 
     @Test
@@ -66,8 +84,8 @@ class AuthControllerIntegrationTest extends AdminAuthTestSupport {
     }
 
     @Test
-    void viewerCanChangeOwnPasswordAndKeepCurrentSession() throws Exception {
-        LoginSession login = login(mockMvc, "viewer", "old-password-1");
+    void userCanChangeOwnPasswordAndKeepCurrentSession() throws Exception {
+        LoginSession login = login(mockMvc, "user", "old-password-1");
         Csrf csrf = csrf(mockMvc);
 
         mockMvc.perform(post("/api/auth/change-password")
@@ -80,16 +98,16 @@ class AuthControllerIntegrationTest extends AdminAuthTestSupport {
                         """))
                 .andExpect(status().isNoContent());
 
-        assertLoginFails("viewer", "old-password-1");
-        login(mockMvc, "viewer", "new-password-123");
+        assertLoginFails("user", "old-password-1");
+        login(mockMvc, "user", "new-password-123");
         mockMvc.perform(get("/api/auth/me").session(login.session()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("Viewer"));
+                .andExpect(jsonPath("$.username").value("User"));
     }
 
     @Test
     void changePasswordRejectsWrongOldPasswordAndShortNewPassword() throws Exception {
-        LoginSession login = login(mockMvc, "viewer", "old-password-1");
+        LoginSession login = login(mockMvc, "user", "old-password-1");
         Csrf csrf = csrf(mockMvc);
 
         mockMvc.perform(post("/api/auth/change-password")
@@ -109,10 +127,28 @@ class AuthControllerIntegrationTest extends AdminAuthTestSupport {
                         .header("X-XSRF-TOKEN", csrf.token())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {"oldPassword":"old-password-1","newPassword":"short"}
+                        {"oldPassword":"old-password-1","newPassword":"1234"}
                         """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void changePasswordAcceptsFiveCharacterNewPassword() throws Exception {
+        LoginSession login = login(mockMvc, "user", "old-password-1");
+        Csrf csrf = csrf(mockMvc);
+
+        mockMvc.perform(post("/api/auth/change-password")
+                        .session(login.session())
+                        .cookie(csrf.cookie())
+                        .header("X-XSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {"oldPassword":"old-password-1","newPassword":"12345"}
+                        """))
+                .andExpect(status().isNoContent());
+
+        login(mockMvc, "user", "12345");
     }
 
     @Test

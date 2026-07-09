@@ -25,16 +25,20 @@ import org.springframework.test.web.servlet.MockMvc;
     "INSERT INTO admin_user (id, username, username_normalized, password_hash, display_name, role, enabled, created_at, updated_at) "
             + "VALUES (1, 'Admin', 'admin', '"
             + AdminAuthTestSupport.ADMIN_PASSWORD_HASH
-            + "', 'Root Admin', 'ADMIN', TRUE, '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+            + "', 'Root Admin', 'SUPER_ADMIN', TRUE, '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
     "INSERT INTO admin_user (id, username, username_normalized, password_hash, display_name, role, enabled, last_login_at, created_at, updated_at) "
-            + "VALUES (2, 'Viewer', 'viewer', '"
-            + AdminAuthTestSupport.VIEWER_PASSWORD_HASH
-            + "', 'Viewer User', 'VIEWER', TRUE, '2024-01-03T00:00:00Z', '2024-01-02T00:00:00Z', '2024-01-02T00:00:00Z')",
+            + "VALUES (2, 'User', 'user', '"
+            + AdminAuthTestSupport.OLD_PASSWORD_HASH
+            + "', 'Basic User', 'USER', TRUE, '2024-01-03T00:00:00Z', '2024-01-02T00:00:00Z', '2024-01-02T00:00:00Z')",
     "INSERT INTO admin_user (id, username, username_normalized, password_hash, display_name, role, enabled, created_at, updated_at) "
             + "VALUES (3, 'SecondAdmin', 'secondadmin', '"
             + AdminAuthTestSupport.ADMIN_PASSWORD_HASH
             + "', 'Second Admin', 'ADMIN', TRUE, '2023-12-31T00:00:00Z', '2023-12-31T00:00:00Z')",
-    "ALTER TABLE admin_user ALTER COLUMN id RESTART WITH 4"
+    "INSERT INTO admin_user (id, username, username_normalized, password_hash, display_name, role, enabled, created_at, updated_at) "
+            + "VALUES (4, 'SecondRoot', 'secondroot', '"
+            + AdminAuthTestSupport.ADMIN_PASSWORD_HASH
+            + "', 'Second Root', 'SUPER_ADMIN', TRUE, '2023-12-30T00:00:00Z', '2023-12-30T00:00:00Z')",
+    "ALTER TABLE admin_user ALTER COLUMN id RESTART WITH 5"
 })
 class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
     @Autowired
@@ -46,9 +50,9 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
 
         mockMvc.perform(get("/api/admin-users").session(login.session()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].username").value("Viewer"))
-                .andExpect(jsonPath("$[0].displayName").value("Viewer User"))
-                .andExpect(jsonPath("$[0].role").value("VIEWER"))
+                .andExpect(jsonPath("$[0].username").value("User"))
+                .andExpect(jsonPath("$[0].displayName").value("Basic User"))
+                .andExpect(jsonPath("$[0].role").value("USER"))
                 .andExpect(jsonPath("$[0].enabled").value(true))
                 .andExpect(jsonPath("$[0].lastLoginAt").value("2024-01-03T00:00:00Z"))
                 .andExpect(jsonPath("$[0].createdAt").value("2024-01-02T00:00:00Z"))
@@ -58,8 +62,8 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
     }
 
     @Test
-    void viewerCannotListUsers() throws Exception {
-        LoginSession login = login(mockMvc, "viewer", "viewer-password-1");
+    void userCannotListUsers() throws Exception {
+        LoginSession login = login(mockMvc, "user", "old-password-1");
 
         mockMvc.perform(get("/api/admin-users").session(login.session()))
                 .andExpect(status().isForbidden())
@@ -67,7 +71,78 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
     }
 
     @Test
-    void adminCreatesViewerWithNormalizedUsernameAndTrimmedDisplayName() throws Exception {
+    void adminCanOnlyManageUsers() throws Exception {
+        LoginSession login = login(mockMvc, "secondadmin", "correct-password-1");
+        Csrf csrf = csrf(mockMvc);
+
+        mockMvc.perform(post("/api/admin-users")
+                        .session(login.session())
+                        .cookie(csrf.cookie())
+                        .header("X-XSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {"username":"ManagedUser","password":"12345","role":"USER"}
+                        """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.role").value("USER"));
+
+        mockMvc.perform(post("/api/admin-users")
+                        .session(login.session())
+                        .cookie(csrf.cookie())
+                        .header("X-XSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {"username":"ManagedAdmin","password":"12345","role":"ADMIN"}
+                        """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+
+        patchUser(login, csrf, 2, """
+                        {"enabled":false}
+                        """)
+                .andExpect(status().isOk());
+
+        patchUser(login, csrf, 1, """
+                        {"enabled":false}
+                        """)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+
+        mockMvc.perform(post("/api/admin-users/3/reset-password")
+                        .session(login.session())
+                        .cookie(csrf.cookie())
+                        .header("X-XSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {"newPassword":"12345"}
+                        """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+    }
+
+    @Test
+    void onlySuperAdminCanReadRoleMatrix() throws Exception {
+        LoginSession superAdmin = login(mockMvc, "admin", "correct-password-1");
+        mockMvc.perform(get("/api/admin-roles").session(superAdmin.session()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].role").value("SUPER_ADMIN"))
+                .andExpect(jsonPath("$[1].role").value("ADMIN"))
+                .andExpect(jsonPath("$[2].role").value("USER"))
+                .andExpect(jsonPath("$[0].description").isNotEmpty());
+
+        LoginSession admin = login(mockMvc, "secondadmin", "correct-password-1");
+        mockMvc.perform(get("/api/admin-roles").session(admin.session()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+
+        LoginSession user = login(mockMvc, "user", "old-password-1");
+        mockMvc.perform(get("/api/admin-roles").session(user.session()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+    }
+
+    @Test
+    void adminCreatesUserWithNormalizedUsernameAndTrimmedDisplayName() throws Exception {
         LoginSession login = login(mockMvc, "admin", "correct-password-1");
         Csrf csrf = csrf(mockMvc);
 
@@ -77,16 +152,16 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
                         .header("X-XSRF-TOKEN", csrf.token())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {"username":"New.Viewer","password":"viewer-password-1","displayName":"   ","role":"VIEWER"}
+                        {"username":"New.User","password":"user-password-1","displayName":"   ","role":"USER"}
                         """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.username").value("New.Viewer"))
+                .andExpect(jsonPath("$.username").value("New.User"))
                 .andExpect(jsonPath("$.displayName").doesNotExist())
-                .andExpect(jsonPath("$.role").value("VIEWER"))
+                .andExpect(jsonPath("$.role").value("USER"))
                 .andExpect(jsonPath("$.enabled").value(true))
                 .andExpect(jsonPath("$", not(hasKey("passwordHash"))));
 
-        login(mockMvc, " new.viewer ", "viewer-password-1");
+        login(mockMvc, " new.user ", "user-password-1");
     }
 
     @Test
@@ -100,7 +175,7 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
                         .header("X-XSRF-TOKEN", csrf.token())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {"username":"Another","password":"viewer-password-1","role":"admin"}
+                        {"username":"Another","password":"user-password-1","role":"admin"}
                         """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
@@ -111,7 +186,7 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
                         .header("X-XSRF-TOKEN", csrf.token())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {"username":"admin","password":"viewer-password-1","role":"VIEWER"}
+                        {"username":"admin","password":"user-password-1","role":"USER"}
                         """))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("ADMIN_USER_CONFLICT"));
@@ -128,12 +203,12 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
                         .header("X-XSRF-TOKEN", csrf.token())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {"displayName":"  Updated Viewer  ","role":"ADMIN","enabled":false}
+                        {"displayName":"  Updated User  ","role":"ADMIN","enabled":false}
                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(2))
-                .andExpect(jsonPath("$.username").value("Viewer"))
-                .andExpect(jsonPath("$.displayName").value("Updated Viewer"))
+                .andExpect(jsonPath("$.username").value("User"))
+                .andExpect(jsonPath("$.displayName").value("Updated User"))
                 .andExpect(jsonPath("$.role").value("ADMIN"))
                 .andExpect(jsonPath("$.enabled").value(false));
     }
@@ -147,7 +222,7 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
                         {"role":"ADMIN"}
                         """)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.displayName").value("Viewer User"))
+                .andExpect(jsonPath("$.displayName").value("Basic User"))
                 .andExpect(jsonPath("$.role").value("ADMIN"))
                 .andExpect(jsonPath("$.enabled").value(true));
     }
@@ -181,12 +256,12 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
                 .andExpect(jsonPath("$.code").value("ADMIN_USER_CONFLICT"));
 
         patchUser(login, csrf, 1, """
-                        {"role":"VIEWER"}
+                        {"role":"USER"}
                         """)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("ADMIN_USER_CONFLICT"));
 
-        patchUser(login, csrf, 3, """
+        patchUser(login, csrf, 4, """
                         {"enabled":false}
                         """)
                 .andExpect(status().isOk());
@@ -197,7 +272,7 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
                 .andExpect(status().isOk());
 
         patchUser(login, csrf, 1, """
-                        {"role":"VIEWER"}
+                        {"role":"USER"}
                         """)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("ADMIN_USER_CONFLICT"));
@@ -236,10 +311,50 @@ class AdminUserControllerIntegrationTest extends AdminAuthTestSupport {
                         .header("X-XSRF-TOKEN", csrf.token())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {"newPassword":"short"}
+                        {"newPassword":"1234"}
                         """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        mockMvc.perform(post("/api/admin-users/2/reset-password")
+                        .session(login.session())
+                        .cookie(csrf.cookie())
+                        .header("X-XSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {"newPassword":"12345"}
+                        """))
+                .andExpect(status().isNoContent());
+
+        login(mockMvc, "user", "12345");
+    }
+
+    @Test
+    void createUserPasswordMinimumLengthIsFive() throws Exception {
+        LoginSession login = login(mockMvc, "admin", "correct-password-1");
+        Csrf csrf = csrf(mockMvc);
+
+        mockMvc.perform(post("/api/admin-users")
+                        .session(login.session())
+                        .cookie(csrf.cookie())
+                        .header("X-XSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {"username":"ShortPass","password":"1234","role":"USER"}
+                        """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        mockMvc.perform(post("/api/admin-users")
+                        .session(login.session())
+                        .cookie(csrf.cookie())
+                        .header("X-XSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {"username":"FivePass","password":"12345","role":"USER"}
+                        """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username").value("FivePass"));
     }
 
     private org.springframework.test.web.servlet.ResultActions patchUser(

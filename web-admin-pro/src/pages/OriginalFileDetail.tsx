@@ -34,8 +34,10 @@ export default function OriginalFileDetailPage() {
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <OriginalFileSummary file={data} />
             <Space>
-              <Link to={`/original-files/${fileId}/blocks`}>查看内容块</Link>
-              {data.matchedWorkId ? <WorkLink workId={data.matchedWorkId} /> : null}
+              <Link to={`/original-files/${fileId}/blocks`}>查看解析后全文</Link>
+              {data.matchedWorkId ? (
+                <WorkLink workId={data.matchedWorkId}>查看匹配论文详情</WorkLink>
+              ) : null}
             </Space>
             <div>
               <h2>文本文件</h2>
@@ -65,7 +67,9 @@ export default function OriginalFileDetailPage() {
                 ]}
               />
             </div>
-            <AssetLink url={data.originalFileUrl}>{data.originalFileName}</AssetLink>
+            <AssetLink url={data.originalFileUrl}>
+              {`查看原始文件：${data.originalFileName}`}
+            </AssetLink>
           </Space>
         )}
       </QueryState>

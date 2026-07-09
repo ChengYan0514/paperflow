@@ -23,15 +23,16 @@ uv run python -c "import yaml; yaml.safe_load(open('docs_java/api.yaml'))"
 
 ## 硬边界
 
-Java 后端第一版只读。禁止生成以下能力：
+Java 后端对 Paperflow 业务表只读。允许写本地管理表 `admin_user` 和
+`admin_audit_log`；除此之外禁止生成以下能力：
 
-- `INSERT`、`UPDATE`、`DELETE`、DDL、迁移脚本。
+- 对 Paperflow 业务表执行 `INSERT`、`UPDATE`、`DELETE`、DDL、迁移脚本。
 - 修改 `original_file_job` 状态。
 - 人工修正 Matching。
 - 调用 Python CLI、MinerU 或外部采集程序。
 - 读取 `DATA_ROOT` 之外的文件、写入文件、下载远程 PDF、生成或修改 parsed
   图片。
-- 登录、角色、JWT、Spring Security。
+- JWT、SSO、自注册、动态 RBAC。
 - Redis、缓存、消息队列、定时任务。
 - GraphQL、WebSocket、前端页面。
 
@@ -45,6 +46,7 @@ Java 后端第一版只读。禁止生成以下能力：
 - Spring Boot 3.x
 - Maven
 - Spring Web
+- Spring Security
 - MyBatis XML mapper
 - PostgreSQL JDBC
 - Bean Validation
@@ -56,7 +58,6 @@ Java 后端第一版只读。禁止生成以下能力：
 - JPA/Hibernate
 - Lombok
 - Redis
-- Spring Security
 - jOOQ
 - Testcontainers
 - Docker 配置
@@ -104,7 +105,7 @@ model
 ## 数据库规范
 
 - Java 默认复用 `.env` 中的 `PAPERFLOW_DB_*` 连接配置；部署时建议这些变量
-  指向 PostgreSQL 只读账号。
+  指向最小权限账号：读 Paperflow 业务表，写 `admin_user` 和 `admin_audit_log`。
 - schema 通过 JDBC URL `currentSchema` 设置。
 - MyBatis SQL 使用裸表名，不拼 `${schema}`。
 - SQL 写在 `src/main/resources/mapper/*.xml`。

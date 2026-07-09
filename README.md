@@ -12,7 +12,18 @@ Paperflow database. It contains:
 
 The platform reads Paperflow PostgreSQL tables and files under `DATA_ROOT`. It
 does not import data, trigger the Python pipeline, run MinerU, or write
-Paperflow tables.
+Paperflow business tables. It only writes local Admin tables such as
+`admin_user` and `admin_audit_log`.
+
+Current management features include:
+
+- Session/CSRF login, fixed roles, user management, and role matrix.
+- Source, Work, Original File, parsed full-text block, and asset browsing.
+- Service status page backed by database, data-root, disk, and recent-error checks.
+- Structured operation audit log for login/logout and user-management actions.
+- CSV export for Source, Work, and Original File lists using current filters.
+- Read-only failure task guidance with CLI retry commands for Matching, Text Parsing,
+  and Block Import failures.
 
 ## Configure
 
@@ -88,7 +99,8 @@ mvn test
 ```bash
 cd web-admin-pro
 npm install
-npm run build
+npm run test
+npm run lint
 ```
 
 The legacy `web-admin/` is kept for comparison until acceptance is complete.

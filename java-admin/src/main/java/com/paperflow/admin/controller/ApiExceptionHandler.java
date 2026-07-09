@@ -4,6 +4,7 @@ import com.paperflow.admin.dto.ErrorResponse;
 import com.paperflow.admin.dto.ErrorCode;
 import com.paperflow.admin.service.ApiException;
 import com.paperflow.admin.service.NotFoundException;
+import com.paperflow.admin.service.RecentErrorService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 public class ApiExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+    private final RecentErrorService recentErrors;
+
+    public ApiExceptionHandler(RecentErrorService recentErrors) {
+        this.recentErrors = recentErrors;
+    }
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> api(ApiException exc, HttpServletRequest request) {
@@ -47,6 +53,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> internal(Exception exc, HttpServletRequest request) {
         String requestId = RequestIds.get(request);
+        recentErrors.record(requestId, request.getMethod(), request.getRequestURI(), exc.getMessage());
         log.error(
                 "Unhandled API exception requestId={} method={} path={}",
                 requestId,

@@ -10,7 +10,9 @@ security:
 tags:
   - name: Auth
   - name: Admin Users
+  - name: Audit Logs
   - name: Task Status
+  - name: Service Status
   - name: Sources
   - name: Works
   - name: Original Files
@@ -257,6 +259,68 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "500":
           $ref: "#/components/responses/InternalError"
+  /api/admin-audit-logs:
+    get:
+      tags: [Audit Logs]
+      operationId: listAdminAuditLogs
+      summary: List structured Admin operation audit logs.
+      description: SUPER_ADMIN only.
+      parameters:
+        - name: actorUsername
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: action
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: targetType
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: result
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [SUCCESS, FAILURE]
+        - name: requestId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: createdFrom
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: createdTo
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: Audit log page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAuditLogPage"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
   /api/task-status:
     get:
       tags: [Task Status]
@@ -269,6 +333,22 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TaskStatus"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/service-status:
+    get:
+      tags: [Service Status]
+      operationId: getServiceStatus
+      summary: Get authenticated service health details for the Admin UI.
+      responses:
+        "200":
+          description: Service health detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "500":
           $ref: "#/components/responses/InternalError"
   /api/sources:
@@ -327,6 +407,60 @@ paths:
                 $ref: "#/components/schemas/SourcePage"
         "400":
           $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/sources/export:
+    get:
+      tags: [Sources]
+      operationId: exportSources
+      summary: Export Sources matching current filters as UTF-8 CSV.
+      parameters:
+        - name: sourceId
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+        - name: sourceName
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+        - name: provider
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+        - name: hasOriginalFiles
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: hasFailures
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [sourceIdAsc, workCountDesc, failureCountDesc]
+      responses:
+        "200":
+          description: CSV export.
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "500":
           $ref: "#/components/responses/InternalError"
   /api/sources/{sourceId}:
@@ -468,6 +602,106 @@ paths:
                 $ref: "#/components/schemas/WorkPage"
         "400":
           $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/works/export:
+    get:
+      tags: [Works]
+      operationId: exportWorks
+      summary: Export Works matching current filters as UTF-8 CSV.
+      parameters:
+        - name: sourceId
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: "^S.+"
+        - name: workId
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: "^W.+"
+        - name: sourceName
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+        - name: authorName
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+        - name: title
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+        - name: doi
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 500
+        - name: yearFrom
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: yearTo
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: processingStatus
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ProcessingStatus"
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+        - name: language
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+        - name: matchedFileId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - publicationYearDesc
+              - publicationYearAsc
+              - titleAsc
+              - workIdAsc
+              - statusIssueFirst
+              - statusReadyFirst
+      responses:
+        "200":
+          description: CSV export.
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "500":
           $ref: "#/components/responses/InternalError"
   /api/works/{workId}:
@@ -629,6 +863,100 @@ paths:
                 $ref: "#/components/schemas/OriginalFilePage"
         "400":
           $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/original-files/export:
+    get:
+      tags: [Original Files]
+      operationId: exportOriginalFiles
+      summary: Export Original Files matching current filters as UTF-8 CSV.
+      parameters:
+        - name: sourceId
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: "^S.+"
+        - name: fileId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: sourceName
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+        - name: provider
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+        - name: matchedWorkId
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: "^W.+"
+        - name: flagMatch
+          in: query
+          required: false
+          schema:
+            type: integer
+            enum: [-1, 0, 1]
+        - name: flagText
+          in: query
+          required: false
+          schema:
+            type: integer
+            enum: [-2, -1, 0, 1, 2]
+        - name: flagBlock
+          in: query
+          required: false
+          schema:
+            type: integer
+            enum: [-1, 0, 1]
+        - name: originalFileType
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [PDF, XML, HTML]
+        - name: yearFrom
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: yearTo
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - sourceIdAsc
+              - yearDesc
+              - fileSizeAsc
+              - providerAsc
+              - textStatusIssueFirst
+      responses:
+        "200":
+          description: CSV export.
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "500":
           $ref: "#/components/responses/InternalError"
   /api/original-files/{fileId}:
@@ -1025,6 +1353,60 @@ components:
           $ref: "#/components/schemas/AdminRole"
         description:
           type: string
+    AdminAuditLogPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminAuditLog"
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+          format: int64
+    AdminAuditLog:
+      type: object
+      required: [id, action, targetType, result, createdAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+        actorId:
+          type: integer
+          format: int64
+          nullable: true
+        actorUsername:
+          type: string
+          nullable: true
+        action:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: string
+          nullable: true
+        result:
+          type: string
+          enum: [SUCCESS, FAILURE]
+        requestId:
+          type: string
+          nullable: true
+        remoteAddr:
+          type: string
+          nullable: true
+        userAgent:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
     ProcessingStatus:
       type: string
       enum:
@@ -1036,6 +1418,56 @@ components:
         - PARSED
         - BLOCK_FAILED
         - READY
+    ServiceStatus:
+      type: object
+      required: [status, version, checkedAt, backend, database, dataRoot, disk, recentErrors]
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN]
+        version:
+          type: string
+        checkedAt:
+          type: string
+          format: date-time
+        backend:
+          $ref: "#/components/schemas/ServiceCheck"
+        database:
+          $ref: "#/components/schemas/ServiceCheck"
+        dataRoot:
+          $ref: "#/components/schemas/ServiceCheck"
+        disk:
+          $ref: "#/components/schemas/ServiceCheck"
+        recentErrors:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecentError"
+    ServiceCheck:
+      type: object
+      required: [name, ok, message]
+      properties:
+        name:
+          type: string
+        ok:
+          type: boolean
+        message:
+          type: string
+    RecentError:
+      type: object
+      required: [requestId, method, path, message, createdAt]
+      properties:
+        requestId:
+          type: string
+        method:
+          type: string
+        path:
+          type: string
+        message:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
     PageMeta:
       type: object
       required: [page, size, total]

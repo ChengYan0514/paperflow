@@ -3,6 +3,11 @@
 本文把 `docs_java/admin_next_plan.md` 拆成可按 TDD 逐步开发的竖切片。每个切片
 遵循：先补一个行为测试，确认失败，再写最少实现让它通过，最后只在需要时重构。
 
+状态更新：本文是文献资源筛选、排序和菜单改造的历史 TDD 拆分。后续已经补齐
+登录权限、用户管理、真实服务状态页、失败任务只读建议、操作审计和三大列表
+CSV 导出；当前状态以 `docs_java/overview.md`、`docs/admin_runbook.md` 和
+`docs/admin_platform_maturity_gap.md` 为准。
+
 ## 已确认决策
 
 - Java API 和数据库继续使用 `Work`；前端可见中文统一显示“论文”。

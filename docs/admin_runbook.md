@@ -33,6 +33,7 @@ http://localhost:8080
 http://localhost:8080/swagger-ui/index.html
 http://localhost:8080/api.yaml
 http://localhost:8080/v3/api-docs
+http://localhost:8080/api/service-status
 ```
 
 ## 启动前端
@@ -145,7 +146,12 @@ password: admin
 - `/task-status`、`/sources`、`/works`、`/original-files` 列表和详情可加载。
 - 内容块阅读器可渲染 title、text、equation、table、image、reference、
   page_footnote。
-- `/service-status`、`/knowledge-base`、`/block-search` 保持占位页面。
+- `/sources`、`/works`、`/original-files` 可按当前筛选导出 CSV。
+- `/service-status` 展示 Java 后端、数据库、`DATA_ROOT`、磁盘空间和最近错误。
+- `/failure-tasks` 展示失败状态解释和可复制 CLI 命令；页面只读，不触发 pipeline。
+- `SUPER_ADMIN` 可访问 `/audit-logs` 查询登录、退出、创建用户、更新用户、重置密码、
+  修改密码等审计事件；`ADMIN` 和 `USER` 不可访问。
+- `/knowledge-base`、`/block-search` 仍保持占位页面。
 - Swagger 菜单打开 `/swagger-ui/index.html`。
 
 ## 停止服务

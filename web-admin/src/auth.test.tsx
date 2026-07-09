@@ -44,15 +44,15 @@ function renderPath(path: string) {
   return router;
 }
 
-const adminUser = { id: 1, username: "admin", displayName: "Root Admin", role: "ADMIN" };
-const viewerUser = { id: 2, username: "viewer", displayName: null, role: "VIEWER" };
+const adminUser = { id: 1, username: "admin", displayName: "Root Admin", role: "SUPER_ADMIN" };
+const viewerUser = { id: 2, username: "viewer", displayName: null, role: "USER" };
 
 const adminUsers = [
   {
     id: 1,
     username: "admin",
     displayName: "Root Admin",
-    role: "ADMIN",
+    role: "SUPER_ADMIN",
     enabled: true,
     lastLoginAt: "2026-07-08T10:20:30Z",
     createdAt: "2026-07-01T08:00:00Z",
@@ -62,7 +62,7 @@ const adminUsers = [
     id: 2,
     username: "viewer",
     displayName: null,
-    role: "VIEWER",
+    role: "USER",
     enabled: false,
     lastLoginAt: null,
     createdAt: "2026-07-02T09:00:00Z",
@@ -108,7 +108,7 @@ describe("auth flow", () => {
       }
       if (url.endsWith("/api/auth/login")) {
         loginCalls.push({ input, init });
-        return json({ id: 1, username: "Admin", displayName: "Root Admin", role: "ADMIN" });
+        return json({ id: 1, username: "Admin", displayName: "Root Admin", role: "SUPER_ADMIN" });
       }
       if (url.endsWith("/api/task-status")) {
         return json(taskStatus);
@@ -158,7 +158,7 @@ describe("auth flow", () => {
   test("redirects authenticated /login visits to the dashboard", async () => {
     mockFetch(({ input }) => {
       if (String(input).endsWith("/api/auth/me")) {
-        return json({ id: 2, username: "viewer", displayName: null, role: "VIEWER" });
+        return json({ id: 2, username: "viewer", displayName: null, role: "USER" });
       }
       throw new Error(`Unexpected fetch ${String(input)}`);
     });
@@ -173,7 +173,7 @@ describe("auth flow", () => {
     mockFetch(({ input, init }) => {
       const url = String(input);
       if (url.endsWith("/api/auth/me")) {
-        return json({ id: 1, username: "Admin", displayName: "Root Admin", role: "ADMIN" });
+        return json({ id: 1, username: "Admin", displayName: "Root Admin", role: "SUPER_ADMIN" });
       }
       if (url.endsWith("/api/task-status")) {
         return json(taskStatus);
@@ -195,7 +195,7 @@ describe("auth flow", () => {
 });
 
 describe("admin users page", () => {
-  test("shows user management navigation only to admins", async () => {
+  test("shows system management navigation only to managers", async () => {
     mockFetch(({ input }) => {
       const url = String(input);
       if (url.endsWith("/api/auth/me")) return json(adminUser);
@@ -204,8 +204,9 @@ describe("admin users page", () => {
     });
     renderPath("/task-status");
 
-    expect(await screen.findByText("用户管理")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "用户列表" })).toBeInTheDocument();
+    expect(await screen.findByText("系统管理")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "用户管理" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "角色管理" })).toBeInTheDocument();
 
     cleanup();
     mockFetch(({ input }) => {
@@ -217,11 +218,12 @@ describe("admin users page", () => {
     renderPath("/task-status");
 
     await screen.findByText("viewer");
-    expect(screen.queryByText("用户管理")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "用户列表" })).not.toBeInTheDocument();
+    expect(screen.queryByText("系统管理")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "用户管理" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "角色管理" })).not.toBeInTheDocument();
   });
 
-  test("guards /users by role and removes the roles placeholder", async () => {
+  test("guards /users by role and lists database admin users", async () => {
     mockFetch(({ input }) => {
       const url = String(input);
       if (url.endsWith("/api/auth/me")) return json(viewerUser);
@@ -241,20 +243,38 @@ describe("admin users page", () => {
     });
     renderPath("/users");
 
-    expect(await screen.findByRole("heading", { name: "用户列表" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "用户管理" })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith("/api/admin-users", expect.objectContaining({ credentials: "same-origin" }));
+  });
+
+  test("shows the role management page only to super admins", async () => {
+    mockFetch(({ input }) => {
+      const url = String(input);
+      if (url.endsWith("/api/auth/me")) return json(adminUser);
+      if (url.endsWith("/api/admin-roles")) {
+        return json([
+          { role: "SUPER_ADMIN", description: "Full system administration" },
+          { role: "ADMIN", description: "Manage users with USER role" },
+          { role: "USER", description: "Read-only admin access" },
+        ]);
+      }
+      throw new Error(`Unexpected fetch ${url}`);
+    });
+    renderPath("/roles");
+
+    expect(await screen.findByRole("heading", { name: "角色管理" })).toBeInTheDocument();
+    expect(await screen.findByText("SUPER_ADMIN")).toBeInTheDocument();
+    expect(screen.getByText("Manage users with USER role")).toBeInTheDocument();
 
     cleanup();
     mockFetch(({ input }) => {
       const url = String(input);
-      if (url.endsWith("/api/auth/me")) return json(adminUser);
-      if (url.endsWith("/api/admin-users")) return json([]);
+      if (url.endsWith("/api/auth/me")) return json({ ...adminUser, role: "ADMIN" });
       throw new Error(`Unexpected fetch ${url}`);
     });
-    const router = renderPath("/roles");
+    renderPath("/roles");
 
-    await waitFor(() => expect(router.state.location.pathname).toBe("/users"));
-    expect(screen.queryByText("角色权限")).not.toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "403" })).toBeInTheDocument();
   });
 
   test("renders admin users without ids or password hashes", async () => {
@@ -269,7 +289,7 @@ describe("admin users page", () => {
     expect(await screen.findByText("admin")).toBeInTheDocument();
     expect(screen.getAllByText("Root Admin").length).toBeGreaterThan(0);
     expect(screen.getAllByText("ADMIN")[0]).toBeInTheDocument();
-    expect(screen.getAllByText("VIEWER")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("USER")[0]).toBeInTheDocument();
     expect(screen.getAllByText("启用")[0]).toBeInTheDocument();
     expect(screen.getAllByText("禁用")[0]).toBeInTheDocument();
     expect(screen.getAllByText("-").length).toBeGreaterThan(0);
@@ -299,13 +319,13 @@ describe("admin users page", () => {
     });
     renderPath("/users");
 
-    await screen.findByRole("heading", { name: "用户列表" });
+    await screen.findByRole("heading", { name: "用户管理" });
     fireEvent.click(screen.getByRole("button", { name: "创建用户" }));
     expect(screen.queryByLabelText("确认密码")).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("用户名"), { target: { value: "new.viewer" } });
     fireEvent.change(screen.getByLabelText("显示名"), { target: { value: " " } });
-    fireEvent.change(screen.getByLabelText("角色"), { target: { value: "VIEWER" } });
-    fireEvent.change(screen.getByLabelText("密码"), { target: { value: "viewer-password-1" } });
+    fireEvent.change(screen.getByLabelText("角色"), { target: { value: "USER" } });
+    fireEvent.change(screen.getByLabelText("密码"), { target: { value: "12345" } });
     fireEvent.click(screen.getByLabelText("启用账号"));
     fireEvent.click(screen.getByLabelText("启用账号"));
     fireEvent.click(screen.getByRole("button", { name: "保存用户" }));
@@ -313,7 +333,7 @@ describe("admin users page", () => {
     await screen.findByText("new.viewer");
     expect((createCalls[0].init?.headers as Headers).get("X-XSRF-TOKEN")).toBe("csrf-cookie");
     expect(createCalls[0].init?.body).toBe(
-      JSON.stringify({ username: "new.viewer", displayName: "", role: "VIEWER", password: "viewer-password-1", enabled: true }),
+      JSON.stringify({ username: "new.viewer", displayName: "", role: "USER", password: "12345", enabled: true }),
     );
   });
 

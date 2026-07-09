@@ -33,6 +33,8 @@ import com.paperflow.admin.model.TaskStatusSourceRow;
 import com.paperflow.admin.model.TaskStatusTotalsRow;
 import com.paperflow.admin.model.TextFileRow;
 import com.paperflow.admin.model.WorkRow;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,6 +98,53 @@ public class AdminService {
             throw new NotFoundException(ErrorCode.SOURCE_NOT_FOUND, "Source not found");
         }
         return toSourceSummary(row);
+    }
+
+    public byte[] exportSources(
+            String sourceId,
+            String sourceName,
+            String provider,
+            Boolean hasOriginalFiles,
+            Boolean hasFailures,
+            String sort) {
+        String normalizedSort = sourceSort(sort);
+        List<List<String>> rows = mapper.listSources(
+                        blankToNull(sourceId),
+                        blankToNull(sourceName),
+                        blankToNull(provider),
+                        hasOriginalFiles,
+                        hasFailures,
+                        normalizedSort,
+                        Integer.MAX_VALUE,
+                        0)
+                .stream()
+                .map(row -> List.of(
+                        text(row.getSourceId()),
+                        text(row.getSourceName()),
+                        text(row.getProvider()),
+                        String.valueOf(row.getWorkCount()),
+                        String.valueOf(row.getOriginalFileCount()),
+                        String.valueOf(row.getMatchedFileCount()),
+                        String.valueOf(row.getParsedFileCount()),
+                        String.valueOf(row.getReadyFileCount()),
+                        String.valueOf(row.getParseFailedFileCount()),
+                        String.valueOf(row.getBlockFailedFileCount()),
+                        String.valueOf(row.getUnsupportedFileCount())))
+                .toList();
+        return csv(
+                List.of(
+                        "来源期刊ID",
+                        "来源期刊名称",
+                        "平台",
+                        "论文数",
+                        "原始文件数",
+                        "已匹配文件数",
+                        "已解析文件数",
+                        "全文入库文件数",
+                        "解析失败文件数",
+                        "内容块入库失败文件数",
+                        "不支持解析文件数"),
+                rows);
     }
 
     public TaskStatusResponse getTaskStatus() {
@@ -176,6 +225,77 @@ public class AdminService {
                 deriveStatus(matchedFile));
     }
 
+    public byte[] exportWorks(
+            String sourceId,
+            String workId,
+            String sourceName,
+            String authorName,
+            String title,
+            String doi,
+            Integer yearFrom,
+            Integer yearTo,
+            ProcessingStatus processingStatus,
+            String type,
+            String language,
+            String matchedFileId,
+            String sort) {
+        if (yearFrom != null && yearTo != null && yearFrom > yearTo) {
+            throw new IllegalArgumentException("Invalid request");
+        }
+        String normalizedTitle = blankToNull(title);
+        String normalizedDoi = normalizeDoi(doi);
+        String status = processingStatus == null ? null : processingStatus.name();
+        String normalizedSort = workSort(sort);
+        List<List<String>> rows = mapper.listWorks(
+                        sourceId,
+                        blankToNull(workId),
+                        blankToNull(sourceName),
+                        blankToNull(authorName),
+                        normalizedTitle,
+                        normalizedDoi,
+                        yearFrom,
+                        yearTo,
+                        status,
+                        blankToNull(type),
+                        blankToNull(language),
+                        blankToNull(matchedFileId),
+                        normalizedSort,
+                        Integer.MAX_VALUE,
+                        0)
+                .stream()
+                .map(row -> List.of(
+                        text(row.getWorkId()),
+                        text(row.getTitle()),
+                        text(row.getDoi()),
+                        text(row.getPublicationYear()),
+                        text(row.getPublicationDate()),
+                        text(row.getType()),
+                        text(row.getLanguage()),
+                        text(row.getSourceIds()),
+                        valueLabel(deriveStatus(toMatchedStatusRow(row)).name()),
+                        text(row.getMatchedFileId()),
+                        flagMatchLabel(row.getFlagMatch()),
+                        flagTextLabel(row.getFlagText()),
+                        flagBlockLabel(row.getFlagBlock())))
+                .toList();
+        return csv(
+                List.of(
+                        "论文ID",
+                        "标题",
+                        "DOI",
+                        "发表年份",
+                        "发表日期",
+                        "类型",
+                        "语言",
+                        "来源期刊ID",
+                        "处理状态",
+                        "匹配原始文件ID",
+                        "匹配状态",
+                        "文本解析状态",
+                        "内容块入库状态"),
+                rows);
+    }
+
     public OriginalFilePage listOriginalFiles(
             String sourceId,
             String fileId,
@@ -240,6 +360,81 @@ public class AdminService {
             throw new NotFoundException(ErrorCode.ORIGINAL_FILE_NOT_FOUND, "Original File not found");
         }
         return toMatchedFile(row);
+    }
+
+    public byte[] exportOriginalFiles(
+            String sourceId,
+            String fileId,
+            String sourceName,
+            String provider,
+            String matchedWorkId,
+            Integer flagMatch,
+            Integer flagText,
+            Integer flagBlock,
+            String originalFileType,
+            Integer yearFrom,
+            Integer yearTo,
+            String sort) {
+        if (yearFrom != null && yearTo != null && yearFrom > yearTo) {
+            throw new IllegalArgumentException("Invalid request");
+        }
+        validateFlag(flagMatch, -1, 0, 1);
+        validateFlag(flagText, -2, -1, 0, 1, 2);
+        validateFlag(flagBlock, -1, 0, 1);
+        String normalizedSort = originalFileSort(sort);
+        List<List<String>> rows = mapper.listOriginalFiles(
+                        sourceId,
+                        blankToNull(fileId),
+                        blankToNull(sourceName),
+                        blankToNull(provider),
+                        matchedWorkId,
+                        flagMatch,
+                        flagText,
+                        flagBlock,
+                        blankToNull(originalFileType),
+                        yearFrom,
+                        yearTo,
+                        normalizedSort,
+                        Integer.MAX_VALUE,
+                        0)
+                .stream()
+                .map(row -> List.of(
+                        text(row.getFileId()),
+                        text(row.getOriginalFileName()),
+                        text(row.getPaperTitle()),
+                        text(row.getSourceId()),
+                        text(row.getYear()),
+                        text(row.getAuthors()),
+                        text(row.getDoi()),
+                        text(row.getUrl()),
+                        text(row.getProvider()),
+                        text(row.getOriginalFileType()),
+                        text(row.getFileSize()),
+                        text(row.getMatchedWorkId()),
+                        flagMatchLabel(row.getFlagMatch()),
+                        flagTextLabel(row.getFlagText()),
+                        flagBlockLabel(row.getFlagBlock()),
+                        text(row.getOriginalFilePath())))
+                .toList();
+        return csv(
+                List.of(
+                        "原始文件ID",
+                        "原始文件名",
+                        "论文标题",
+                        "来源期刊ID",
+                        "年份",
+                        "作者",
+                        "DOI",
+                        "URL",
+                        "平台",
+                        "文件类型",
+                        "文件大小",
+                        "匹配论文ID",
+                        "匹配状态",
+                        "文本解析状态",
+                        "内容块入库状态",
+                        "原始文件路径"),
+                rows);
     }
 
     public BlockPage listWorkBlocks(String workId, Boolean includeDiscarded, Integer page, Integer size) {
@@ -553,5 +748,86 @@ public class AdminService {
             }
         }
         throw new IllegalArgumentException("Invalid request");
+    }
+
+    private byte[] csv(List<String> header, List<List<String>> rows) {
+        StringBuilder builder = new StringBuilder("\uFEFF");
+        appendCsvRow(builder, header);
+        for (List<String> row : rows) {
+            appendCsvRow(builder, row);
+        }
+        return builder.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    private void appendCsvRow(StringBuilder builder, List<String> row) {
+        List<String> escaped = new ArrayList<>(row.size());
+        for (String value : row) {
+            escaped.add(csvCell(value));
+        }
+        builder.append(String.join(",", escaped)).append("\r\n");
+    }
+
+    private String csvCell(String value) {
+        String text = value == null ? "" : value;
+        if (text.contains("\"") || text.contains(",") || text.contains("\r") || text.contains("\n")) {
+            return "\"" + text.replace("\"", "\"\"") + "\"";
+        }
+        return text;
+    }
+
+    private String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    private String valueLabel(String status) {
+        return switch (status) {
+            case "NO_MATCHED_FILE" -> "未匹配原始文件";
+            case "MATCHED" -> "已匹配";
+            case "PARSING" -> "解析中";
+            case "PARSE_FAILED" -> "解析失败";
+            case "UNSUPPORTED_TEXT_INPUT" -> "不支持解析";
+            case "PARSED" -> "已解析";
+            case "BLOCK_FAILED" -> "内容块入库失败";
+            case "READY" -> "就绪";
+            default -> status;
+        };
+    }
+
+    private String flagMatchLabel(Integer value) {
+        if (value == null) {
+            return "";
+        }
+        return switch (value) {
+            case -1 -> "匹配失败";
+            case 0 -> "未尝试";
+            case 1 -> "已匹配";
+            default -> String.valueOf(value);
+        };
+    }
+
+    private String flagTextLabel(Integer value) {
+        if (value == null) {
+            return "";
+        }
+        return switch (value) {
+            case -2 -> "不支持解析";
+            case -1 -> "解析失败";
+            case 0 -> "未解析";
+            case 1 -> "解析中";
+            case 2 -> "解析完成";
+            default -> String.valueOf(value);
+        };
+    }
+
+    private String flagBlockLabel(Integer value) {
+        if (value == null) {
+            return "";
+        }
+        return switch (value) {
+            case -1 -> "入库失败";
+            case 0 -> "未入库";
+            case 1 -> "入库完成";
+            default -> String.valueOf(value);
+        };
     }
 }

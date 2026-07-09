@@ -4,6 +4,11 @@
 每个阶段都按竖切片推进：先写一个能失败的行为测试，再写最少实现让它通过，
 最后只做必要重构。
 
+后续状态：第一阶段迁移完成后，`/service-status`、`/failure-tasks`、`/audit-logs`
+和三大列表 CSV 导出已接入真实功能；知识管理页面仍按占位处理。当前能力以
+`docs/admin_runbook.md`、`docs/admin_platform_maturity_gap.md` 和
+`docs_java/overview.md` 为准。
+
 ## 执行顺序
 
 1. `docs/ant_design_pro_tdd_01_roles_backend.md`
@@ -26,7 +31,8 @@
 - 旧 `web-admin/` 在验收前保留。
 - 新前端只使用 `API_BASE_URL`，不兼容 `VITE_API_BASE_URL`。
 - 角色固定为 `SUPER_ADMIN`、`ADMIN`、`USER`，不做动态 RBAC。
-- 服务管理和知识管理第一阶段只保留占位页面。
+- 服务管理和知识管理第一阶段只保留占位页面；后续服务状态、失败任务和审计查询
+  已单独补齐。
 
 ## 每阶段提交建议
 

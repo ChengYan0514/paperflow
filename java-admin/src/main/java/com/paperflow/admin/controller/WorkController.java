@@ -9,6 +9,7 @@ import com.paperflow.admin.dto.WorkPage;
 import com.paperflow.admin.service.AdminService;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +60,39 @@ public class WorkController {
                 sort,
                 page,
                 size);
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportWorks(
+            @RequestParam(required = false) @Pattern(regexp = "^S.+") String sourceId,
+            @RequestParam(required = false) @Pattern(regexp = "^W.+") String workId,
+            @RequestParam(required = false) @Size(max = 200) String sourceName,
+            @RequestParam(required = false) @Size(max = 200) String authorName,
+            @RequestParam(required = false) @Size(max = 200) String title,
+            @RequestParam(required = false) @Size(max = 500) String doi,
+            @RequestParam(required = false) Integer yearFrom,
+            @RequestParam(required = false) Integer yearTo,
+            @RequestParam(required = false) ProcessingStatus processingStatus,
+            @RequestParam(required = false) @Size(max = 100) String type,
+            @RequestParam(required = false) @Size(max = 100) String language,
+            @RequestParam(required = false) String matchedFileId,
+            @RequestParam(required = false) String sort) {
+        return CsvResponses.attachment(
+                "works.csv",
+                service.exportWorks(
+                        sourceId,
+                        workId,
+                        sourceName,
+                        authorName,
+                        title,
+                        doi,
+                        yearFrom,
+                        yearTo,
+                        processingStatus,
+                        type,
+                        language,
+                        matchedFileId,
+                        sort));
     }
 
     @GetMapping("/{workId}")

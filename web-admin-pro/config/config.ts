@@ -10,13 +10,13 @@ export default defineConfig({
   publicPath: '/',
   proxy: proxy[umiEnv as keyof typeof proxy] || proxy.dev,
   routes,
-  title: 'PaperFlow Admin',
+  title: 'PaperFlow 管理台',
   ignoreMomentLocale: true,
   model: {},
   initialState: {},
   access: {},
   layout: {
-    title: 'PaperFlow Admin',
+    title: 'PaperFlow 管理台',
     locale: false,
   },
   antd: {

@@ -51,7 +51,11 @@ export default function WorkDetailPage() {
               <h2>来源期刊</h2>
               <Space wrap>
                 {data.sources.map((source) => (
-                  <SourceLink key={source.sourceId} sourceId={source.sourceId} />
+                  <SourceLink
+                    key={source.sourceId}
+                    sourceId={source.sourceId}
+                    sourceName={source.sourceName}
+                  />
                 ))}
               </Space>
             </div>
@@ -73,8 +77,10 @@ export default function WorkDetailPage() {
               {data.matchedFile ? <OriginalFileSummary file={data.matchedFile} /> : '未匹配原始文件'}
             </div>
             <Space>
-              <Link to={`/works/${workId}/blocks`}>查看内容块</Link>
-              {data.matchedFile ? <OriginalFileLink fileId={data.matchedFile.fileId} /> : null}
+              <Link to={`/works/${workId}/blocks`}>查看解析后全文</Link>
+              {data.matchedFile ? (
+                <OriginalFileLink fileId={data.matchedFile.fileId}>查看匹配原始文件</OriginalFileLink>
+              ) : null}
             </Space>
           </Space>
         )}

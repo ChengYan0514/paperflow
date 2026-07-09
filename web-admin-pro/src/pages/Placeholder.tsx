@@ -13,7 +13,7 @@ const pageTitles: Record<string, string> = {
 
 export default function Placeholder() {
   const { pathname } = useLocation();
-  const title = pageTitles[pathname] ?? 'PaperFlow Admin';
+  const title = pageTitles[pathname] ?? 'PaperFlow 管理台';
 
   return (
     <PageContainer title={title}>

@@ -67,6 +67,17 @@ export const fieldLabels: Record<string, string> = {
   fileType: '文件类型',
   fileName: '文件名',
   filePath: '文件路径',
+  actorUsername: '操作人',
+  action: '操作类型',
+  targetType: '目标类型',
+  targetId: '目标',
+  result: '结果',
+  requestId: '请求 ID',
+  remoteAddr: 'IP',
+  userAgent: 'User-Agent',
+  message: '说明',
+  createdAt: '操作时间',
+  createdRange: '操作时间',
 };
 
 const valueLabels: Record<string, string> = {
@@ -103,18 +114,28 @@ const valueLabels: Record<string, string> = {
   MATCHING: '论文匹配',
   TEXT_PARSING: '文件解析',
   BLOCK_IMPORT: '全文入库',
+  SUCCESS: '成功',
+  FAILURE: '失败',
+  LOGIN: '登录',
+  LOGOUT: '退出登录',
+  CHANGE_PASSWORD: '修改密码',
+  CREATE_ADMIN_USER: '创建用户',
+  UPDATE_ADMIN_USER: '更新用户',
+  RESET_PASSWORD: '重置密码',
+  AUTH: '认证',
+  ADMIN_USER: '用户',
 };
 
-const flagLabels: Record<string, Record<string, string>> = {
-  flagMatch: { '-1': '未匹配 (-1)', '0': '未尝试 (0)', '1': '已匹配 (1)' },
+export const flagLabels: Record<string, Record<string, string>> = {
+  flagMatch: { '-1': '未匹配', '0': '未尝试', '1': '已匹配' },
   flagText: {
-    '-2': '不支持解析 (-2)',
-    '-1': '解析失败 (-1)',
-    '0': '未解析 (0)',
-    '1': '解析中 (1)',
-    '2': '解析完成 (2)',
+    '-2': '不支持解析',
+    '-1': '解析失败',
+    '0': '未解析',
+    '1': '解析中',
+    '2': '解析完成',
   },
-  flagBlock: { '-1': '入库失败 (-1)', '0': '未入库 (0)', '1': '入库完成 (1)' },
+  flagBlock: { '-1': '入库失败', '0': '未入库', '1': '入库完成' },
 };
 
 export function fieldLabel(value: string) {
@@ -428,16 +449,38 @@ export function AssetLink({
   );
 }
 
-export function SourceLink({ sourceId }: { sourceId: string }) {
-  return <Link to={`/sources/${sourceId}`}>{sourceId}</Link>;
+export function SourceLink({
+  sourceId,
+  sourceName,
+}: {
+  sourceId: string;
+  sourceName?: string | null;
+}) {
+  return (
+    <Link to={`/sources/${sourceId}`}>
+      {sourceName ? `${sourceName} (${sourceId})` : sourceId}
+    </Link>
+  );
 }
 
-export function WorkLink({ workId }: { workId: string }) {
-  return <Link to={`/works/${workId}`}>{workId}</Link>;
+export function WorkLink({
+  workId,
+  children,
+}: {
+  workId: string;
+  children?: ReactNode;
+}) {
+  return <Link to={`/works/${workId}`}>{children ?? workId}</Link>;
 }
 
-export function OriginalFileLink({ fileId }: { fileId: string }) {
-  return <Link to={`/original-files/${fileId}`}>{fileId}</Link>;
+export function OriginalFileLink({
+  fileId,
+  children,
+}: {
+  fileId: string;
+  children?: ReactNode;
+}) {
+  return <Link to={`/original-files/${fileId}`}>{children ?? fileId}</Link>;
 }
 
 export function DetailGrid({

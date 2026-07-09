@@ -27,6 +27,31 @@ describe('routes', () => {
           name: '角色管理',
           path: '/roles',
         }),
+        expect.objectContaining({
+          access: 'canViewAuditLogs',
+          component: './AuditLogs',
+          name: '操作审计',
+          path: '/audit-logs',
+        }),
+      ]),
+    );
+  });
+
+  it('uses real pages for service status and failure tasks', () => {
+    const service = routes.find((route) => route.key === 'service');
+
+    expect(service?.routes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          component: './ServiceStatus',
+          name: '服务状态',
+          path: '/service-status',
+        }),
+        expect.objectContaining({
+          component: './FailureTasks',
+          name: '失败任务',
+          path: '/failure-tasks',
+        }),
       ]),
     );
   });

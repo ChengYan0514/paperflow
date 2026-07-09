@@ -1,8 +1,10 @@
+import { DownloadOutlined } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { Link, useSearchParams } from '@umijs/max';
+import { Button } from 'antd';
 import { useEffect, useState } from 'react';
 import type { Page, WorkListItem } from '@/services/business';
-import { listWorks } from '@/services/business';
+import { listWorks, worksExportUrl } from '@/services/business';
 import {
   fieldLabel,
   OriginalFileLink,
@@ -74,7 +76,11 @@ export default function WorksPage() {
             dataSource={page.items}
             rowKey="workId"
             search={false}
-            toolBarRender={false}
+            toolBarRender={() => [
+              <Button href={worksExportUrl(searchParams)} icon={<DownloadOutlined />} key="export">
+                导出 CSV
+              </Button>,
+            ]}
             pagination={tablePagination(page, searchParams, setSearchParams)}
             scroll={{ x: 1080 }}
             columns={[

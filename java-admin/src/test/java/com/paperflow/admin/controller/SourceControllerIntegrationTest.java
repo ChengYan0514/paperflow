@@ -1,6 +1,8 @@
 package com.paperflow.admin.controller;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -125,5 +127,14 @@ class SourceControllerIntegrationTest {
         mockMvc.perform(get("/api/sources").param("sort", "providerAsc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void exportsFilteredSourcesAsCsv() throws Exception {
+        mockMvc.perform(get("/api/sources/export").param("sourceId", "S1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("text/csv;charset=UTF-8"))
+                .andExpect(content().string(containsString("来源期刊ID,来源期刊名称,平台")))
+                .andExpect(content().string(containsString("S1,Source One,Publisher A")));
     }
 }

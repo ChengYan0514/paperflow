@@ -6,6 +6,7 @@ import com.paperflow.admin.dto.OriginalFilePage;
 import com.paperflow.admin.service.AdminService;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,6 +55,37 @@ public class OriginalFileController {
                 sort,
                 page,
                 size);
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportOriginalFiles(
+            @RequestParam(required = false) @Pattern(regexp = "^S.+") String sourceId,
+            @RequestParam(required = false) String fileId,
+            @RequestParam(required = false) @Size(max = 200) String sourceName,
+            @RequestParam(required = false) @Size(max = 200) String provider,
+            @RequestParam(required = false) @Pattern(regexp = "^W.+") String matchedWorkId,
+            @RequestParam(required = false) Integer flagMatch,
+            @RequestParam(required = false) Integer flagText,
+            @RequestParam(required = false) Integer flagBlock,
+            @RequestParam(required = false) String originalFileType,
+            @RequestParam(required = false) Integer yearFrom,
+            @RequestParam(required = false) Integer yearTo,
+            @RequestParam(required = false) String sort) {
+        return CsvResponses.attachment(
+                "original-files.csv",
+                service.exportOriginalFiles(
+                        sourceId,
+                        fileId,
+                        sourceName,
+                        provider,
+                        matchedWorkId,
+                        flagMatch,
+                        flagText,
+                        flagBlock,
+                        originalFileType,
+                        yearFrom,
+                        yearTo,
+                        sort));
     }
 
     @GetMapping("/{fileId}")

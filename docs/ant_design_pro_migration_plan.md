@@ -4,6 +4,10 @@
 前端的实施方案，并同步定义三角色用户权限模型。第一阶段目标是功能等价迁移，
 同时完成用户与角色管理所需的最小后端改造。
 
+现状补充：第一阶段之后已继续补齐服务状态页、操作审计查询、失败任务只读处理建议，
+以及 Source / Work / Original File 三大列表 CSV 导出。业务写操作和在线触发
+pipeline 仍然不是当前目标。
+
 按 TDD 逐步开发时，从阶段索引开始：
 `docs/ant_design_pro_tdd_00_index.md`。
 
@@ -30,7 +34,7 @@
 第一阶段不做：
 
 - 动态 RBAC，不创建 `role`、`permission`、`role_permission` 表。
-- 用户删除、审计日志、登录历史查询。
+- 用户删除、登录历史查询；操作审计查询已在后续补齐。
 - SSO、JWT、第三方登录、自注册。
 - Spring Boot JAR 内嵌前端静态资源。
 - 业务数据写操作，例如重试任务、人工修正匹配、修改 Paperflow 表。
@@ -94,6 +98,7 @@ API_BASE_URL=http://localhost:8080 npm start
 
 服务管理
 - 服务状态
+- 失败任务
 - Swagger
 
 知识管理
@@ -110,7 +115,7 @@ USER:        业务菜单 + 服务管理 + 知识管理，不显示系统管理
 ```
 
 `/swagger-ui/index.html` 继续作为外链入口。
-`服务管理` 和 `知识管理` 第一阶段只保留原前端占位页面，不做具体功能实现。
+`服务状态` 和 `失败任务` 已接入真实页面；`知识管理` 第一阶段仍保留占位页面。
 
 ## 角色模型
 
@@ -154,6 +159,7 @@ USER
 /works
 /original-files
 /service-status
+/failure-tasks
 /knowledge-base
 /block-search
 /swagger-ui/index.html

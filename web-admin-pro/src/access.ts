@@ -10,6 +10,7 @@ export default function access(
   return {
     canSuperAdmin,
     canManageUsers,
+    canViewAuditLogs: canSuperAdmin,
     canViewRoles: canSuperAdmin,
   };
 }

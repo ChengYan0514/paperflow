@@ -33,7 +33,11 @@ export function OriginalFileSummary({ file }: { file: OriginalFile }) {
         { label: fieldLabel('flagMatch'), value: <StatusTag kind="flagMatch" value={file.flagMatch} /> },
         {
           label: fieldLabel('matchedWorkId'),
-          value: file.matchedWorkId ? <WorkLink workId={file.matchedWorkId} /> : '-',
+          value: file.matchedWorkId ? (
+            <WorkLink workId={file.matchedWorkId}>查看匹配论文</WorkLink>
+          ) : (
+            '-'
+          ),
         },
         { label: fieldLabel('flagText'), value: <StatusTag kind="flagText" value={file.flagText} /> },
         { label: fieldLabel('flagBlock'), value: <StatusTag kind="flagBlock" value={file.flagBlock} /> },

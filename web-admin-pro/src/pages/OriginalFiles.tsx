@@ -1,11 +1,14 @@
+import { DownloadOutlined } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { Link, useSearchParams } from '@umijs/max';
+import { Button } from 'antd';
 import { useEffect, useState } from 'react';
 import type { OriginalFile, Page } from '@/services/business';
-import { listOriginalFiles } from '@/services/business';
+import { listOriginalFiles, originalFilesExportUrl } from '@/services/business';
 import {
   bytes,
   fieldLabel,
+  flagLabels,
   QueryBar,
   QueryState,
   SourceLink,
@@ -29,17 +32,17 @@ const advancedFields = [
   {
     name: 'flagMatch',
     type: 'select' as const,
-    options: [-1, 0, 1].map((value) => ({ label: valueLabel(value), value })),
+    options: [-1, 0, 1].map((value) => ({ label: flagLabels.flagMatch[value], value })),
   },
   {
     name: 'flagText',
     type: 'select' as const,
-    options: [-2, -1, 0, 1, 2].map((value) => ({ label: valueLabel(value), value })),
+    options: [-2, -1, 0, 1, 2].map((value) => ({ label: flagLabels.flagText[value], value })),
   },
   {
     name: 'flagBlock',
     type: 'select' as const,
-    options: [-1, 0, 1].map((value) => ({ label: valueLabel(value), value })),
+    options: [-1, 0, 1].map((value) => ({ label: flagLabels.flagBlock[value], value })),
   },
 ];
 const sortOptions = ['sourceIdAsc', 'yearDesc', 'fileSizeAsc', 'providerAsc', 'textStatusIssueFirst'].map(
@@ -75,7 +78,15 @@ export default function OriginalFilesPage() {
             dataSource={page.items}
             rowKey="fileId"
             search={false}
-            toolBarRender={false}
+            toolBarRender={() => [
+              <Button
+                href={originalFilesExportUrl(searchParams)}
+                icon={<DownloadOutlined />}
+                key="export"
+              >
+                导出 CSV
+              </Button>,
+            ]}
             pagination={tablePagination(page, searchParams, setSearchParams)}
             scroll={{ x: 1080 }}
             columns={[

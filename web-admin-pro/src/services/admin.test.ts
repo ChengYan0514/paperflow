@@ -112,4 +112,17 @@ describe('admin service', () => {
       method: 'GET',
     });
   });
+
+  it('lists audit logs with defaults', async () => {
+    requestMock.mockResolvedValueOnce({ items: [], page: 1, size: 10, total: 0 });
+
+    const { listAdminAuditLogs } = await import('./admin');
+    const params = new URLSearchParams('action=LOGIN');
+
+    await listAdminAuditLogs(params);
+
+    expect(requestMock).toHaveBeenCalledWith('/api/admin-audit-logs?action=LOGIN&page=1&size=10', {
+      method: 'GET',
+    });
+  });
 });

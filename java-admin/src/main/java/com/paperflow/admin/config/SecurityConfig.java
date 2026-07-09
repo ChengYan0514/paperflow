@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paperflow.admin.controller.RequestIds;
 import com.paperflow.admin.dto.ErrorCode;
 import com.paperflow.admin.dto.ErrorResponse;
+import com.paperflow.admin.service.AdminAuditLogService;
+import com.paperflow.admin.service.AdminUserPrincipal;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +23,8 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 @Configuration
 public class SecurityConfig {
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper) throws Exception {
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity http, ObjectMapper objectMapper, AdminAuditLogService auditLogs) throws Exception {
         CsrfTokenRequestAttributeHandler csrfTokenRequestHandler = new CsrfTokenRequestAttributeHandler();
         return http.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "/api/auth/csrf")
                         .permitAll()
@@ -32,8 +35,19 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(csrfTokenRequestHandler))
                 .logout(logout -> logout.logoutUrl("/api/auth/logout")
-                        .logoutSuccessHandler((request, response, authentication) ->
-                                response.setStatus(HttpServletResponse.SC_NO_CONTENT)))
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            if (authentication != null
+                                    && authentication.getPrincipal() instanceof AdminUserPrincipal principal) {
+                                auditLogs.success(
+                                        principal,
+                                        "LOGOUT",
+                                        "AUTH",
+                                        String.valueOf(principal.id()),
+                                        request,
+                                        "退出登录");
+                            }
+                            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                        }))
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint((request, response, ex) -> {

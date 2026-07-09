@@ -84,6 +84,12 @@ export default [
         access: 'canViewRoles',
         component: './Roles',
       },
+      {
+        path: '/audit-logs',
+        name: '操作审计',
+        access: 'canViewAuditLogs',
+        component: './AuditLogs',
+      },
     ],
   },
   {
@@ -94,7 +100,12 @@ export default [
       {
         path: '/service-status',
         name: '服务状态',
-        component: './Placeholder',
+        component: './ServiceStatus',
+      },
+      {
+        path: '/failure-tasks',
+        name: '失败任务',
+        component: './FailureTasks',
       },
       {
         path: '/swagger-ui/index.html',

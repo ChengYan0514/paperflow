@@ -172,7 +172,7 @@ type ProcessingStatus =
   | "READY";
 
 type ApiError = { code: string; message: string; requestId: string };
-type AdminRole = "ADMIN" | "VIEWER";
+type AdminRole = "SUPER_ADMIN" | "ADMIN" | "USER";
 type AuthUser = { id: number; username: string; displayName: string | null; role: AdminRole };
 type AdminUser = AuthUser & {
   enabled: boolean;
@@ -180,6 +180,7 @@ type AdminUser = AuthUser & {
   createdAt: string;
   updatedAt: string;
 };
+type AdminRoleInfo = { role: AdminRole; description: string };
 type CsrfToken = { token: string; headerName: string; parameterName: string };
 type Page<T> = { items: T[]; page: number; size: number; total: number };
 type SourceStats = {
@@ -453,11 +454,11 @@ function Layout({ user }: { user: AuthUser }) {
               </label>
               <label>
                 <span>新密码</span>
-                <input name="newPassword" type="password" autoComplete="new-password" required minLength={12} maxLength={200} />
+                <input name="newPassword" type="password" autoComplete="new-password" required minLength={5} maxLength={200} />
               </label>
               <label>
                 <span>确认新密码</span>
-                <input name="confirmNewPassword" type="password" autoComplete="new-password" required minLength={12} maxLength={200} />
+                <input name="confirmNewPassword" type="password" autoComplete="new-password" required minLength={5} maxLength={200} />
               </label>
               {passwordError ? <small>{errorText(passwordError)}</small> : null}
               {passwordMessage ? <small className="success-text">{passwordMessage}</small> : null}
@@ -471,9 +472,10 @@ function Layout({ user }: { user: AuthUser }) {
           <NavLink to="/works">论文</NavLink>
           <NavLink to="/original-files">原始文件</NavLink>
         </NavGroup>
-        {user.role === "ADMIN" ? (
-          <NavGroup title="用户管理" paths={["/users"]}>
-            <NavLink to="/users">用户列表</NavLink>
+        {user.role !== "USER" ? (
+          <NavGroup title="系统管理" paths={["/users", "/roles"]}>
+            <NavLink to="/users">用户管理</NavLink>
+            {user.role === "SUPER_ADMIN" ? <NavLink to="/roles">角色管理</NavLink> : null}
           </NavGroup>
         ) : null}
         <NavGroup title="服务管理" paths={["/service-status"]}>
@@ -610,7 +612,7 @@ function LoginPage() {
         </label>
         <label>
           <span>密码</span>
-          <input name="password" type="password" autoComplete="current-password" required minLength={12} maxLength={200} />
+          <input name="password" type="password" autoComplete="current-password" required minLength={5} maxLength={200} />
         </label>
         {csrfQuery.isError ? <ErrorState error={csrfQuery.error} /> : null}
         <button type="submit" disabled={submitting || csrfQuery.isLoading}>
@@ -980,10 +982,12 @@ function UsersPage() {
   const [resetError, setResetError] = React.useState<unknown>(null);
   const [message, setMessage] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
-  const query = useQuery({ queryKey: ["admin-users"], queryFn: () => getJson<AdminUser[]>("/api/admin-users"), enabled: user.role === "ADMIN" });
+  const canManageUsers = user.role !== "USER";
+  const roleOptions: AdminRole[] = user.role === "SUPER_ADMIN" ? ["SUPER_ADMIN", "ADMIN", "USER"] : ["USER"];
+  const query = useQuery({ queryKey: ["admin-users"], queryFn: () => getJson<AdminUser[]>("/api/admin-users"), enabled: canManageUsers });
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["admin-users"] });
 
-  if (user.role !== "ADMIN") return <ForbiddenPage />;
+  if (!canManageUsers) return <ForbiddenPage />;
 
   const createUser = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -1043,7 +1047,7 @@ function UsersPage() {
 
   return (
     <>
-      <PageHeader title="用户列表" meta={<button type="button" onClick={() => setCreateOpen((open) => !open)}>创建用户</button>} />
+      <PageHeader title="用户管理" meta={<button type="button" onClick={() => setCreateOpen((open) => !open)}>创建用户</button>} />
       {message ? <div className="state success-state">{message}</div> : null}
       {actionError ? <ErrorState error={actionError} /> : null}
       {createOpen ? (
@@ -1058,14 +1062,13 @@ function UsersPage() {
           </label>
           <label>
             <span>角色</span>
-            <select name="role" defaultValue="VIEWER" required>
-              <option value="ADMIN">ADMIN</option>
-              <option value="VIEWER">VIEWER</option>
+            <select name="role" defaultValue={roleOptions[roleOptions.length - 1]} required>
+              {roleOptions.map((role) => <option key={role} value={role}>{role}</option>)}
             </select>
           </label>
           <label>
             <span>密码</span>
-            <input name="password" type="password" autoComplete="new-password" required minLength={12} maxLength={200} />
+            <input name="password" type="password" autoComplete="new-password" required minLength={5} maxLength={200} />
           </label>
           <label className="check">
             <input name="enabled" type="checkbox" defaultChecked />
@@ -1083,7 +1086,7 @@ function UsersPage() {
           <h2>重置密码：{resetUser.username}</h2>
           <label>
             <span>新密码</span>
-            <input name="newPassword" type="password" autoComplete="new-password" required minLength={12} maxLength={200} />
+            <input name="newPassword" type="password" autoComplete="new-password" required minLength={5} maxLength={200} />
           </label>
           {resetError ? <ErrorState error={resetError} /> : null}
           <div className="form-actions">
@@ -1116,8 +1119,7 @@ function UsersPage() {
                       <td>
                         <label className="sr-label" htmlFor={`role-${item.id}`}>{item.username} 的角色</label>
                         <select id={`role-${item.id}`} value={item.role} onChange={(event) => patchUser(item, { role: event.target.value as AdminRole })}>
-                          <option value="ADMIN">ADMIN</option>
-                          <option value="VIEWER">VIEWER</option>
+                          {roleOptions.map((role) => <option key={role} value={role}>{role}</option>)}
                         </select>
                       </td>
                       <td><UserStatusBadge enabled={item.enabled} /></td>
@@ -1131,6 +1133,45 @@ function UsersPage() {
                           <button type="button" onClick={() => setResetUser(item)}>重置密码</button>
                         </div>
                       </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <Empty />
+          )
+        )}
+      </QueryView>
+    </>
+  );
+}
+
+function RolesPage() {
+  const user = useOutletContext<AuthUser>();
+  const query = useQuery({ queryKey: ["admin-roles"], queryFn: () => getJson<AdminRoleInfo[]>("/api/admin-roles"), enabled: user.role === "SUPER_ADMIN" });
+
+  if (user.role !== "SUPER_ADMIN") return <ForbiddenPage />;
+
+  return (
+    <>
+      <PageHeader title="角色管理" />
+      <QueryView query={query}>
+        {(roles) => (
+          roles.length ? (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>角色</th>
+                    <th>权限说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {roles.map((item) => (
+                    <tr key={item.role}>
+                      <td>{item.role}</td>
+                      <td>{item.description}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1788,7 +1829,7 @@ function routes() {
         { path: "original-files", element: <OriginalFilesPage /> },
         { path: "original-files/:fileId", element: <OriginalFileDetailPage /> },
         { path: "users", element: <UsersPage /> },
-        { path: "roles", element: <Navigate to="/users" replace /> },
+        { path: "roles", element: <RolesPage /> },
         { path: "service-status", element: <PlaceholderPage title="服务状态" /> },
         { path: "knowledge-base", element: <PlaceholderPage title="知识库" /> },
         { path: "block-search", element: <PlaceholderPage title="内容块检索" /> },

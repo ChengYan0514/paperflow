@@ -6,6 +6,7 @@ describe('access', () => {
     expect(access({ currentUser: { role: 'SUPER_ADMIN' } as any })).toMatchObject({
       canSuperAdmin: true,
       canManageUsers: true,
+      canViewAuditLogs: true,
       canViewRoles: true,
     });
   });
@@ -14,6 +15,7 @@ describe('access', () => {
     expect(access({ currentUser: { role: 'ADMIN' } as any })).toMatchObject({
       canSuperAdmin: false,
       canManageUsers: true,
+      canViewAuditLogs: false,
       canViewRoles: false,
     });
   });
@@ -22,6 +24,7 @@ describe('access', () => {
     expect(access({ currentUser: { role: 'USER' } as any })).toMatchObject({
       canSuperAdmin: false,
       canManageUsers: false,
+      canViewAuditLogs: false,
       canViewRoles: false,
     });
   });

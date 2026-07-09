@@ -51,6 +51,31 @@ export type TaskStatus = {
   sources: TaskStatusSource[];
 };
 
+export type ServiceCheck = {
+  name: string;
+  ok: boolean;
+  message: string;
+};
+
+export type RecentError = {
+  requestId: string;
+  method: string;
+  path: string;
+  message?: string | null;
+  createdAt: string;
+};
+
+export type ServiceStatus = {
+  status: 'UP' | 'DOWN';
+  version: string;
+  checkedAt: string;
+  backend: ServiceCheck;
+  database: ServiceCheck;
+  dataRoot: ServiceCheck;
+  disk: ServiceCheck;
+  recentErrors: RecentError[];
+};
+
 export type ProcessingStatus =
   | 'NO_MATCHED_FILE'
   | 'MATCHED'
@@ -167,6 +192,13 @@ function withDefaults(params?: URLSearchParams) {
   return next;
 }
 
+function withoutPagination(params?: URLSearchParams) {
+  const next = new URLSearchParams(params);
+  next.delete('page');
+  next.delete('size');
+  return next;
+}
+
 async function getJson<T>(path: string, params?: URLSearchParams) {
   const query = params?.toString();
   return request<T>(`${path}${query ? `?${query}` : ''}`, {
@@ -185,8 +217,17 @@ export function listTaskStatus() {
   return getJson<TaskStatus>('/api/task-status');
 }
 
+export function getServiceStatus() {
+  return getJson<ServiceStatus>('/api/service-status');
+}
+
 export function listSources(params?: URLSearchParams) {
   return getJson<Page<SourceSummary>>('/api/sources', withDefaults(params));
+}
+
+export function sourcesExportUrl(params?: URLSearchParams) {
+  const query = withoutPagination(params).toString();
+  return `${apiBaseUrl}/api/sources/export${query ? `?${query}` : ''}`;
 }
 
 export function getSource(sourceId: string) {
@@ -197,12 +238,22 @@ export function listWorks(params?: URLSearchParams) {
   return getJson<Page<WorkListItem>>('/api/works', withDefaults(params));
 }
 
+export function worksExportUrl(params?: URLSearchParams) {
+  const query = withoutPagination(params).toString();
+  return `${apiBaseUrl}/api/works/export${query ? `?${query}` : ''}`;
+}
+
 export function getWork(workId: string) {
   return getJson<WorkDetail>(`/api/works/${workId}`);
 }
 
 export function listOriginalFiles(params?: URLSearchParams) {
   return getJson<Page<OriginalFile>>('/api/original-files', withDefaults(params));
+}
+
+export function originalFilesExportUrl(params?: URLSearchParams) {
+  const query = withoutPagination(params).toString();
+  return `${apiBaseUrl}/api/original-files/export${query ? `?${query}` : ''}`;
 }
 
 export function getOriginalFile(fileId: string) {

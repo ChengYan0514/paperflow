@@ -1,6 +1,8 @@
 package com.paperflow.admin.controller;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -212,5 +214,15 @@ class WorkControllerIntegrationTest {
                 .andExpect(jsonPath("$.total").value(3))
                 .andExpect(jsonPath("$.items[2].blockId").value("B3"))
                 .andExpect(jsonPath("$.items[2].blockType").value("discarded"));
+    }
+
+    @Test
+    void exportsFilteredWorksAsCsvWithChineseStatus() throws Exception {
+        mockMvc.perform(get("/api/works/export").param("processingStatus", "PARSE_FAILED"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("text/csv;charset=UTF-8"))
+                .andExpect(content().string(containsString("论文ID,标题,DOI")))
+                .andExpect(content().string(containsString("W2,Beta Work,10.1000/two")))
+                .andExpect(content().string(containsString("解析失败")));
     }
 }

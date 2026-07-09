@@ -1,6 +1,6 @@
 # Java Admin Database Read Model
 
-本文定义 Java 只读 API 如何从 Paperflow PostgreSQL 表组织数据。数据库表、
+本文定义 Java 只读业务 API 如何从 Paperflow PostgreSQL 表组织数据。数据库表、
 字段、约束和状态值以 `docs/db_design.md` 为准。
 
 ## 总原则
@@ -262,6 +262,22 @@ ORDER BY source_id ASC, file_id ASC
 `text_file` 列表。Original File 和 Text File DTO 同时返回数据库相对路径和
 `/api/assets/...` 只读 URL。只有 `original_file` 不存在时返回
 `ORIGINAL_FILE_NOT_FOUND`。
+
+## 列表导出读模型
+
+列表导出接口复用对应列表的筛选和排序口径，不分页，不改变 Paperflow 业务数据。
+返回内容为 UTF-8 BOM CSV，便于中文表头和 Excel 打开。
+
+```text
+GET /api/sources/export
+GET /api/works/export
+GET /api/original-files/export
+```
+
+- Source 导出复用 `GET /api/sources` 的 `sourceId`、`sourceName`、`provider`、
+  `hasOriginalFiles`、`hasFailures` 和 `sort`。
+- Work 导出复用 `GET /api/works` 的全部筛选、`processingStatus` 和 `sort`。
+- Original File 导出复用 `GET /api/original-files` 的全部筛选和 `sort`。
 
 ## Asset 读模型
 

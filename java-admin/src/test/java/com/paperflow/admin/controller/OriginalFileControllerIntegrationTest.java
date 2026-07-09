@@ -1,6 +1,8 @@
 package com.paperflow.admin.controller;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -162,5 +164,15 @@ class OriginalFileControllerIntegrationTest {
         mockMvc.perform(get("/api/original-files").param("flagText", "99"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void exportsFilteredOriginalFilesAsCsvWithChineseFlagLabels() throws Exception {
+        mockMvc.perform(get("/api/original-files/export").param("flagText", "-2"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("text/csv;charset=UTF-8"))
+                .andExpect(content().string(containsString("原始文件ID,原始文件名,论文标题")))
+                .andExpect(content().string(containsString("F2,F2.xml,Beta File")))
+                .andExpect(content().string(containsString("不支持解析")));
     }
 }

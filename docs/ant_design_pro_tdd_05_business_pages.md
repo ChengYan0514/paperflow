@@ -3,6 +3,9 @@
 本阶段迁移现有只读业务页面。列表页用 `ProTable`，详情页用 Ant Design 基础组件，
 内容块阅读器直接迁移旧逻辑。
 
+后续状态：`/service-status` 已改为真实服务状态页，新增 `/failure-tasks` 失败任务
+只读处理建议页；`/knowledge-base` 和 `/block-search` 仍为占位页面。
+
 ## Public Interface
 
 ```text
@@ -100,7 +103,7 @@ GREEN:
 
 RED:
 
-- `/service-status` 显示占位。
+- 本阶段 `/service-status` 显示占位；后续已接入真实服务状态页。
 - `/knowledge-base` 显示占位。
 - `/block-search` 显示占位。
 - Swagger 菜单打开 `/swagger-ui/index.html`。
@@ -108,7 +111,7 @@ RED:
 GREEN:
 
 - 使用统一 `Placeholder` 页面。
-- 不新增 API。
+- 本阶段不新增 API；后续服务状态页使用 `GET /api/service-status`。
 
 ## Done
 

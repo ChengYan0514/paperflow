@@ -1,8 +1,10 @@
+import { DownloadOutlined } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { Link, useSearchParams } from '@umijs/max';
+import { Button } from 'antd';
 import { useEffect, useState } from 'react';
 import type { Page, SourceSummary } from '@/services/business';
-import { listSources } from '@/services/business';
+import { listSources, sourcesExportUrl } from '@/services/business';
 import { fieldLabel, QueryBar, QueryState, tablePagination, valueLabel } from './businessUtils';
 
 const primaryField = { name: 'sourceName', placeholder: '按来源期刊名称检索' };
@@ -60,7 +62,15 @@ export default function SourcesPage() {
             dataSource={page.items}
             rowKey="sourceId"
             search={false}
-            toolBarRender={false}
+            toolBarRender={() => [
+              <Button
+                href={sourcesExportUrl(searchParams)}
+                icon={<DownloadOutlined />}
+                key="export"
+              >
+                导出 CSV
+              </Button>,
+            ]}
             pagination={tablePagination(page, searchParams, setSearchParams)}
             scroll={{ x: 1080 }}
             columns={[

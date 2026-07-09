@@ -1,11 +1,11 @@
 # Paperflow Java Admin Overview
 
-本文定义 Paperflow Java 后端管理服务的第一版边界。该服务对 Paperflow 业务
-表保持只读，只为登录和用户管理写入 `admin_user` 表，不替代 Python pipeline。
+本文定义 Paperflow Java 后端管理服务的当前边界。该服务对 Paperflow 业务
+表保持只读，只为登录、用户管理和审计写入本地管理表，不替代 Python pipeline。
 
 ## 目标
 
-Java 后端只做四件事：
+Java 后端只做六件事：
 
 1. 从 Paperflow 项目库读取 `source`、`work`、`original_file`、
    `original_file_job`、`text_file`、`block*` 表。
@@ -13,6 +13,8 @@ Java 后端只做四件事：
 3. 通过 REST API 暴露 Source 概览、Work 搜索、Work 详情、Original File
    blocks 和 `DATA_ROOT` 下只读文件资产。
 4. 通过本地 Admin User 账号提供后台登录、退出、当前用户和用户管理接口。
+5. 提供服务状态、最近错误摘要和结构化操作审计查询。
+6. 为 Source、Work、Original File 列表提供按当前筛选导出 CSV。
 
 Python 项目继续负责所有数据生产：
 
@@ -50,13 +52,19 @@ GET /api/admin-users
 POST /api/admin-users
 PATCH /api/admin-users/{id}
 POST /api/admin-users/{id}/reset-password
+GET /api/admin-roles
+GET /api/admin-audit-logs
 GET /api/task-status
+GET /api/service-status
 GET /api/sources
+GET /api/sources/export
 GET /api/sources/{sourceId}
 GET /api/works
+GET /api/works/export
 GET /api/works/{workId}
 GET /api/works/{workId}/blocks
 GET /api/original-files
+GET /api/original-files/export
 GET /api/original-files/{fileId}
 GET /api/original-files/{fileId}/blocks
 GET /api/assets/**
@@ -116,7 +124,7 @@ com.paperflow.admin
 
 Java 后端默认复用 `.env` 中的 `PAPERFLOW_DB_*` 连接配置。部署时建议让这些
 变量指向最小权限账号：允许读取 Paperflow 业务表，只允许写当前 schema 中的
-`admin_user` 表。
+`admin_user` 和 `admin_audit_log` 表。
 
 schema 通过 JDBC URL 的 `currentSchema` 指定：
 
@@ -164,7 +172,7 @@ MyBatis SQL 使用裸表名，不动态拼接 schema。
   `/v3/api-docs` 和 Swagger UI 需要登录。
 - 未登录和无权限 API 返回 JSON `ErrorResponse`，不返回 HTML 登录页或重定向。
 - 不做失败锁定、登录限流、忘记密码、头像、邮箱、手机号、备注、
-  `created_by`、`updated_by`、`deleted_at`、审计表、逻辑删除、角色/启用状态
+  `created_by`、`updated_by`、`deleted_at`、逻辑删除、角色/启用状态
   索引或迁移框架。
 
 推荐表结构：
@@ -184,7 +192,43 @@ CREATE TABLE admin_user (
 );
 ```
 
-实现顺序：
+## Admin Audit Log
+
+`admin_audit_log` 位于当前 schema，用于记录本地管理操作，不写 Paperflow 业务表。
+应用启动时会用 `CREATE TABLE IF NOT EXISTS` 确保该表和基础索引存在；
+`docs/admin_user_init.sql` 也包含同一表结构，便于手工初始化。
+
+当前记录的事件：
+
+- 登录成功和登录失败。
+- 退出登录。
+- 创建用户、更新用户、重置密码。
+- 修改自己的密码。
+
+审计字段包括 actorId、actorUsername、action、targetType、targetId、result、
+requestId、remoteAddr、userAgent、message、createdAt。只有 `SUPER_ADMIN`
+可以通过 `GET /api/admin-audit-logs` 查询。
+
+## Service Status and Failure Guidance
+
+`GET /api/service-status` 需要登录后访问，返回 Java 后端、数据库连接、
+`DATA_ROOT`、磁盘空间、版本号和最近未处理 API 错误摘要。最近错误只保存在进程内，
+用于管理台快速定位，不替代集中日志系统。
+
+失败任务处理仍保持只读。前端 `/failure-tasks` 复用 Original File 查询失败项，
+只展示解释、上下文入口和可复制的 Python CLI 建议命令；Java 后端不执行这些命令。
+
+列表导出接口返回 UTF-8 BOM CSV：
+
+```text
+GET /api/sources/export
+GET /api/works/export
+GET /api/original-files/export
+```
+
+导出复用列表筛选和排序参数，不分页。
+
+历史实现顺序：
 
 1. 增加 `admin_user` 建表 SQL 和 Spring Security Session/CSRF 配置。
 2. 实现 `auth` 和 `admin-users` API。

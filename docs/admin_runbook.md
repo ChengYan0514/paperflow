@@ -1,7 +1,6 @@
 # Admin Frontend and Backend Runbook
 
-本文说明 Paperflow Java Admin 后端、旧 Vite 前端和新 Ant Design Pro 前端的
-本地启动方式。
+本文说明 Paperflow Java Admin 后端和 Ant Design Pro 前端的本地启动方式。
 
 ## 前置条件
 
@@ -38,7 +37,7 @@ http://localhost:8080/api/service-status
 
 ## 启动前端
 
-### 新前端：web-admin-pro
+### web-admin-pro
 
 另开一个终端，在仓库根目录执行：
 
@@ -62,34 +61,6 @@ cd web-admin-pro
 API_BASE_URL=http://localhost:8081 npm run dev
 ```
 
-### 旧前端：web-admin
-
-旧 `web-admin/` 在最终验收前保留，用于对照旧功能。
-
-另开一个终端，在仓库根目录执行：
-
-```bash
-cd web-admin
-npm install
-npm run dev
-```
-
-默认地址：
-
-```text
-http://localhost:5173
-```
-
-旧前端开发服务会把同源 `/api` 和 `/v3` 请求代理到 Java 后端。默认后端地址是
-`http://localhost:8080`。
-
-如果后端不在默认地址，旧前端启动前设置：
-
-```bash
-cd web-admin
-VITE_API_BASE_URL=http://localhost:8081 npm run dev
-```
-
 ## 生产构建前端
 
 ```bash
@@ -102,20 +73,6 @@ npm run build
 
 ```text
 web-admin-pro/dist/
-```
-
-旧前端构建：
-
-```bash
-cd web-admin
-npm install
-npm run build
-```
-
-构建产物输出到：
-
-```text
-web-admin/dist/
 ```
 
 ## 默认超级管理员

@@ -5,15 +5,15 @@
 同时完成用户与角色管理所需的最小后端改造。
 
 现状补充：第一阶段之后已继续补齐服务状态页、操作审计查询、失败任务只读处理建议，
-以及 Source / Work / Original File 三大列表 CSV 导出。业务写操作和在线触发
-pipeline 仍然不是当前目标。
+以及 Source / Work / Original File 三大列表 CSV 导出。旧 `web-admin/` 已在
+`web-admin-pro/` 验收后移除。业务写操作和在线触发 pipeline 仍然不是当前目标。
 
 按 TDD 逐步开发时，从阶段索引开始：
 `docs/ant_design_pro_tdd_00_index.md`。
 
 ## 已确认决策
 
-- 新前端并行放在 `web-admin-pro/`，旧 `web-admin/` 保留到验收完成。
+- 前端统一使用 `web-admin-pro/`；旧 `web-admin/` 已删除。
 - 实施时新建分支，避免污染当前可用前端。
 - `web-admin-pro/` 直接基于官方 Ant Design Pro 模板初始化，不手工从零搭 Umi。
 - 前端架构从 Vite 切换到 Umi Max，使用 Ant Design Pro 生态。
@@ -45,8 +45,7 @@ pipeline 仍然不是当前目标。
 ```text
 paperflow-admin-platform/
   java-admin/      Spring Boot REST API
-  web-admin/       旧 Vite React 前端，验收前保留
-  web-admin-pro/   新 Ant Design Pro / Umi Max 前端
+  web-admin-pro/   Ant Design Pro / Umi Max 前端
 ```
 
 开发运行：
@@ -341,8 +340,7 @@ web-admin-pro/src/
 8. 更新 README 和运行手册：
    - 新前端启动命令。
    - `API_BASE_URL`。
-   - 旧 `web-admin` 保留说明。
-9. 验收通过后，单独决定是否删除或替换旧 `web-admin/`。
+9. 验收通过后，删除旧 `web-admin/`。
 
 ## 验收清单
 

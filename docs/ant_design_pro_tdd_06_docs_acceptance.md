@@ -1,6 +1,6 @@
 # Ant Design Pro TDD 06: 文档和最终验收
 
-本阶段只做收口：更新运行文档、确认旧前端保留策略、跑完整检查。
+本阶段只做收口：更新运行文档、确认旧前端移除策略、跑完整检查。
 
 ## Public Interface
 
@@ -9,7 +9,6 @@ README.md
 docs/admin_runbook.md
 docs/ant_design_pro_migration_plan.md
 docs_java/api.yaml
-web-admin/
 web-admin-pro/
 ```
 
@@ -27,7 +26,7 @@ RED:
 GREEN:
 
 - 更新 README。
-- 明确旧 `web-admin/` 验收前保留。
+- 明确前端统一使用 `web-admin-pro/`。
 
 ### 2. Runbook 更新
 
@@ -35,8 +34,7 @@ RED:
 
 - `docs/admin_runbook.md` 包含：
   - 后端启动。
-  - 旧前端启动。
-  - 新前端启动。
+  - 前端启动。
   - 默认 `SUPER_ADMIN` 初始化说明。
   - 默认账号 `admin`、默认密码 `admin`，并要求首次登录后修改。
   - 密码最小长度 5。
@@ -44,7 +42,6 @@ RED:
 GREEN:
 
 - 更新 runbook。
-- 不删除旧前端说明。
 
 ### 3. 旧角色文档收口
 
@@ -88,7 +85,6 @@ npm run build
 GREEN:
 
 - 修复类型、路由、构建问题。
-- 不要求删除旧 `web-admin/`。
 
 ### 6. 最终手工验收清单
 
@@ -125,4 +121,4 @@ cd ../web-admin-pro
 npm run build
 ```
 
-验收通过后，单独决定是否删除或替换旧 `web-admin/`。
+验收通过后，旧 `web-admin/` 已删除。

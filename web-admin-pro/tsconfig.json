@@ -56,9 +56,8 @@
     "src/services/auth.test.ts",
     "src/services/business.ts",
     "src/services/business.test.ts",
+    "src/test/setupTests.ts",
     "src/typings.d.ts",
-    "tests/**/*.ts",
-    "types/**/*.d.ts",
     "vitest.config.ts"
   ],
   "exclude": ["node_modules", "dist", "src/.umi", "src/.umi-production"]

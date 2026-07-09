@@ -5,7 +5,6 @@ Paperflow database. It contains:
 
 - `java-admin/`: Spring Boot REST API and Swagger UI.
 - `web-admin-pro/`: Ant Design Pro / Umi Max management frontend.
-- `web-admin/`: legacy Vite React frontend, retained until final acceptance.
 - `docs_java/`: Java backend contract and read model.
 - `docs/`: frontend plan, runbook, and Paperflow database reference docs.
 - `CONTEXT.md`: shared Paperflow domain terms.
@@ -49,7 +48,7 @@ http://localhost:8080/api.yaml
 http://localhost:8080/v3/api-docs
 ```
 
-## Run New Frontend
+## Run Frontend
 
 ```bash
 cd web-admin-pro
@@ -57,7 +56,7 @@ npm install
 npm run dev
 ```
 
-Default new frontend URL:
+Default frontend URL:
 
 ```text
 http://localhost:8000
@@ -67,26 +66,6 @@ For a non-default backend:
 
 ```bash
 API_BASE_URL=http://localhost:8081 npm run dev
-```
-
-## Run Legacy Frontend
-
-```bash
-cd web-admin
-npm install
-npm run dev
-```
-
-Default legacy frontend URL:
-
-```text
-http://localhost:5173
-```
-
-For a non-default backend, the legacy Vite frontend still uses:
-
-```bash
-VITE_API_BASE_URL=http://localhost:8081 npm run dev
 ```
 
 ## Checks
@@ -102,8 +81,6 @@ npm install
 npm run test
 npm run lint
 ```
-
-The legacy `web-admin/` is kept for comparison until acceptance is complete.
 
 ```bash
 python -c "import yaml; yaml.safe_load(open('docs_java/api.yaml'))"

@@ -77,13 +77,12 @@ export default function OriginalFilesPage() {
             search={false}
             toolBarRender={false}
             pagination={tablePagination(page, searchParams, setSearchParams)}
-            scroll={{ x: 1420 }}
+            scroll={{ x: 1080 }}
             columns={[
               {
                 title: fieldLabel('fileId'),
                 dataIndex: 'fileId',
-                width: 180,
-                ellipsis: true,
+                width: 130,
                 render: (_, file) => (
                   <Link to={`/original-files/${file.fileId}`}>{file.fileId}</Link>
                 ),
@@ -91,55 +90,52 @@ export default function OriginalFilesPage() {
               {
                 title: fieldLabel('sourceId'),
                 dataIndex: 'sourceId',
-                width: 160,
-                ellipsis: true,
+                width: 120,
                 render: (_, file) => <SourceLink sourceId={file.sourceId} />,
               },
               {
                 title: fieldLabel('originalFileType'),
                 dataIndex: 'originalFileType',
-                width: 120,
+                width: 100,
                 render: (_, file) => <StatusTag value={file.originalFileType} />,
               },
               {
                 title: fieldLabel('originalFileName'),
                 dataIndex: 'originalFileName',
-                width: 260,
-                ellipsis: true,
+                width: 180,
               },
               {
                 title: fieldLabel('fileSize'),
                 dataIndex: 'fileSize',
-                width: 120,
+                width: 100,
                 render: (_, file) => bytes(file.fileSize),
               },
               {
                 title: fieldLabel('matchedWorkId'),
                 dataIndex: 'matchedWorkId',
-                width: 180,
-                ellipsis: true,
+                width: 130,
                 render: (_, file) =>
                   file.matchedWorkId ? <WorkLink workId={file.matchedWorkId} /> : '-',
               },
               {
                 title: fieldLabel('flagMatch'),
                 dataIndex: 'flagMatch',
-                width: 130,
+                width: 110,
                 render: (_, file) => <StatusTag kind="flagMatch" value={file.flagMatch} />,
               },
               {
                 title: fieldLabel('flagText'),
                 dataIndex: 'flagText',
-                width: 150,
+                width: 120,
                 render: (_, file) => <StatusTag kind="flagText" value={file.flagText} />,
               },
               {
                 title: fieldLabel('flagBlock'),
                 dataIndex: 'flagBlock',
-                width: 150,
+                width: 120,
                 render: (_, file) => <StatusTag kind="flagBlock" value={file.flagBlock} />,
               },
-              { title: fieldLabel('provider'), dataIndex: 'provider', width: 140, ellipsis: true },
+              { title: fieldLabel('provider'), dataIndex: 'provider', width: 100 },
               { title: fieldLabel('year'), dataIndex: 'year', width: 80 },
             ]}
           />

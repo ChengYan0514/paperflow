@@ -76,59 +76,56 @@ export default function WorksPage() {
             search={false}
             toolBarRender={false}
             pagination={tablePagination(page, searchParams, setSearchParams)}
-            scroll={{ x: 1380 }}
+            scroll={{ x: 1080 }}
             columns={[
               {
                 title: fieldLabel('workId'),
                 dataIndex: 'workId',
-                width: 180,
-                ellipsis: true,
+                width: 130,
                 render: (_, work) => <Link to={`/works/${work.workId}`}>{work.workId}</Link>,
               },
-              { title: fieldLabel('title'), dataIndex: 'title', width: 300, ellipsis: true },
-              { title: fieldLabel('doi'), dataIndex: 'doi', width: 180, ellipsis: true },
+              { title: fieldLabel('title'), dataIndex: 'title', width: 210 },
+              { title: fieldLabel('doi'), dataIndex: 'doi', width: 130 },
               {
                 title: fieldLabel('publicationYear'),
                 dataIndex: 'publicationYear',
-                width: 100,
+                width: 90,
               },
               {
                 title: fieldLabel('sourceIds'),
                 dataIndex: 'sourceIds',
-                width: 180,
-                ellipsis: true,
+                width: 130,
                 render: (_, work) => work.sourceIds.join(', '),
               },
               {
                 title: fieldLabel('processingStatus'),
                 dataIndex: 'processingStatus',
-                width: 150,
+                width: 120,
                 render: (_, work) => <StatusTag value={work.processingStatus} />,
               },
               {
                 title: fieldLabel('matchedFileId'),
                 dataIndex: 'matchedFileId',
-                width: 180,
-                ellipsis: true,
+                width: 130,
                 render: (_, work) =>
                   work.matchedFileId ? <OriginalFileLink fileId={work.matchedFileId} /> : '-',
               },
               {
                 title: fieldLabel('flagMatch'),
                 dataIndex: 'flagMatch',
-                width: 130,
+                width: 110,
                 render: (_, work) => <StatusTag kind="flagMatch" value={work.flagMatch} />,
               },
               {
                 title: fieldLabel('flagText'),
                 dataIndex: 'flagText',
-                width: 150,
+                width: 120,
                 render: (_, work) => <StatusTag kind="flagText" value={work.flagText} />,
               },
               {
                 title: fieldLabel('flagBlock'),
                 dataIndex: 'flagBlock',
-                width: 150,
+                width: 120,
                 render: (_, work) => <StatusTag kind="flagBlock" value={work.flagBlock} />,
               },
             ]}

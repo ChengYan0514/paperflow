@@ -134,9 +134,9 @@ const work = {
 
 vi.mock('@/services/business', () => ({
   assetUrl: (path?: string | null) => path,
-  listSources: vi.fn(async () => ({ items: [source], page: 1, size: 20, total: 1 })),
+  listSources: vi.fn(async () => ({ items: [source], page: 1, size: 10, total: 1 })),
   getSource: vi.fn(async () => source),
-  listWorks: vi.fn(async () => ({ items: [work], page: 1, size: 20, total: 1 })),
+  listWorks: vi.fn(async () => ({ items: [work], page: 1, size: 10, total: 1 })),
   getWork: vi.fn(async () => ({
     work,
     sources: [{ sourceId: 'S1', sourceName: 'Nature', provider: 'OpenAlex' }],
@@ -144,7 +144,7 @@ vi.mock('@/services/business', () => ({
     matchedFile: file,
     processingStatus: 'READY',
   })),
-  listOriginalFiles: vi.fn(async () => ({ items: [file], page: 1, size: 20, total: 1 })),
+  listOriginalFiles: vi.fn(async () => ({ items: [file], page: 1, size: 10, total: 1 })),
   getOriginalFile: vi.fn(async () => file),
 }));
 
@@ -173,7 +173,7 @@ describe('business pages', () => {
     await waitFor(() => expect(setSearchParams).toHaveBeenCalled());
 
     const next = setSearchParams.mock.calls[0][0] as URLSearchParams;
-    expect(next.toString()).toBe('sourceId=S1&sort=sourceIdAsc&page=2&size=20');
+    expect(next.toString()).toBe('sourceId=S1&sort=sourceIdAsc&page=2&size=10');
   });
 
   it('updates URL query from list filters', async () => {

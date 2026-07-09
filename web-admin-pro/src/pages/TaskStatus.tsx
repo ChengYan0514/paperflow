@@ -1,6 +1,6 @@
 import { PageContainer } from '@ant-design/pro-components';
 import { Link, useSearchParams } from '@umijs/max';
-import { Card, Col, Progress, Row, Statistic } from 'antd';
+import { Card, Col, Progress, Row, Statistic, Table } from 'antd';
 import { useEffect, useState } from 'react';
 import type { TaskStatus, TaskStatusSource } from '@/services/business';
 import { listTaskStatus } from '@/services/business';
@@ -18,20 +18,14 @@ const sortOptions = [
   'matchedProgressAsc',
   'parsedProgressAsc',
   'blockImportedProgressAsc',
-  'abnormalCountDesc',
 ].map((value) => ({ label: valueLabel(value), value }));
 
 function progress(value: number, total: number) {
   return total > 0 ? value / total : 1;
 }
 
-function abnormalCount(source: TaskStatusSource) {
-  return (
-    source.workCount -
-    source.matchedWorkCount +
-    (source.originalFileCount - source.parsedFileCount) +
-    (source.originalFileCount - source.blockImportedFileCount)
-  );
+function progressPercent(value: number, total: number) {
+  return Math.round(progress(value, total) * 100);
 }
 
 export function filterTaskStatusSources(
@@ -81,11 +75,18 @@ export function filterTaskStatusSources(
           left.sourceId.localeCompare(right.sourceId)
         );
       }
-      if (sort === 'abnormalCountDesc') {
-        return abnormalCount(right) - abnormalCount(left) || left.sourceId.localeCompare(right.sourceId);
-      }
       return left.sourceId.localeCompare(right.sourceId);
     });
+}
+
+function ProgressCell({ label, value, total }: { label: string; value: number; total: number }) {
+  return (
+    <Progress
+      percent={progressPercent(value, total)}
+      size="small"
+      format={() => `${label} ${value}/${total}`}
+    />
+  );
 }
 
 export default function TaskStatusPage() {
@@ -126,34 +127,72 @@ export default function TaskStatusPage() {
               </Row>
               <div style={{ marginTop: 16 }}>
                 <h2>各来源期刊进度</h2>
-                <Row gutter={[16, 16]}>
-                  {sources.map((source) => (
-                    <Col key={source.sourceId} xs={24} md={12} xl={8}>
-                      <Card
-                        title={<Link to={`/sources/${source.sourceId}`}>{source.sourceId}</Link>}
-                        extra={source.provider || '-'}
-                      >
-                        <strong>{source.sourceName || '-'}</strong>
-                        <Progress
-                          percent={Math.round(progress(source.matchedWorkCount, source.workCount) * 100)}
-                          format={() => `论文匹配 ${source.matchedWorkCount}/${source.workCount}`}
+                <Table<TaskStatusSource>
+                  dataSource={sources}
+                  rowKey="sourceId"
+                  pagination={{
+                    defaultPageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `共 ${total} 条`,
+                  }}
+                  scroll={{ x: 1080 }}
+                  columns={[
+                    {
+                      title: fieldLabel('sourceId'),
+                      dataIndex: 'sourceId',
+                      width: 130,
+                      render: (_, source) => (
+                        <Link to={`/sources/${source.sourceId}`}>{source.sourceId}</Link>
+                      ),
+                    },
+                    {
+                      title: fieldLabel('sourceName'),
+                      dataIndex: 'sourceName',
+                      width: 220,
+                      render: (value) => value || '-',
+                    },
+                    {
+                      title: fieldLabel('provider'),
+                      dataIndex: 'provider',
+                      width: 180,
+                      render: (value) => value || '-',
+                    },
+                    {
+                      title: '论文匹配',
+                      width: 180,
+                      render: (_, source) => (
+                        <ProgressCell label="论文匹配" value={source.matchedWorkCount} total={source.workCount} />
+                      ),
+                    },
+                    {
+                      title: '文件解析',
+                      width: 180,
+                      render: (_, source) => (
+                        <ProgressCell
+                          label="文件解析"
+                          value={source.parsedFileCount}
+                          total={source.originalFileCount}
                         />
-                        <Progress
-                          percent={Math.round(progress(source.parsedFileCount, source.originalFileCount) * 100)}
-                          format={() => `文件解析 ${source.parsedFileCount}/${source.originalFileCount}`}
+                      ),
+                    },
+                    {
+                      title: '全文入库',
+                      width: 180,
+                      render: (_, source) => (
+                        <ProgressCell
+                          label="全文入库"
+                          value={source.blockImportedFileCount}
+                          total={source.originalFileCount}
                         />
-                        <Progress
-                          percent={Math.round(
-                            progress(source.blockImportedFileCount, source.originalFileCount) * 100,
-                          )}
-                          format={() =>
-                            `全文入库 ${source.blockImportedFileCount}/${source.originalFileCount}`
-                          }
-                        />
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
+                      ),
+                    },
+                    {
+                      title: '操作',
+                      width: 90,
+                      render: (_, source) => <Link to={`/sources/${source.sourceId}`}>查看详情</Link>,
+                    },
+                  ]}
+                />
               </div>
             </>
           );

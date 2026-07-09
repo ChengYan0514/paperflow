@@ -100,7 +100,6 @@ const valueLabels: Record<string, string> = {
   matchedProgressAsc: '匹配进度升序',
   parsedProgressAsc: '解析进度升序',
   blockImportedProgressAsc: '入库进度升序',
-  abnormalCountDesc: '异常数降序',
   MATCHING: '论文匹配',
   TEXT_PARSING: '文件解析',
   BLOCK_IMPORT: '全文入库',
@@ -316,7 +315,7 @@ export function QueryBar({
           </Form.Item>
           {advanced.length ? (
             <Button onClick={() => setAdvancedOpen((open) => !open)}>
-              筛选{activeFields.length ? ` ${activeFields.length}` : ''}
+              更多条件{activeFields.length ? ` ${activeFields.length}` : ''}
             </Button>
           ) : null}
           <Form.Item style={{ marginBottom: 0 }}>

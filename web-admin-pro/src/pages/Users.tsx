@@ -75,7 +75,6 @@ export default function Users() {
         pagination={false}
         rowKey="id"
         search={false}
-        toolBarRender={false}
         toolbar={{
           actions: [
             <Button key="create" type="primary" onClick={() => setCreateOpen(true)}>

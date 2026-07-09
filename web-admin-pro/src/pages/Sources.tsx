@@ -62,13 +62,12 @@ export default function SourcesPage() {
             search={false}
             toolBarRender={false}
             pagination={tablePagination(page, searchParams, setSearchParams)}
-            scroll={{ x: 1360 }}
+            scroll={{ x: 1080 }}
             columns={[
               {
                 title: fieldLabel('sourceId'),
                 dataIndex: 'sourceId',
-                width: 180,
-                ellipsis: true,
+                width: 130,
                 render: (_, source) => (
                   <Link to={`/sources/${source.sourceId}`}>{source.sourceId}</Link>
                 ),
@@ -76,45 +75,44 @@ export default function SourcesPage() {
               {
                 title: fieldLabel('sourceName'),
                 dataIndex: 'sourceName',
-                width: 240,
-                ellipsis: true,
+                width: 170,
               },
-              { title: fieldLabel('provider'), dataIndex: 'provider', width: 140, ellipsis: true },
-              { title: fieldLabel('workCount'), dataIndex: ['stats', 'workCount'], width: 110 },
+              { title: fieldLabel('provider'), dataIndex: 'provider', width: 100 },
+              { title: fieldLabel('workCount'), dataIndex: ['stats', 'workCount'], width: 90 },
               {
                 title: fieldLabel('originalFileCount'),
                 dataIndex: ['stats', 'originalFileCount'],
-                width: 120,
+                width: 100,
               },
               {
                 title: fieldLabel('matchedFileCount'),
                 dataIndex: ['stats', 'matchedFileCount'],
-                width: 130,
+                width: 100,
               },
               {
                 title: fieldLabel('parsedFileCount'),
                 dataIndex: ['stats', 'parsedFileCount'],
-                width: 120,
+                width: 100,
               },
               {
                 title: fieldLabel('readyFileCount'),
                 dataIndex: ['stats', 'readyFileCount'],
-                width: 110,
+                width: 90,
               },
               {
                 title: fieldLabel('parseFailedFileCount'),
                 dataIndex: ['stats', 'parseFailedFileCount'],
-                width: 140,
+                width: 110,
               },
               {
                 title: fieldLabel('blockFailedFileCount'),
                 dataIndex: ['stats', 'blockFailedFileCount'],
-                width: 170,
+                width: 120,
               },
               {
                 title: fieldLabel('unsupportedFileCount'),
                 dataIndex: ['stats', 'unsupportedFileCount'],
-                width: 140,
+                width: 110,
               },
             ]}
           />

@@ -15,4 +15,19 @@ describe('routes', () => {
     );
     expect(menuGroups.every((route) => !route.path)).toBe(true);
   });
+
+  it('keeps role management under system management', () => {
+    const system = routes.find((route) => route.key === 'system');
+
+    expect(system?.routes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          access: 'canViewRoles',
+          component: './Roles',
+          name: '角色管理',
+          path: '/roles',
+        }),
+      ]),
+    );
+  });
 });

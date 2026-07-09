@@ -24,7 +24,7 @@ describe('business service', () => {
     await listSources(params);
 
     expect(requestMock).toHaveBeenCalledWith(
-      '/api/sources?sourceName=nature&sort=workCountDesc&page=1&size=20',
+      '/api/sources?sourceName=nature&sort=workCountDesc&page=1&size=10',
       { method: 'GET' },
     );
   });

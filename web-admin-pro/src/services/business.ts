@@ -162,7 +162,7 @@ function withDefaults(params?: URLSearchParams) {
     next.set('page', '1');
   }
   if (!next.has('size')) {
-    next.set('size', '20');
+    next.set('size', '10');
   }
   return next;
 }

@@ -65,6 +65,14 @@ body,
   display: none;
 }
 
+.ant-table-wrapper {
+  .ant-table-cell {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+}
+
 canvas {
   display: block;
 }
@@ -82,7 +90,9 @@ ol {
     &-tbody > tr {
       > th,
       > td {
-        white-space: pre;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
         > span {
           display: block;
         }

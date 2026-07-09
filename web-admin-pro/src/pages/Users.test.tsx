@@ -31,9 +31,9 @@ vi.mock('@ant-design/pro-components', async () => {
         {children}
       </main>
     ),
-    ProTable: ({ dataSource = [], columns = [], rowKey, toolbar }: any) => (
+    ProTable: ({ dataSource = [], columns = [], rowKey, toolbar, toolBarRender }: any) => (
       <section aria-label="用户表格">
-        {toolbar?.actions}
+        {toolBarRender === false ? null : toolbar?.actions}
         <table>
           <thead>
             <tr>

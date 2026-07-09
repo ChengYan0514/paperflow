@@ -41,7 +41,7 @@ vi.mock('@/services/business', () => ({
       {
         sourceId: 'S2',
         sourceName: 'Science',
-        provider: 'Crossref',
+        provider: 'Institute for Operations Research and the Management Sciences',
         workCount: 4,
         originalFileCount: 3,
         matchedWorkCount: 1,
@@ -63,7 +63,9 @@ describe('TaskStatus page', () => {
     expect(listTaskStatus).toHaveBeenCalled();
     expect(await screen.findByText('来源期刊数')).toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'S2' })).toHaveAttribute('href', '/sources/S2');
     expect(screen.getByText('Nature')).toBeInTheDocument();
+    expect(screen.getByText('Institute for Operations Research and the Management Sciences')).toBeInTheDocument();
     expect(screen.getByText('论文匹配 5/6')).toBeInTheDocument();
     expect(screen.getByText('全文入库 2/4')).toBeInTheDocument();
   });

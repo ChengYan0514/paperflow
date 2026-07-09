@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Roles from './Roles';
 import { listAdminRoles } from '@/services/admin';
@@ -23,6 +23,32 @@ vi.mock('@ant-design/pro-components', () => ({
       {children}
     </main>
   ),
+  ProTable: ({ columns = [], dataSource = [], rowKey }: any) => {
+    return (
+      <table>
+        <thead>
+          <tr>
+            {columns.map((column: any) => (
+              <th key={String(column.title)}>{column.title}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {dataSource.map((row: any) => (
+            <tr key={row[rowKey]}>
+              {columns.map((column: any) => (
+                <td key={String(column.title)}>
+                  {column.render
+                    ? column.render(row[column.dataIndex], row)
+                    : row[column.dataIndex]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  },
 }));
 
 vi.mock('@/services/admin', () => ({
@@ -51,6 +77,9 @@ describe('Roles page', () => {
     expect(await screen.findByText('SUPER_ADMIN')).toBeInTheDocument();
     expect(screen.getByText('ADMIN')).toBeInTheDocument();
     expect(screen.getByText('USER')).toBeInTheDocument();
+    expect(screen.getByText('超级管理员')).toBeInTheDocument();
+    expect(screen.getByText('管理员')).toBeInTheDocument();
+    expect(screen.getByText('用户')).toBeInTheDocument();
     expect(screen.getByText('Full system administration')).toBeInTheDocument();
   });
 
@@ -65,6 +94,6 @@ describe('Roles page', () => {
     render(<Roles />);
 
     expect(await screen.findByRole('heading', { name: '403' })).toBeInTheDocument();
-    expect(listAdminRoles).not.toHaveBeenCalled();
+    await waitFor(() => expect(listAdminRoles).not.toHaveBeenCalled());
   });
 });

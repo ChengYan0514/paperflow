@@ -1,6 +1,7 @@
 # Admin Frontend and Backend Runbook
 
-本文说明 Paperflow Java Admin 后端和 Ant Design Pro 前端的本地启动方式。
+本文说明 Paperflow Java Admin 后端和 Ant Design Pro 前端的本地启动方式，以及
+Nginx + systemd 的生产部署方式。
 
 ## 前置条件
 
@@ -74,6 +75,87 @@ npm run build
 ```text
 web-admin-pro/dist/
 ```
+
+## 生产部署（Nginx + systemd）
+
+生产环境只常驻运行 Java 后端。前端构建为静态文件后，由 Nginx 提供；Nginx 将
+`/api/`、Swagger 相关路径反向代理到本机 `127.0.0.1:8080`。前后端同源，现有
+Session 和 CSRF 配置无需 CORS 配置。
+
+前置条件：服务器已安装 Java 17、Nginx、Node.js 22+ 和 Maven；已有 HTTPS
+证书；`paperflow` 是无登录权限的系统用户，且能读取 `DATA_ROOT`。
+
+### 首次安装
+
+以下路径是部署约定，可按需整体替换，但配置中的路径必须保持一致：
+
+```bash
+sudo install -d -o paperflow -g paperflow /opt/paperflow-admin
+sudo install -d -m 700 -o root -g paperflow /etc/paperflow-admin
+sudo install -m 600 -o root -g paperflow .env.example /etc/paperflow-admin/admin.env
+sudoedit /etc/paperflow-admin/admin.env
+```
+
+在生产环境的 `admin.env` 中填入真实数据库和 `DATA_ROOT`，并设置：
+
+```dotenv
+SESSION_COOKIE_SECURE=true
+SERVER_ADDRESS=127.0.0.1
+```
+
+构建、安装后端和前端：
+
+```bash
+cd java-admin
+mvn -DskipTests package
+sudo install -o paperflow -g paperflow -m 640 target/paperflow-admin-0.1.0.jar /opt/paperflow-admin/paperflow-admin.jar
+
+cd ../web-admin-pro
+npm ci
+npm run build
+sudo install -d -o root -g root /var/www/paperflow-admin
+sudo rsync -a --delete dist/ /var/www/paperflow-admin/
+```
+
+安装仓库中的服务与站点模板。将其中的 `admin.example.com` 和证书路径替换为实际值后，
+再启用：
+
+```bash
+sudo install -m 644 deploy/systemd/paperflow-admin.service /etc/systemd/system/paperflow-admin.service
+sudo install -m 644 deploy/nginx/paperflow-admin.conf /etc/nginx/sites-available/paperflow-admin
+sudo ln -s /etc/nginx/sites-available/paperflow-admin /etc/nginx/sites-enabled/paperflow-admin
+sudo nginx -t
+sudo systemctl daemon-reload
+sudo systemctl enable --now paperflow-admin
+sudo systemctl reload nginx
+```
+
+常用检查：
+
+```bash
+systemctl status paperflow-admin
+journalctl -u paperflow-admin -f
+curl --fail http://127.0.0.1:8080/api/service-status
+curl --fail https://admin.example.com/api/service-status
+```
+
+### 升级
+
+重新构建 JAR 和 `dist/`，覆盖上述两个安装目标后执行：
+
+```bash
+sudo systemctl restart paperflow-admin
+```
+
+前端文件由 Nginx 直接读取，静态文件更新不需要重启 Nginx。仅改动 Nginx 配置时先运行
+`sudo nginx -t`，再 `sudo systemctl reload nginx`。
+
+### 注意事项
+
+- 不要在生产环境运行 `mvn spring-boot:run`、`npm run dev` 或 `npm run preview`。
+- 后端只监听回环地址；不要将 8080 暴露到公网。只公开 Nginx 的 443 端口。
+- `/etc/paperflow-admin/admin.env` 是密钥文件，不提交 Git，不复制到前端构建目录。
+- `.env.example` 只包含占位值。此前若其中的数据库密码真实有效，应立即轮换。
 
 ## 默认超级管理员
 

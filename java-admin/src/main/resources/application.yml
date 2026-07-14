@@ -9,6 +9,13 @@ spring:
     password: ${PAPERFLOW_DB_PASSWORD:password}
     hikari:
       maximum-pool-size: 10
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        secure: ${SESSION_COOKIE_SECURE:false}
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   configuration:

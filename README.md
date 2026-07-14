@@ -7,6 +7,7 @@ Paperflow database. It contains:
 - `web-admin-pro/`: Ant Design Pro / Umi Max management frontend.
 - `docs_java/`: Java backend contract and read model.
 - `docs/`: frontend plan, runbook, and Paperflow database reference docs.
+- `docs/admin_platform_design.md`: detailed Chinese design document.
 - `CONTEXT.md`: shared Paperflow domain terms.
 
 The platform reads Paperflow PostgreSQL tables and files under `DATA_ROOT`. It
@@ -67,6 +68,13 @@ For a non-default backend:
 ```bash
 API_BASE_URL=http://localhost:8081 npm run dev
 ```
+
+## Production
+
+Deploy the frontend as Nginx static files and run the packaged Spring Boot JAR
+under systemd. Nginx proxies `/api/` to the loopback-only backend, so the
+browser uses one HTTPS origin. Deployment templates and commands are in
+[`docs/admin_runbook.md`](docs/admin_runbook.md).
 
 ## Checks
 

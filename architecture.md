@@ -16,7 +16,7 @@ paperflow-admin-platform/
 ├── docs/
 ├── docs_java/
 ├── java-admin/
-└── web-admin/
+└── web-admin-pro/
 ```
 
 - `CONTEXT.md`: Paperflow domain glossary. Keep API and UI wording consistent
@@ -26,6 +26,8 @@ paperflow-admin-platform/
 - `docs/pipeline.md`: reference for Paperflow pipeline stages and status
   transitions.
 - `docs/admin_ui_plan.md`: read-only frontend scope and page design.
+- `docs/admin_platform_design.md`: detailed Chinese design document for the
+  current admin platform implementation.
 - `docs/admin_runbook.md`: local backend/frontend runbook.
 - `docs_java/api.yaml`: the single OpenAPI contract source.
 - `docs_java/db_read_model.md`: SQL join and DTO derivation rules.
@@ -49,13 +51,19 @@ GET /api/admin-users
 POST /api/admin-users
 PATCH /api/admin-users/{id}
 POST /api/admin-users/{id}/reset-password
+GET /api/admin-roles
+GET /api/admin-audit-logs
 GET /api/task-status
+GET /api/service-status
 GET /api/sources
+GET /api/sources/export
 GET /api/sources/{sourceId}
 GET /api/works
+GET /api/works/export
 GET /api/works/{workId}
 GET /api/works/{workId}/blocks
 GET /api/original-files
+GET /api/original-files/export
 GET /api/original-files/{fileId}
 GET /api/original-files/{fileId}/blocks
 GET /api/assets/**
@@ -72,9 +80,10 @@ JDBC `currentSchema`.
 
 ## Web Frontend
 
-`web-admin/` is a Vite React TypeScript frontend. It calls the Java Admin REST
-API only. During local development, `vite.config.ts` proxies same-origin `/api`
-and `/v3` requests to `VITE_API_BASE_URL` or `http://localhost:8080`.
+`web-admin-pro/` is an Ant Design Pro / Umi Max React TypeScript frontend. It
+calls the Java Admin REST API only. During local development, Umi proxy config
+forwards same-origin `/api` requests to `API_BASE_URL` or
+`http://localhost:8080`.
 
 Production deployment is same-origin: the React app and Java API are served
 under the same site, and login state uses an HttpOnly session cookie. Unsafe

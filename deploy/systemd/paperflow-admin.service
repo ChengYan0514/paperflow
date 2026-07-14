@@ -1,0 +1,23 @@
+[Unit]
+Description=Paperflow Admin API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=paperflow
+Group=paperflow
+WorkingDirectory=/opt/paperflow-admin
+EnvironmentFile=/etc/paperflow-admin/admin.env
+Environment=LOG_FILE=/var/log/paperflow-admin/paperflow-admin.log
+ExecStart=/usr/bin/java -jar /opt/paperflow-admin/paperflow-admin.jar
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+UMask=027
+NoNewPrivileges=true
+LogsDirectory=paperflow-admin
+
+[Install]
+WantedBy=multi-user.target

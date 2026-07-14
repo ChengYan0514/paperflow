@@ -10,15 +10,16 @@
 1. `CONTEXT.md`
 2. `architecture.md`
 3. `docs/db_design.md`
-4. `docs_java/overview.md`
-5. `docs_java/api.yaml`
-6. `docs_java/db_read_model.md`
+4. `docs/backend/overview.md`
+5. `docs/backend/api.yaml`
+6. `docs/backend/db_read_model.md`
 
-涉及 API 契约时，先改 `docs_java/api.yaml`，再改 Controller/DTO/Mapper。
-修改 `docs_java/api.yaml` 后，用以下命令确认 YAML 可解析：
+涉及 API 契约时，先改 `docs/backend/api.yaml`，再改 Controller/DTO/Mapper。
+修改 `docs/backend/api.yaml` 后，用以下命令确认 YAML 可解析且运行时契约保持一致：
 
 ```bash
-uv run python -c "import yaml; yaml.safe_load(open('docs_java/api.yaml'))"
+cd java-admin
+mvn test -Dtest=OpenApiContractTest
 ```
 
 ## 硬边界
@@ -97,8 +98,8 @@ model
 - Work 列表默认排序：
   `publicationYear DESC NULLS LAST, workId ASC`。
 - Blocks 固定按 `blockSeq ASC` 排序。
-- 错误响应必须符合 `docs_java/api.yaml`。
-- `docs_java/api.yaml` 是唯一 OpenAPI 契约源；Swagger UI 必须加载运行时
+- 错误响应必须符合 `docs/backend/api.yaml`。
+- `docs/backend/api.yaml` 是唯一 OpenAPI 契约源；Swagger UI 必须加载运行时
   `/api.yaml` 静态资源，`/v3/api-docs` 必须返回同一份资源，不启用生成式
   api-docs 作为第二份契约。
 
@@ -145,7 +146,8 @@ mvn test
 
 - 新增 `java-admin/` 代码结构时，同步更新 `architecture.md`。
 - API 字段、路径、错误码、分页规则变化时，同步更新
-  `docs_java/api.yaml`。
+  `docs/backend/api.yaml`。
 - 查询口径、状态派生、表关联变化时，同步更新
-  `docs_java/db_read_model.md`。
+  `docs/backend/db_read_model.md`。
 - 不要把已废弃的设计留在活动文档正文里。
+- 部署或配置变化时，同步更新 `docs/admin_runbook.md` 和 `.env.example`。

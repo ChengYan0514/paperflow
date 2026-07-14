@@ -5,9 +5,7 @@ Paperflow database. It contains:
 
 - `java-admin/`: Spring Boot REST API and Swagger UI.
 - `web-admin-pro/`: Ant Design Pro / Umi Max management frontend.
-- `docs_java/`: Java backend contract and read model.
-- `docs/`: frontend plan, runbook, and Paperflow database reference docs.
-- `docs/admin_platform_design.md`: detailed Chinese design document.
+- `docs/`: backend contract, runbook, and Paperflow database reference docs.
 - `CONTEXT.md`: shared Paperflow domain terms.
 
 The platform reads Paperflow PostgreSQL tables and files under `DATA_ROOT`. It
@@ -28,7 +26,8 @@ Current management features include:
 ## Configure
 
 Copy `.env.example` to `.env` and update the database and data-root values.
-Use a read-only PostgreSQL account when possible.
+The database account needs read access to Paperflow business tables and read/write
+access to `admin_user` and `admin_audit_log`.
 
 ```bash
 cp .env.example .env
@@ -53,7 +52,7 @@ http://localhost:8080/v3/api-docs
 
 ```bash
 cd web-admin-pro
-npm install
+npm ci
 npm run dev
 ```
 
@@ -85,11 +84,7 @@ mvn test
 
 ```bash
 cd web-admin-pro
-npm install
+npm ci
 npm run test
 npm run lint
-```
-
-```bash
-python -c "import yaml; yaml.safe_load(open('docs_java/api.yaml'))"
 ```

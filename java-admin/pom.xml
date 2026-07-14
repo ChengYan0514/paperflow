@@ -71,7 +71,7 @@
                 <directory>src/main/resources</directory>
             </resource>
             <resource>
-                <directory>${project.basedir}/../docs_java</directory>
+                <directory>${project.basedir}/../docs/backend</directory>
                 <includes>
                     <include>api.yaml</include>
                 </includes>

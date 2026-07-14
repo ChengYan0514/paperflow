@@ -70,7 +70,7 @@ GET /api/original-files/{fileId}/blocks
 GET /api/assets/**
 ```
 
-API 契约见 `docs_java/api.yaml`。
+API 契约见 `docs/backend/api.yaml`。
 
 ## 技术栈
 
@@ -166,8 +166,7 @@ MyBatis SQL 使用裸表名，不动态拼接 schema。
 - `created_at`、`updated_at`、`last_login_at` 使用数据库时间；不使用 trigger，
   更新 SQL 显式设置 `updated_at = now()`。
 - 允许同账号多端同时登录；改密码或重置密码不主动踢掉已有会话。
-- 生产环境必须使用 HTTPS，Session Cookie 使用 `SameSite=Lax`，生产启用
-  `Secure`。
+- 生产环境必须使用 HTTPS，并设置 `SESSION_COOKIE_SECURE=true`。
 - 匿名 API 只开放 `GET /api/auth/csrf` 和 `POST /api/auth/login`；`/api.yaml`、
   `/v3/api-docs` 和 Swagger UI 需要登录。
 - 未登录和无权限 API 返回 JSON `ErrorResponse`，不返回 HTML 登录页或重定向。
@@ -228,16 +227,10 @@ GET /api/original-files/export
 
 导出复用列表筛选和排序参数，不分页。
 
-历史实现顺序：
-
-1. 增加 `admin_user` 建表 SQL 和 Spring Security Session/CSRF 配置。
-2. 实现 `auth` 和 `admin-users` API。
-3. 前端实现 `/login`、路由保护和 CSRF header。
-4. 前端实现 `/users`，删除 `/roles` 占位。
-
 ## 配置
 
-第一版只需要以下配置项：
+本地环境读取 `java-admin/.env` 或仓库根目录 `.env`。生产环境由 systemd 读取
+`/etc/paperflow-admin/admin.env`；完整部署步骤见 `docs/admin_runbook.md`。
 
 ```yaml
 spring:
@@ -246,11 +239,18 @@ spring:
       - optional:file:.env[.properties]
       - optional:file:../.env[.properties]
   datasource:
-    url: "jdbc:postgresql://${PAPERFLOW_DB_HOST:localhost}:${PAPERFLOW_DB_PORT:5432}/${PAPERFLOW_DB_NAME:paperflow}?currentSchema=${PAPERFLOW_DB_SCHEMA:widi_chengyan}"
+    url: "jdbc:postgresql://${PAPERFLOW_DB_HOST:localhost}:${PAPERFLOW_DB_PORT:5432}/${PAPERFLOW_DB_NAME:paperflow}?currentSchema=${PAPERFLOW_DB_SCHEMA:paperflow}"
     username: ${PAPERFLOW_DB_USER:paperflow}
     password: ${PAPERFLOW_DB_PASSWORD:password}
     hikari:
       maximum-pool-size: 10
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        secure: ${SESSION_COOKIE_SECURE:false}
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   configuration:
@@ -270,12 +270,15 @@ paperflow:
     data-root: ${DATA_ROOT:data}
 ```
 
+`LOG_FILE` 设置后端日志文件。数据库账号读取 Paperflow 业务表，并读写
+`admin_user` 和 `admin_audit_log`。
+
 Blocks 接口单独使用默认 `size=100`、最大 `size=500`。
 资产接口只解析并读取 `paperflow.api.data-root` 下的相对路径。
 
 ## OpenAPI 和 Swagger
 
-`docs_java/api.yaml` 是唯一 OpenAPI 契约源。`java-admin/pom.xml` 在构建和
+`docs/backend/api.yaml` 是唯一 OpenAPI 契约源。`java-admin/pom.xml` 在构建和
 运行时把它作为 classpath 静态资源打包为 `/api.yaml`。Swagger UI 使用
 springdoc UI，但只加载 `/api.yaml`：
 
@@ -286,12 +289,12 @@ springdoc UI，但只加载 `/api.yaml`：
 ```
 
 `/v3/api-docs` 由 Java controller 返回同一份 classpath YAML。springdoc 默认
-生成式 api-docs 关闭，避免运行时 Swagger/OpenAPI 与 `docs_java/api.yaml`
+生成式 api-docs 关闭，避免运行时 Swagger/OpenAPI 与 `docs/backend/api.yaml`
 产生第二份契约。`/api.yaml`、`/v3/api-docs` 和 Swagger UI 需要登录后访问。
 
 ## 运行方式
 
-第一版只文档化本地运行：
+本地运行：
 
 ```bash
 cd java-admin
@@ -305,3 +308,5 @@ cd java-admin
 mvn package
 java -jar target/*.jar
 ```
+
+生产部署使用 `docs/admin_runbook.md` 中的 Nginx 和 systemd 步骤。

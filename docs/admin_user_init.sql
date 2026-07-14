@@ -1,3 +1,5 @@
+-- Run once on a new schema with a schema-owner account.
+-- This script is intentionally not idempotent: do not rerun it after setup.
 CREATE TABLE admin_user (
   id BIGSERIAL PRIMARY KEY,
   username VARCHAR(50) NOT NULL CHECK (username ~ '^[A-Za-z0-9_.-]{3,50}$'),

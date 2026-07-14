@@ -1,8 +1,8 @@
 # Paperflow Admin Platform Architecture
 
 This repository is the standalone management platform for Paperflow. It keeps
-Paperflow business data read-only, and only writes Admin User records for
-login and user management. It is split into a Java backend, a React frontend,
+Paperflow business data read-only, and only writes the local `admin_user` and
+`admin_audit_log` tables. It is split into a Java backend, a React frontend,
 and documentation copied from the Paperflow project where the database and
 domain terms are defined.
 
@@ -14,7 +14,7 @@ paperflow-admin-platform/
 ├── CONTEXT.md
 ├── architecture.md
 ├── docs/
-├── docs_java/
+│   └── backend/
 ├── java-admin/
 └── web-admin-pro/
 ```
@@ -25,21 +25,18 @@ paperflow-admin-platform/
   and indexes consumed by the Java backend.
 - `docs/pipeline.md`: reference for Paperflow pipeline stages and status
   transitions.
-- `docs/admin_ui_plan.md`: read-only frontend scope and page design.
-- `docs/admin_platform_design.md`: detailed Chinese design document for the
-  current admin platform implementation.
 - `docs/admin_runbook.md`: local backend/frontend runbook.
-- `docs_java/api.yaml`: the single OpenAPI contract source.
-- `docs_java/db_read_model.md`: SQL join and DTO derivation rules.
-- `docs_java/overview.md`: Java backend scope and non-goals.
-- `docs_java/vibe_coding_rules.md`: Java backend generation rules.
+- `docs/backend/api.yaml`: the single OpenAPI contract source.
+- `docs/backend/db_read_model.md`: SQL join and DTO derivation rules.
+- `docs/backend/overview.md`: Java backend scope and non-goals.
+- `docs/backend/vibe_coding_rules.md`: Java backend generation rules.
 
 ## Java Backend
 
 `java-admin/` is a Spring Boot 3.x, Java 17, Maven project. It exposes REST
 JSON endpoints over the Paperflow PostgreSQL database. Paperflow business
-tables remain read-only; user management writes only the `admin_user` table in
-the configured schema.
+tables remain read-only; user management and audit logging write only the
+`admin_user` and `admin_audit_log` tables in the configured schema.
 
 ```text
 GET /api/auth/csrf
@@ -69,7 +66,7 @@ GET /api/original-files/{fileId}/blocks
 GET /api/assets/**
 ```
 
-`docs_java/api.yaml` is packaged by `java-admin/pom.xml` as the runtime
+`docs/backend/api.yaml` is packaged by `java-admin/pom.xml` as the runtime
 `/api.yaml` static resource. `/v3/api-docs` returns the same YAML resource, and
 generated springdoc API docs are disabled. `/api.yaml`, `/v3/api-docs`, and
 Swagger UI require login in production.
@@ -88,8 +85,8 @@ forwards same-origin `/api` requests to `API_BASE_URL` or
 Production deployment is same-origin: the React app and Java API are served
 under the same site, and login state uses an HttpOnly session cookie. Unsafe
 requests use Spring Security CSRF protection with `XSRF-TOKEN` and the
-`X-XSRF-TOKEN` header. Production requires HTTPS; the session cookie uses
-`SameSite=Lax` and `Secure` in production.
+`X-XSRF-TOKEN` header. Production requires HTTPS and sets
+`SESSION_COOKIE_SECURE=true`.
 
 ## Boundaries
 

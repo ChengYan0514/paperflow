@@ -42,14 +42,14 @@ class OpenApiContractTest {
     }
 
     @Test
-    void servesDocsJavaApiYamlAsRuntimeOpenApiContract() throws Exception {
+    void servesDocsBackendApiYamlAsRuntimeOpenApiContract() throws Exception {
         String served = mockMvc.perform(get("/api.yaml").with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
 
-        String canonical = Files.readString(Path.of("..", "docs_java", "api.yaml"));
+        String canonical = Files.readString(Path.of("..", "docs", "backend", "api.yaml"));
         assertThat(served).isEqualTo(canonical);
     }
 
@@ -68,21 +68,21 @@ class OpenApiContractTest {
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
 
-        String canonical = Files.readString(Path.of("..", "docs_java", "api.yaml"));
+        String canonical = Files.readString(Path.of("..", "docs", "backend", "api.yaml"));
         assertThat(served).isEqualTo(canonical);
     }
 
     @Test
     void adminRoleContractUsesThreeRolesAndFiveCharacterPasswords() throws Exception {
         Map<?, ?> api = new ObjectMapper(new YAMLFactory())
-                .readValue(Files.readString(Path.of("..", "docs_java", "api.yaml")), Map.class);
+                .readValue(Files.readString(Path.of("..", "docs", "backend", "api.yaml")), Map.class);
         Map<?, ?> paths = (Map<?, ?>) api.get("paths");
         Map<?, ?> schemas = (Map<?, ?>) ((Map<?, ?>) api.get("components")).get("schemas");
 
         assertThat(paths.containsKey("/api/admin-roles")).isTrue();
         assertThat((List<Object>) ((Map<?, ?>) schemas.get("AdminRole")).get("enum"))
                 .containsExactly("SUPER_ADMIN", "ADMIN", "USER");
-        assertThat(Files.readString(Path.of("..", "docs_java", "api.yaml"))).doesNotContain("VIEWER");
+        assertThat(Files.readString(Path.of("..", "docs", "backend", "api.yaml"))).doesNotContain("VIEWER");
         assertThat(passwordMinLength(schemas, "CreateAdminUserRequest", "password")).isEqualTo(5);
         assertThat(passwordMinLength(schemas, "ResetPasswordRequest", "newPassword")).isEqualTo(5);
         assertThat(passwordMinLength(schemas, "ChangePasswordRequest", "newPassword")).isEqualTo(5);

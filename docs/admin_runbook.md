@@ -6,9 +6,11 @@ Nginx + systemd 的生产部署方式。
 ## 前置条件
 
 - Java 17 和 Maven 可用。
-- Node.js 和 npm 可用。
-- 仓库根目录 `.env` 已配置 `PAPERFLOW_DB_*`，Java 后端会读取这些配置连接
-  Paperflow PostgreSQL 数据库。
+- Node.js 22+ 和 npm 可用。
+- 仓库根目录 `.env` 或 `java-admin/.env` 已配置 `PAPERFLOW_DB_*`，Java 后端会读取
+  这些配置连接 Paperflow PostgreSQL 数据库。
+- 数据库账号需要读取 Paperflow 业务表，并读写 `admin_user` 和
+  `admin_audit_log`。
 - 如果要预览 PDF/HTML 或 parsed 图片，`.env` 还需要配置 `DATA_ROOT` 指向
   Paperflow 数据根目录；未配置时默认使用仓库相对路径 `data`。
 
@@ -44,7 +46,7 @@ http://localhost:8080/api/service-status
 
 ```bash
 cd web-admin-pro
-npm install
+npm ci
 npm run dev
 ```
 
@@ -66,7 +68,7 @@ API_BASE_URL=http://localhost:8081 npm run dev
 
 ```bash
 cd web-admin-pro
-npm install
+npm ci
 npm run build
 ```
 
@@ -103,6 +105,18 @@ SESSION_COOKIE_SECURE=true
 SERVER_ADDRESS=127.0.0.1
 ```
 
+新数据库需要由 schema owner 账号连接到 `admin.env` 指定的数据库和 schema 后，执行
+一次初始化 SQL。该脚本创建两个本地管理表和默认 `SUPER_ADMIN`，已有管理表的数据库
+不要重复执行：
+
+```bash
+psql -v ON_ERROR_STOP=1 -f docs/admin_user_init.sql
+```
+
+当前后端启动时还会对审计表执行 `CREATE TABLE/INDEX IF NOT EXISTS`，因此运行账号
+需要目标 schema 的 `CREATE` 权限。若后续改为仅由迁移账号建表，可移除这一运行时
+DDL 要求。
+
 构建、安装后端和前端：
 
 ```bash
@@ -135,9 +149,12 @@ sudo systemctl reload nginx
 ```bash
 systemctl status paperflow-admin
 journalctl -u paperflow-admin -f
-curl --fail http://127.0.0.1:8080/api/service-status
-curl --fail https://admin.example.com/api/service-status
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8080/api/service-status
+curl -s -o /dev/null -w '%{http_code}\n' https://admin.example.com/api/service-status
 ```
+
+两个 `curl` 命令应返回 `401`，表示受保护 API 可达。实际服务检查在登录后通过 Web
+界面验证。
 
 ### 升级
 
@@ -159,7 +176,8 @@ sudo systemctl restart paperflow-admin
 
 ## 默认超级管理员
 
-`docs/admin_user_init.sql` 会初始化一个启用的 `SUPER_ADMIN`：
+在新数据库上执行一次 `docs/admin_user_init.sql` 后，会初始化一个启用的
+`SUPER_ADMIN`：
 
 ```text
 username: admin

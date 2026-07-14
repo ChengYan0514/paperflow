@@ -129,6 +129,39 @@ export default [
         name: '块搜索',
         component: './Placeholder',
       },
+      {
+        path: '/knowledge/causal-graph',
+        name: '因果知识图谱',
+        component: './Knowledge/CausalGraph/Overview',
+      },
+      {
+        path: '/knowledge/causal-graph/nodes/:variable',
+        name: '变量详情',
+        hideInMenu: true,
+        component: './Knowledge/CausalGraph/NodeDetail',
+      },
+      {
+        path: '/knowledge/causal-graph/edges',
+        name: '关系详情',
+        hideInMenu: true,
+        component: './Knowledge/CausalGraph/EdgeDetail',
+      },
+      {
+        path: '/knowledge/causal-graph/papers/:workId',
+        name: '论文因果声明',
+        hideInMenu: true,
+        component: './Knowledge/CausalGraph/PaperClaims',
+      },
+      {
+        path: '/knowledge/causal-graph/fields',
+        name: '领域分析',
+        component: './Knowledge/CausalGraph/Fields',
+      },
+      {
+        path: '/knowledge/causal-graph/methodology',
+        name: '方法说明',
+        component: './Knowledge/CausalGraph/Methodology',
+      },
     ],
   },
   {

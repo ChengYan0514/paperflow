@@ -1021,6 +1021,304 @@ paths:
           $ref: "#/components/responses/OriginalFileNotFound"
         "500":
           $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/summary:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: getCausalGraphSummary
+      summary: Get causal knowledge graph summary.
+      responses:
+        "200":
+          description: Causal graph summary.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CausalGraphSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/graph:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: getCausalGraph
+      summary: Get filtered causal graph nodes and edges.
+      parameters:
+        - name: minRecordCount
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 3
+        - name: minPaperCount
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: minDiversity
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: subfields
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+        - name: maxNodes
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 300
+        - name: maxEdges
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2000
+            default: 500
+      responses:
+        "200":
+          description: Filtered graph.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CausalGraphData"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/search/nodes:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: searchCausalNodes
+      summary: Search standard causal variables.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        "200":
+          description: Variable search results.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CausalNodeSearchResult"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/search/papers:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: searchCausalPapers
+      summary: Search local papers that have causal claims.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        "200":
+          description: Paper search results.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CausalPaperSearchResult"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/nodes/{variable}:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: getCausalNodeDetail
+      summary: Get one causal variable detail.
+      parameters:
+        - name: variable
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+      responses:
+        "200":
+          description: Variable detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CausalNodeDetail"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/edges:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: getCausalEdgeDetail
+      summary: Get causal relation detail by cause and effect.
+      parameters:
+        - name: cause
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+        - name: effect
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+      responses:
+        "200":
+          description: Relation detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CausalEdgeDetail"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/claims/{claimId}:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: getCausalClaimDetail
+      summary: Get causal relation detail by claim id.
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: Relation detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CausalEdgeDetail"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/papers/{workId}:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: getCausalPaperDetail
+      summary: Get causal claims extracted from one Work.
+      parameters:
+        - $ref: "#/components/parameters/WorkId"
+      responses:
+        "200":
+          description: Paper causal claims detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CausalPaperDetail"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/papers/{workId}/summary:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: getCausalPaperSummary
+      summary: Get causal claim summary for one Work.
+      parameters:
+        - $ref: "#/components/parameters/WorkId"
+      responses:
+        "200":
+          description: Paper causal claim summary.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CausalPaperSummary"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/fields:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: getCausalFieldAnalysis
+      summary: Get causal claim field and topic analysis.
+      responses:
+        "200":
+          description: Field analysis.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CausalFieldAnalysis"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
   /api/assets/{relativePath}:
     get:
       tags: [Assets]
@@ -1931,3 +2229,365 @@ components:
           items:
             type: string
           nullable: true
+    CausalGraphSummary:
+      type: object
+      required: [overview, subfields, methods]
+      properties:
+        overview:
+          $ref: "#/components/schemas/CausalGraphOverview"
+        subfields:
+          type: array
+          items:
+            type: string
+        methods:
+          type: array
+          items:
+            type: string
+        datasetVersion:
+          $ref: "#/components/schemas/CausalDatasetVersion"
+    CausalDatasetVersion:
+      type: object
+      properties:
+        versionName:
+          type: string
+          nullable: true
+        refreshedAt:
+          type: string
+          nullable: true
+    CausalGraphOverview:
+      type: object
+      required: [totalClaimRecords, totalStandardClaims, totalPapers, totalNodes, totalEdges, graphNodes, graphEdges, graphMinRepetition]
+      properties:
+        totalClaimRecords:
+          type: integer
+          format: int64
+        totalStandardClaims:
+          type: integer
+          format: int64
+        totalPapers:
+          type: integer
+          format: int64
+        totalNodes:
+          type: integer
+          format: int64
+        totalEdges:
+          type: integer
+          format: int64
+        graphNodes:
+          type: integer
+          format: int64
+        graphEdges:
+          type: integer
+          format: int64
+        graphMinRepetition:
+          type: integer
+    CausalGraphData:
+      type: object
+      required: [nodes, edges]
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/CausalGraphNode"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/CausalGraphEdge"
+    CausalGraphNode:
+      type: object
+      required: [id, label, occurrences, asCauseCount, asEffectCount]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        occurrences:
+          type: integer
+          format: int64
+        dominantSubfield:
+          type: string
+          nullable: true
+        asCauseCount:
+          type: integer
+          format: int64
+        asEffectCount:
+          type: integer
+          format: int64
+    CausalGraphEdge:
+      type: object
+      required: [source, target, recordCount, paperCount, diversity, disagreement, dominantSignCategory, signBreakdown]
+      properties:
+        claimId:
+          type: integer
+          format: int64
+          nullable: true
+        source:
+          type: string
+        target:
+          type: string
+        recordCount:
+          type: integer
+          format: int64
+        paperCount:
+          type: integer
+          format: int64
+        diversity:
+          type: integer
+          format: int64
+        disagreement:
+          type: number
+          format: double
+        dominantSign:
+          type: string
+          nullable: true
+        dominantSignCategory:
+          type: string
+          enum: [positive, negative, "null", mixed]
+        signBreakdown:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+    CausalNodeDetail:
+      type: object
+      required: [node, subfieldCounts, yearCounts, totalClaims, outgoing, incoming]
+      properties:
+        node:
+          $ref: "#/components/schemas/CausalGraphNode"
+        subfieldCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        yearCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        totalClaims:
+          type: integer
+          format: int64
+        outgoing:
+          type: array
+          items:
+            $ref: "#/components/schemas/CausalGraphEdge"
+        incoming:
+          type: array
+          items:
+            $ref: "#/components/schemas/CausalGraphEdge"
+    CausalEdgeDetail:
+      type: object
+      required: [edge, stats, claims]
+      properties:
+        edge:
+          $ref: "#/components/schemas/CausalGraphEdge"
+        stats:
+          $ref: "#/components/schemas/CausalEdgeStats"
+        claims:
+          type: array
+          items:
+            $ref: "#/components/schemas/CausalClaim"
+    CausalEdgeStats:
+      type: object
+      required: [spreadSubfield, spreadTopic, spreadTime, methods]
+      properties:
+        spreadSubfield:
+          type: integer
+          format: int64
+        spreadTopic:
+          type: integer
+          format: int64
+        spreadTime:
+          type: integer
+          format: int64
+        methods:
+          type: array
+          items:
+            type: string
+    CausalClaim:
+      type: object
+      required: [recordId, workId, causeStandard, effectStandard, signCategory]
+      properties:
+        recordId:
+          type: integer
+          format: int64
+        workId:
+          type: string
+        title:
+          type: string
+          nullable: true
+        publicationYear:
+          type: integer
+          nullable: true
+        sourceId:
+          type: string
+          nullable: true
+        sourceName:
+          type: string
+          nullable: true
+        topicName:
+          type: string
+          nullable: true
+        subfieldName:
+          type: string
+          nullable: true
+        claimId:
+          type: integer
+          format: int64
+          nullable: true
+        claim:
+          type: string
+          nullable: true
+        cause:
+          type: string
+          nullable: true
+        effect:
+          type: string
+          nullable: true
+        causeStandard:
+          type: string
+        effectStandard:
+          type: string
+        signOfImpact:
+          type: string
+          nullable: true
+        signCategory:
+          type: string
+          enum: [positive, negative, "null", mixed]
+        typeOfRelationship:
+          type: string
+          nullable: true
+        causalInferenceMethod:
+          type: string
+          nullable: true
+        evidenceMethodOtherDescription:
+          type: string
+          nullable: true
+        isMainContribution:
+          type: boolean
+          nullable: true
+        levelOfTentativeness:
+          type: string
+          nullable: true
+        sourcesOfExogenousVariation:
+          type: string
+          nullable: true
+        statisticalSignificance:
+          type: string
+          nullable: true
+        causeScore:
+          type: number
+          format: double
+          nullable: true
+        effectScore:
+          type: number
+          format: double
+          nullable: true
+        evidence:
+          type: string
+          nullable: true
+    CausalPaperDetail:
+      type: object
+      required: [paper, claims, paperGraph]
+      properties:
+        paper:
+          $ref: "#/components/schemas/CausalPaperInfo"
+        claims:
+          type: array
+          items:
+            $ref: "#/components/schemas/CausalClaim"
+        paperGraph:
+          $ref: "#/components/schemas/CausalGraphData"
+    CausalPaperInfo:
+      type: object
+      required: [workId]
+      properties:
+        workId:
+          type: string
+        title:
+          type: string
+          nullable: true
+        publicationYear:
+          type: integer
+          nullable: true
+        sourceId:
+          type: string
+          nullable: true
+        sourceName:
+          type: string
+          nullable: true
+        topicName:
+          type: string
+          nullable: true
+        subfieldName:
+          type: string
+          nullable: true
+    CausalPaperSummary:
+      type: object
+      required: [workId, claimRecordCount, standardClaimCount, variableCount, hasCausalClaims]
+      properties:
+        workId:
+          type: string
+        claimRecordCount:
+          type: integer
+          format: int64
+        standardClaimCount:
+          type: integer
+          format: int64
+        variableCount:
+          type: integer
+          format: int64
+        hasCausalClaims:
+          type: boolean
+    CausalFieldAnalysis:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CausalFieldItem"
+    CausalFieldItem:
+      type: object
+      required: [subfield, topic, claimRecordCount, paperCount, variableCount]
+      properties:
+        subfield:
+          type: string
+        topic:
+          type: string
+        claimRecordCount:
+          type: integer
+          format: int64
+        paperCount:
+          type: integer
+          format: int64
+        variableCount:
+          type: integer
+          format: int64
+    CausalNodeSearchResult:
+      type: object
+      required: [variable, occurrences]
+      properties:
+        variable:
+          type: string
+        occurrences:
+          type: integer
+          format: int64
+    CausalPaperSearchResult:
+      type: object
+      required: [workId, claimRecordCount]
+      properties:
+        workId:
+          type: string
+        title:
+          type: string
+          nullable: true
+        publicationYear:
+          type: integer
+          nullable: true
+        sourceName:
+          type: string
+          nullable: true
+        claimRecordCount:
+          type: integer
+          format: int64

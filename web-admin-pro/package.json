@@ -29,7 +29,8 @@
     "dayjs": "^1.11.20",
     "katex": "^0.16.45",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "react-force-graph-2d": "^1.29.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.0",

@@ -9,6 +9,8 @@ Nginx + systemd 的生产部署方式。
 - Node.js 22+ 和 npm 可用。
 - 仓库根目录 `.env` 或 `java-admin/.env` 已配置 `PAPERFLOW_DB_*`，Java 后端会读取
   这些配置连接 Paperflow PostgreSQL 数据库。
+- 如果 causal knowledge graph 在单独数据库，再额外配置 `CAUSAL_DB_*`；知识图谱
+  相关接口会优先使用这组连接信息。
 - 数据库账号需要读取 Paperflow 业务表，并读写 `admin_user` 和
   `admin_audit_log`。
 - 如果要预览 PDF/HTML 或 parsed 图片，`.env` 还需要配置 `DATA_ROOT` 指向

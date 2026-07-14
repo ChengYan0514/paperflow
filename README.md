@@ -28,6 +28,8 @@ Current management features include:
 Copy `.env.example` to `.env` and update the database and data-root values.
 The database account needs read access to Paperflow business tables and read/write
 access to `admin_user` and `admin_audit_log`.
+If the causal knowledge graph is stored in a different PostgreSQL database, also set
+`CAUSAL_DB_*` so the knowledge-graph endpoints use that separate connection.
 
 ```bash
 cp .env.example .env

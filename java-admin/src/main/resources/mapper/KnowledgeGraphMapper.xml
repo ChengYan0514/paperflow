@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.paperflow.admin.mapper.KnowledgeGraphMapper">
+    <sql id="EdgeAggregateSelect">
+        SELECT
+            ct.claim_id,
+            ct.cause_standard,
+            ct.effect_standard,
+            COUNT(DISTINCT pct.record_id) AS record_count,
+            COUNT(DISTINCT pct.paper_id) AS paper_count,
+            COUNT(DISTINCT NULLIF(pct.causal_inference_method, '')) AS diversity,
+            COUNT(DISTINCT pct.record_id) FILTER (WHERE pct.sign_of_impact = 'positive') AS positive_count,
+            COUNT(DISTINCT pct.record_id) FILTER (WHERE pct.sign_of_impact = 'negative') AS negative_count,
+            COUNT(DISTINCT pct.record_id) FILTER (WHERE pct.sign_of_impact = 'null_efffect' OR pct.sign_of_impact = 'null') AS null_count,
+            COUNT(DISTINCT pct.record_id) FILTER (
+                WHERE pct.sign_of_impact IS NULL
+                   OR pct.sign_of_impact NOT IN ('positive', 'negative', 'null_efffect', 'null')
+            ) AS mixed_count,
+            COUNT(DISTINCT NULLIF(wt.subfield_name, '')) AS subfield_count,
+            COUNT(DISTINCT NULLIF(wt.topic_name, '')) AS topic_count,
+            MIN(w.publication_year) AS year_min,
+            MAX(w.publication_year) AS year_max,
+            STRING_AGG(DISTINCT NULLIF(pct.causal_inference_method, ''), '||') AS methods_text
+        FROM claim_table ct
+        JOIN paper_claim_table pct ON pct.claim_id = ct.claim_id
+        LEFT JOIN work w ON w.work_id = pct.paper_id
+        LEFT JOIN work_topic wt ON wt.work_id = pct.paper_id
+    </sql>
+
+    <sql id="ClaimRecordSelect">
+        SELECT
+            pct.record_id,
+            pct.paper_id AS work_id,
+            w.title,
+            w.publication_year,
+            (
+                SELECT ws.source_id
+                FROM work_source ws
+                WHERE ws.work_id = pct.paper_id
+                ORDER BY ws.source_id ASC
+                LIMIT 1
+            ) AS source_id,
+            (
+                SELECT s.source_name
+                FROM work_source ws
+                JOIN source s ON s.source_id = ws.source_id
+                WHERE ws.work_id = pct.paper_id
+                ORDER BY ws.source_id ASC
+                LIMIT 1
+            ) AS source_name,
+            (
+                SELECT wt.topic_name
+                FROM work_topic wt
+                WHERE wt.work_id = pct.paper_id
+                ORDER BY wt.topic_name ASC NULLS LAST
+                LIMIT 1
+            ) AS topic_name,
+            (
+                SELECT wt.subfield_name
+                FROM work_topic wt
+                WHERE wt.work_id = pct.paper_id
+                ORDER BY wt.subfield_name ASC NULLS LAST
+                LIMIT 1
+            ) AS subfield_name,
+            ct.claim_id,
+            pct.claim,
+            pct.cause,
+            pct.effect,
+            ct.cause_standard,
+            ct.effect_standard,
+            pct.sign_of_impact,
+            pct.type_of_relationship,
+            pct.causal_inference_method,
+            pct.evidence_method_other_description,
+            pct.is_main_contribution,
+            pct.level_of_tentativeness,
+            pct.sources_of_exogenous_variation,
+            pct.statistical_significance,
+            pct.cause_score,
+            pct.effect_score,
+            pct.evidence
+        FROM paper_claim_table pct
+        JOIN claim_table ct ON ct.claim_id = pct.claim_id
+        LEFT JOIN work w ON w.work_id = pct.paper_id
+    </sql>
+
+    <select id="findOverview" resultType="com.paperflow.admin.model.CausalOverviewRow">
+        SELECT
+            (SELECT COUNT(*) FROM paper_claim_table) AS total_claim_records,
+            (SELECT COUNT(*) FROM claim_table) AS total_standard_claims,
+            (SELECT COUNT(DISTINCT paper_id) FROM paper_claim_table) AS total_papers,
+            (
+                SELECT COUNT(DISTINCT variable)
+                FROM (
+                    SELECT cause_standard AS variable FROM claim_table
+                    UNION
+                    SELECT effect_standard AS variable FROM claim_table
+                ) variables
+            ) AS total_nodes,
+            (SELECT COUNT(*) FROM claim_table) AS total_edges,
+            (
+                SELECT COUNT(*)
+                FROM (
+                    SELECT pct.claim_id
+                    FROM paper_claim_table pct
+                    GROUP BY pct.claim_id
+                    HAVING COUNT(DISTINCT pct.record_id) &gt;= #{minRecordCount}
+                ) graph_edges
+            ) AS graph_edges
+    </select>
+
+    <select id="listSubfields" resultType="string">
+        SELECT DISTINCT subfield_name
+        FROM work_topic
+        WHERE subfield_name IS NOT NULL AND subfield_name != ''
+        ORDER BY subfield_name ASC
+    </select>
+
+    <select id="listMethods" resultType="string">
+        SELECT DISTINCT causal_inference_method
+        FROM paper_claim_table
+        WHERE causal_inference_method IS NOT NULL AND causal_inference_method != ''
+        ORDER BY causal_inference_method ASC
+    </select>
+
+    <select id="listGraphEdges" resultType="com.paperflow.admin.model.CausalEdgeAggregateRow">
+        <include refid="EdgeAggregateSelect"/>
+        <where>
+            <if test="query != null">
+                AND (
+                    LOWER(ct.cause_standard) LIKE CONCAT('%', LOWER(#{query}), '%')
+                    OR LOWER(ct.effect_standard) LIKE CONCAT('%', LOWER(#{query}), '%')
+                )
+            </if>
+            <if test="subfields != null and subfields.size() > 0">
+                AND EXISTS (
+                    SELECT 1
+                    FROM work_topic wt_filter
+                    WHERE wt_filter.work_id = pct.paper_id
+                    AND wt_filter.subfield_name IN
+                    <foreach collection="subfields" item="subfield" open="(" separator="," close=")">
+                        #{subfield}
+                    </foreach>
+                )
+            </if>
+        </where>
+        GROUP BY ct.claim_id, ct.cause_standard, ct.effect_standard
+        HAVING COUNT(DISTINCT pct.record_id) &gt;= #{minRecordCount}
+           AND COUNT(DISTINCT NULLIF(pct.causal_inference_method, '')) &gt;= #{minDiversity}
+        <if test="minPaperCount != null">
+           AND COUNT(DISTINCT pct.paper_id) &gt;= #{minPaperCount}
+        </if>
+        ORDER BY COUNT(DISTINCT pct.record_id) DESC, COUNT(DISTINCT pct.paper_id) DESC, ct.claim_id ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="findEdgeByClaimId" resultType="com.paperflow.admin.model.CausalEdgeAggregateRow">
+        <include refid="EdgeAggregateSelect"/>
+        WHERE ct.claim_id = #{claimId}
+        GROUP BY ct.claim_id, ct.cause_standard, ct.effect_standard
+    </select>
+
+    <select id="findEdgeByCauseEffect" resultType="com.paperflow.admin.model.CausalEdgeAggregateRow">
+        <include refid="EdgeAggregateSelect"/>
+        WHERE ct.cause_standard = #{cause}
+          AND ct.effect_standard = #{effect}
+        GROUP BY ct.claim_id, ct.cause_standard, ct.effect_standard
+        ORDER BY COUNT(DISTINCT pct.record_id) DESC, ct.claim_id ASC
+        LIMIT 1
+    </select>
+
+    <select id="listOutgoingEdges" resultType="com.paperflow.admin.model.CausalEdgeAggregateRow">
+        <include refid="EdgeAggregateSelect"/>
+        WHERE ct.cause_standard = #{variable}
+        GROUP BY ct.claim_id, ct.cause_standard, ct.effect_standard
+        ORDER BY COUNT(DISTINCT pct.record_id) DESC, ct.effect_standard ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="listIncomingEdges" resultType="com.paperflow.admin.model.CausalEdgeAggregateRow">
+        <include refid="EdgeAggregateSelect"/>
+        WHERE ct.effect_standard = #{variable}
+        GROUP BY ct.claim_id, ct.cause_standard, ct.effect_standard
+        ORDER BY COUNT(DISTINCT pct.record_id) DESC, ct.cause_standard ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="listSubfieldCountsForVariable" resultType="com.paperflow.admin.model.CausalCountRow">
+        SELECT COALESCE(wt.subfield_name, '未标注') AS name, COUNT(DISTINCT pct.record_id) AS count
+        FROM paper_claim_table pct
+        JOIN claim_table ct ON ct.claim_id = pct.claim_id
+        LEFT JOIN work_topic wt ON wt.work_id = pct.paper_id
+        WHERE ct.cause_standard = #{variable} OR ct.effect_standard = #{variable}
+        GROUP BY COALESCE(wt.subfield_name, '未标注')
+        ORDER BY count DESC, name ASC
+    </select>
+
+    <select id="listYearCountsForVariable" resultType="com.paperflow.admin.model.CausalCountRow">
+        SELECT COALESCE(w.publication_year::text, '未知') AS name, COUNT(DISTINCT pct.record_id) AS count
+        FROM paper_claim_table pct
+        JOIN claim_table ct ON ct.claim_id = pct.claim_id
+        LEFT JOIN work w ON w.work_id = pct.paper_id
+        WHERE ct.cause_standard = #{variable} OR ct.effect_standard = #{variable}
+        GROUP BY COALESCE(w.publication_year::text, '未知')
+        ORDER BY name ASC
+    </select>
+
+    <select id="listClaimsByClaimId" resultType="com.paperflow.admin.model.CausalClaimRecord">
+        <include refid="ClaimRecordSelect"/>
+        WHERE ct.claim_id = #{claimId}
+        ORDER BY w.publication_year DESC NULLS LAST, pct.record_id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="listClaimsByCauseEffect" resultType="com.paperflow.admin.model.CausalClaimRecord">
+        <include refid="ClaimRecordSelect"/>
+        WHERE ct.cause_standard = #{cause}
+          AND ct.effect_standard = #{effect}
+        ORDER BY w.publication_year DESC NULLS LAST, pct.record_id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="listClaimsByWorkId" resultType="com.paperflow.admin.model.CausalClaimRecord">
+        <include refid="ClaimRecordSelect"/>
+        WHERE pct.paper_id = #{workId}
+        ORDER BY pct.record_id ASC
+    </select>
+
+    <select id="searchNodes" resultType="com.paperflow.admin.model.CausalNodeSearchRow">
+        SELECT variable, SUM(count) AS occurrences
+        FROM (
+            SELECT ct.cause_standard AS variable, COUNT(pct.record_id) AS count
+            FROM claim_table ct
+            JOIN paper_claim_table pct ON pct.claim_id = ct.claim_id
+            WHERE LOWER(ct.cause_standard) LIKE CONCAT('%', LOWER(#{query}), '%')
+            GROUP BY ct.cause_standard
+            UNION ALL
+            SELECT ct.effect_standard AS variable, COUNT(pct.record_id) AS count
+            FROM claim_table ct
+            JOIN paper_claim_table pct ON pct.claim_id = ct.claim_id
+            WHERE LOWER(ct.effect_standard) LIKE CONCAT('%', LOWER(#{query}), '%')
+            GROUP BY ct.effect_standard
+        ) hits
+        GROUP BY variable
+        ORDER BY occurrences DESC, variable ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="searchPapers" resultType="com.paperflow.admin.model.CausalPaperSearchRow">
+        SELECT
+            w.work_id,
+            w.title,
+            w.publication_year,
+            (
+                SELECT s.source_name
+                FROM work_source ws
+                JOIN source s ON s.source_id = ws.source_id
+                WHERE ws.work_id = w.work_id
+                ORDER BY ws.source_id ASC
+                LIMIT 1
+            ) AS source_name,
+            COUNT(pct.record_id) AS claim_record_count
+        FROM work w
+        JOIN paper_claim_table pct ON pct.paper_id = w.work_id
+        WHERE LOWER(w.work_id) LIKE CONCAT('%', LOWER(#{query}), '%')
+           OR LOWER(w.title) LIKE CONCAT('%', LOWER(#{query}), '%')
+        GROUP BY w.work_id, w.title, w.publication_year
+        ORDER BY claim_record_count DESC, w.publication_year DESC NULLS LAST, w.work_id ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="findPaperSummary" resultType="com.paperflow.admin.model.CausalPaperSummaryRow">
+        SELECT
+            #{workId} AS work_id,
+            COUNT(pct.record_id) AS claim_record_count,
+            COUNT(DISTINCT pct.claim_id) AS standard_claim_count,
+            COUNT(DISTINCT variable) AS variable_count
+        FROM paper_claim_table pct
+        JOIN claim_table ct ON ct.claim_id = pct.claim_id
+        CROSS JOIN LATERAL (
+            VALUES (ct.cause_standard), (ct.effect_standard)
+        ) AS variables(variable)
+        WHERE pct.paper_id = #{workId}
+    </select>
+
+    <select id="listFields" resultType="com.paperflow.admin.model.CausalFieldRow">
+        SELECT
+            COALESCE(wt.subfield_name, '未标注') AS subfield,
+            COALESCE(wt.topic_name, '未标注') AS topic,
+            COUNT(DISTINCT pct.record_id) AS claim_record_count,
+            COUNT(DISTINCT pct.paper_id) AS paper_count,
+            COUNT(DISTINCT variable) AS variable_count
+        FROM paper_claim_table pct
+        JOIN claim_table ct ON ct.claim_id = pct.claim_id
+        LEFT JOIN work_topic wt ON wt.work_id = pct.paper_id
+        CROSS JOIN LATERAL (
+            VALUES (ct.cause_standard), (ct.effect_standard)
+        ) AS variables(variable)
+        GROUP BY COALESCE(wt.subfield_name, '未标注'), COALESCE(wt.topic_name, '未标注')
+        ORDER BY claim_record_count DESC, subfield ASC, topic ASC
+        LIMIT #{limit}
+    </select>
+</mapper>

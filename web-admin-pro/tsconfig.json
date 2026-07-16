@@ -30,6 +30,7 @@
     "src/loading.tsx",
     "src/pages/Login.tsx",
     "src/pages/Login.test.tsx",
+    "src/pages/Knowledge/CausalGraph/**/*.tsx",
     "src/pages/Placeholder.tsx",
     "src/pages/BlocksReader.tsx",
     "src/pages/BlocksReader.test.tsx",
@@ -56,6 +57,7 @@
     "src/services/auth.test.ts",
     "src/services/business.ts",
     "src/services/business.test.ts",
+    "src/services/knowledge.ts",
     "src/test/setupTests.ts",
     "src/typings.d.ts",
     "vitest.config.ts"

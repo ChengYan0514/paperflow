@@ -9,6 +9,13 @@ spring:
     password: ${PAPERFLOW_DB_PASSWORD:password}
     hikari:
       maximum-pool-size: 10
+causal:
+  datasource:
+    url: "jdbc:postgresql://${CAUSAL_DB_HOST:${PAPERFLOW_DB_HOST:localhost}}:${CAUSAL_DB_PORT:${PAPERFLOW_DB_PORT:5432}}/${CAUSAL_DB_NAME:${PAPERFLOW_DB_NAME:paperflow}}?currentSchema=${CAUSAL_DB_SCHEMA:${PAPERFLOW_DB_SCHEMA:paperflow}}"
+    username: ${CAUSAL_DB_USER:${PAPERFLOW_DB_USER:paperflow}}
+    password: ${CAUSAL_DB_PASSWORD:${PAPERFLOW_DB_PASSWORD:password}}
+    hikari:
+      maximum-pool-size: 10
 server:
   address: ${SERVER_ADDRESS:127.0.0.1}
   forward-headers-strategy: framework

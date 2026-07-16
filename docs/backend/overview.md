@@ -125,11 +125,19 @@ com.paperflow.admin
 Java 后端默认复用 `.env` 中的 `PAPERFLOW_DB_*` 连接配置。部署时建议让这些
 变量指向最小权限账号：允许读取 Paperflow 业务表，只允许写当前 schema 中的
 `admin_user` 和 `admin_audit_log` 表。
+如果 causal knowledge graph 在另一套数据库中，再额外设置 `CAUSAL_DB_*`；
+知识图谱相关的 MyBatis mapper 会使用这组连接。
 
 schema 通过 JDBC URL 的 `currentSchema` 指定：
 
 ```text
 jdbc:postgresql://${PAPERFLOW_DB_HOST}:${PAPERFLOW_DB_PORT}/${PAPERFLOW_DB_NAME}?currentSchema=${PAPERFLOW_DB_SCHEMA}
+```
+
+causal knowledge graph 的数据库也可以通过独立 schema 指定：
+
+```text
+jdbc:postgresql://${CAUSAL_DB_HOST}:${CAUSAL_DB_PORT}/${CAUSAL_DB_NAME}?currentSchema=${CAUSAL_DB_SCHEMA}
 ```
 
 MyBatis SQL 使用裸表名，不动态拼接 schema。

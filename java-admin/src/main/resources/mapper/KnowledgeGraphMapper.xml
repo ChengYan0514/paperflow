@@ -1,7 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.paperflow.admin.mapper.KnowledgeGraphMapper">
-    <sql id="EdgeAggregateSelect">
+    <sql id="EdgeListAggregateSelect">
+        SELECT
+            ct.claim_id,
+            ct.cause_standard,
+            ct.effect_standard,
+            COUNT(*) AS record_count,
+            COUNT(DISTINCT pct.paper_id) AS paper_count,
+            COUNT(DISTINCT NULLIF(pct.causal_inference_method, '')) AS diversity,
+            COUNT(*) FILTER (WHERE pct.sign_of_impact = 'positive') AS positive_count,
+            COUNT(*) FILTER (WHERE pct.sign_of_impact = 'negative') AS negative_count,
+            COUNT(*) FILTER (WHERE pct.sign_of_impact = 'null_efffect' OR pct.sign_of_impact = 'null') AS null_count,
+            COUNT(*) FILTER (
+                WHERE pct.sign_of_impact IS NULL
+                   OR pct.sign_of_impact NOT IN ('positive', 'negative', 'null_efffect', 'null')
+            ) AS mixed_count
+        FROM claim_table ct
+        JOIN paper_claim_table pct ON pct.claim_id = ct.claim_id
+    </sql>
+
+    <sql id="EdgeDetailAggregateSelect">
         SELECT
             ct.claim_id,
             ct.cause_standard,
@@ -85,28 +104,41 @@
     </sql>
 
     <select id="findOverview" resultType="com.paperflow.admin.model.CausalOverviewRow">
+        WITH edge_counts AS MATERIALIZED (
+            SELECT claim_id, COUNT(*) AS record_count
+            FROM paper_claim_table
+            GROUP BY claim_id
+        ),
+        eligible_edges AS MATERIALIZED (
+            SELECT claim_id
+            FROM edge_counts
+            WHERE record_count &gt;= #{minRecordCount}
+        ),
+        graph_variables AS (
+            SELECT ct.cause_standard AS variable
+            FROM claim_table ct
+            JOIN eligible_edges ee ON ee.claim_id = ct.claim_id
+            UNION
+            SELECT ct.effect_standard AS variable
+            FROM claim_table ct
+            JOIN eligible_edges ee ON ee.claim_id = ct.claim_id
+        ),
+        all_variables AS (
+            SELECT cause_standard AS variable FROM claim_table
+            UNION
+            SELECT effect_standard AS variable FROM claim_table
+        ),
+        claim_total AS (
+            SELECT COUNT(*) AS count FROM claim_table
+        )
         SELECT
-            (SELECT COUNT(*) FROM paper_claim_table) AS total_claim_records,
-            (SELECT COUNT(*) FROM claim_table) AS total_standard_claims,
+            (SELECT COALESCE(SUM(record_count), 0) FROM edge_counts) AS total_claim_records,
+            (SELECT count FROM claim_total) AS total_standard_claims,
             (SELECT COUNT(DISTINCT paper_id) FROM paper_claim_table) AS total_papers,
-            (
-                SELECT COUNT(DISTINCT variable)
-                FROM (
-                    SELECT cause_standard AS variable FROM claim_table
-                    UNION
-                    SELECT effect_standard AS variable FROM claim_table
-                ) variables
-            ) AS total_nodes,
-            (SELECT COUNT(*) FROM claim_table) AS total_edges,
-            (
-                SELECT COUNT(*)
-                FROM (
-                    SELECT pct.claim_id
-                    FROM paper_claim_table pct
-                    GROUP BY pct.claim_id
-                    HAVING COUNT(DISTINCT pct.record_id) &gt;= #{minRecordCount}
-                ) graph_edges
-            ) AS graph_edges
+            (SELECT COUNT(*) FROM all_variables) AS total_nodes,
+            (SELECT count FROM claim_total) AS total_edges,
+            (SELECT COUNT(*) FROM graph_variables) AS graph_nodes,
+            (SELECT COUNT(*) FROM eligible_edges) AS graph_edges
     </select>
 
     <select id="listSubfields" resultType="string">
@@ -124,7 +156,7 @@
     </select>
 
     <select id="listGraphEdges" resultType="com.paperflow.admin.model.CausalEdgeAggregateRow">
-        <include refid="EdgeAggregateSelect"/>
+        <include refid="EdgeListAggregateSelect"/>
         <where>
             <if test="query != null">
                 AND (
@@ -145,23 +177,23 @@
             </if>
         </where>
         GROUP BY ct.claim_id, ct.cause_standard, ct.effect_standard
-        HAVING COUNT(DISTINCT pct.record_id) &gt;= #{minRecordCount}
+        HAVING COUNT(*) &gt;= #{minRecordCount}
            AND COUNT(DISTINCT NULLIF(pct.causal_inference_method, '')) &gt;= #{minDiversity}
         <if test="minPaperCount != null">
            AND COUNT(DISTINCT pct.paper_id) &gt;= #{minPaperCount}
         </if>
-        ORDER BY COUNT(DISTINCT pct.record_id) DESC, COUNT(DISTINCT pct.paper_id) DESC, ct.claim_id ASC
+        ORDER BY COUNT(*) DESC, COUNT(DISTINCT pct.paper_id) DESC, ct.claim_id ASC
         LIMIT #{limit}
     </select>
 
     <select id="findEdgeByClaimId" resultType="com.paperflow.admin.model.CausalEdgeAggregateRow">
-        <include refid="EdgeAggregateSelect"/>
+        <include refid="EdgeDetailAggregateSelect"/>
         WHERE ct.claim_id = #{claimId}
         GROUP BY ct.claim_id, ct.cause_standard, ct.effect_standard
     </select>
 
     <select id="findEdgeByCauseEffect" resultType="com.paperflow.admin.model.CausalEdgeAggregateRow">
-        <include refid="EdgeAggregateSelect"/>
+        <include refid="EdgeDetailAggregateSelect"/>
         WHERE ct.cause_standard = #{cause}
           AND ct.effect_standard = #{effect}
         GROUP BY ct.claim_id, ct.cause_standard, ct.effect_standard
@@ -170,18 +202,18 @@
     </select>
 
     <select id="listOutgoingEdges" resultType="com.paperflow.admin.model.CausalEdgeAggregateRow">
-        <include refid="EdgeAggregateSelect"/>
+        <include refid="EdgeListAggregateSelect"/>
         WHERE ct.cause_standard = #{variable}
         GROUP BY ct.claim_id, ct.cause_standard, ct.effect_standard
-        ORDER BY COUNT(DISTINCT pct.record_id) DESC, ct.effect_standard ASC
+        ORDER BY COUNT(*) DESC, ct.effect_standard ASC
         LIMIT #{limit}
     </select>
 
     <select id="listIncomingEdges" resultType="com.paperflow.admin.model.CausalEdgeAggregateRow">
-        <include refid="EdgeAggregateSelect"/>
+        <include refid="EdgeListAggregateSelect"/>
         WHERE ct.effect_standard = #{variable}
         GROUP BY ct.claim_id, ct.cause_standard, ct.effect_standard
-        ORDER BY COUNT(DISTINCT pct.record_id) DESC, ct.cause_standard ASC
+        ORDER BY COUNT(*) DESC, ct.cause_standard ASC
         LIMIT #{limit}
     </select>
 

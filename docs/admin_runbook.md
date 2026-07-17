@@ -11,12 +11,36 @@ Nginx + systemd 的生产部署方式。
   这些配置连接 Paperflow PostgreSQL 数据库。
 - 如果 causal knowledge graph 在单独数据库，再额外配置 `CAUSAL_DB_*`；知识图谱
   相关接口会优先使用这组连接信息。
+- causal 数据库首次部署知识图谱查询前，由 schema owner 创建声明关联索引并更新
+  统计信息；详见下方“因果知识图谱索引”。
 - 数据库账号需要读取 Paperflow 业务表，并读写 `admin_user` 和
   `admin_audit_log`。
 - 如果要预览 PDF/HTML 或 parsed 图片，`.env` 还需要配置 `DATA_ROOT` 指向
   Paperflow 数据根目录；未配置时默认使用仓库相对路径 `data`。
 
 ## 启动后端
+
+### 因果知识图谱索引
+
+在 causal 数据库上执行一次：
+
+```sql
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_paper_claim_claim_id
+    ON paper_claim_table (claim_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_paper_claim_paper_id
+    ON paper_claim_table (paper_id);
+
+ANALYZE paper_claim_table;
+ANALYZE claim_table;
+ANALYZE work_topic;
+```
+
+`CREATE INDEX CONCURRENTLY` 不能放在显式事务中执行。应用运行账号只需要读取这些
+表；索引创建和 `ANALYZE` 应由 causal schema owner 或维护账号执行。
+
+如果修改了 causal 查询账号的 `work_mem` 或 `statement_timeout`，重启后端或排空
+连接池后再验收，确保新连接继承角色配置。
 
 在仓库根目录执行：
 

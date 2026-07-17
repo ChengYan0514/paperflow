@@ -54,9 +54,6 @@ public class KnowledgeGraphService {
 
     public CausalGraphSummaryDto summary() {
         CausalOverviewRow row = mapper.findOverview(DEFAULT_MIN_RECORD_COUNT);
-        List<CausalEdgeAggregateRow> graphEdges =
-                mapper.listGraphEdges(DEFAULT_MIN_RECORD_COUNT, null, DEFAULT_MIN_DIVERSITY, null, null, MAX_EDGES);
-        long graphNodes = countNodes(graphEdges);
         return new CausalGraphSummaryDto(
                 new CausalGraphOverviewDto(
                         row.getTotalClaimRecords(),
@@ -64,7 +61,7 @@ public class KnowledgeGraphService {
                         row.getTotalPapers(),
                         row.getTotalNodes(),
                         row.getTotalEdges(),
-                        graphNodes,
+                        row.getGraphNodes(),
                         row.getGraphEdges(),
                         DEFAULT_MIN_RECORD_COUNT),
                 mapper.listSubfields(),
@@ -297,15 +294,6 @@ public class KnowledgeGraphService {
             map.put(row.getName(), row.getCount());
         }
         return map;
-    }
-
-    private long countNodes(List<CausalEdgeAggregateRow> edges) {
-        Set<String> nodes = new LinkedHashSet<>();
-        for (CausalEdgeAggregateRow edge : edges) {
-            nodes.add(edge.getCauseStandard());
-            nodes.add(edge.getEffectStandard());
-        }
-        return nodes.size();
     }
 
     private int clamp(Integer value, int defaultValue, int min, int max) {

@@ -6,6 +6,7 @@ public class CausalOverviewRow {
     private long totalPapers;
     private long totalNodes;
     private long totalEdges;
+    private long graphNodes;
     private long graphEdges;
 
     public long getTotalClaimRecords() {
@@ -46,6 +47,14 @@ public class CausalOverviewRow {
 
     public void setTotalEdges(long totalEdges) {
         this.totalEdges = totalEdges;
+    }
+
+    public long getGraphNodes() {
+        return graphNodes;
+    }
+
+    public void setGraphNodes(long graphNodes) {
+        this.graphNodes = graphNodes;
     }
 
     public long getGraphEdges() {

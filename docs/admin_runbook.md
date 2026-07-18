@@ -234,7 +234,6 @@ password: admin
 - `/failure-tasks` 展示失败状态解释和可复制 CLI 命令；页面只读，不触发 pipeline。
 - `SUPER_ADMIN` 可访问 `/audit-logs` 查询登录、退出、创建用户、更新用户、重置密码、
   修改密码等审计事件；`ADMIN` 和 `USER` 不可访问。
-- `/knowledge-base`、`/block-search` 仍保持占位页面。
 - Swagger 菜单打开 `/swagger-ui/index.html`。
 
 ## 停止服务

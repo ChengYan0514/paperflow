@@ -165,6 +165,10 @@ vi.mock('@/services/business', () => ({
   })),
 }));
 
+vi.mock('@/services/knowledge', () => ({
+  getCausalPaperSummary: vi.fn(async () => ({ hasCausalClaims: false })),
+}));
+
 describe('business pages', () => {
   beforeEach(() => {
     vi.clearAllMocks();

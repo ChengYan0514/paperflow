@@ -120,16 +120,6 @@ export default [
     icon: 'database',
     routes: [
       {
-        path: '/knowledge-base',
-        name: '知识库',
-        component: './Placeholder',
-      },
-      {
-        path: '/block-search',
-        name: '块搜索',
-        component: './Placeholder',
-      },
-      {
         path: '/knowledge/causal-graph',
         name: '因果知识图谱',
         component: './Knowledge/CausalGraph/Overview',

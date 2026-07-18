@@ -278,6 +278,19 @@
         LIMIT #{limit}
     </select>
 
+    <select id="searchTerms" resultType="string">
+        SELECT label_en
+        FROM (
+            SELECT DISTINCT label_en
+            FROM stw_label
+            WHERE LOWER(label_en) LIKE CONCAT('%', LOWER(#{query}), '%')
+        ) candidates
+        ORDER BY
+            CASE WHEN LOWER(label_en) LIKE CONCAT(LOWER(#{query}), '%') THEN 0 ELSE 1 END,
+            label_en ASC
+        LIMIT #{limit}
+    </select>
+
     <select id="searchPapers" resultType="com.paperflow.admin.model.CausalPaperSearchRow">
         SELECT
             w.work_id,

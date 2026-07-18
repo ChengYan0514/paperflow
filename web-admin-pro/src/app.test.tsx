@@ -4,16 +4,17 @@ import { getInitialState, layout } from './app';
 import { changePassword, getCurrentUser, logout } from '@/services/auth';
 
 const mocks = vi.hoisted(() => ({
+  location: {
+    hash: '',
+    pathname: '/task-status',
+    search: '',
+  },
   replace: vi.fn(),
 }));
 
 vi.mock('@umijs/max', () => ({
   history: {
-    location: {
-      pathname: '/task-status',
-      search: '',
-      hash: '',
-    },
+    location: mocks.location,
     replace: mocks.replace,
   },
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
@@ -216,6 +217,39 @@ describe('app runtime auth', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'select child' }));
     expect(captures.at(-1).openKeys).toEqual(['literature']);
+  });
+
+  it('selects only the exact causal graph menu item', () => {
+    mocks.location.pathname = '/knowledge/causal-graph/fields';
+    const runtime = layout({
+      initialState: {},
+      setInitialState: vi.fn(),
+    } as any);
+    const captures: any[] = [];
+    function MenuProbe(props: any) {
+      captures.push(props);
+      return null;
+    }
+
+    const renderMenuContent = runtime.menuContentRender as Exclude<
+      typeof runtime.menuContentRender,
+      false | undefined
+    >;
+    render(renderMenuContent(
+      {
+        menuData: [{
+          key: 'knowledge',
+          children: [
+            { key: '/knowledge/causal-graph', path: '/knowledge/causal-graph' },
+            { key: '/knowledge/causal-graph/fields', path: '/knowledge/causal-graph/fields' },
+          ],
+        }],
+      } as any,
+      <MenuProbe />,
+    ));
+
+    expect(captures.at(-1).selectedKeys).toEqual(['/knowledge/causal-graph/fields']);
+    mocks.location.pathname = '/task-status';
   });
 
   it('changes the current user password from the layout avatar menu', async () => {

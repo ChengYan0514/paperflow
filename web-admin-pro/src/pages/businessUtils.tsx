@@ -9,6 +9,7 @@ import {
   Input,
   Select,
   Space,
+  Spin,
   Tag,
 } from 'antd';
 import type { TablePaginationConfig } from 'antd';
@@ -421,7 +422,7 @@ export function QueryState<T>({
   children: (data: T) => ReactNode;
 }) {
   if (loading) {
-    return <div>加载中</div>;
+    return <div style={{ padding: 48, textAlign: 'center' }}><Spin size="large" /></div>;
   }
   if (error) {
     return <div role="alert">加载失败</div>;

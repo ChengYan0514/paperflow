@@ -121,6 +121,7 @@ export async function getInitialState(): Promise<{
 type MenuLinkItem = {
   children?: MenuLinkItem[];
   hideInMenu?: boolean;
+  key?: string;
   path?: string;
   target?: string;
 };
@@ -152,11 +153,31 @@ function renderMenuLink(item: MenuLinkItem, dom: ReactNode) {
   );
 }
 
-function AccordionMenu({ children }: { children: ReactElement<Record<string, unknown>> }) {
+function getExactMenuKey(items: MenuLinkItem[] | undefined, pathname: string): string | undefined {
+  for (const item of items || []) {
+    if (!item.hideInMenu && item.path === pathname) {
+      return item.key || item.path;
+    }
+    const key = getExactMenuKey(item.children, pathname);
+    if (key) {
+      return key;
+    }
+  }
+  return undefined;
+}
+
+function AccordionMenu({
+  children,
+  selectedKeys,
+}: {
+  children: ReactElement<Record<string, unknown>>;
+  selectedKeys?: string[];
+}) {
   const [openKeys, setOpenKeys] = useState<string[]>([]);
 
   return cloneElement(children, {
     openKeys,
+    ...(selectedKeys && { selectedKeys }),
     onOpenChange: (nextOpenKeys: string[]) => {
       const nextTopLevelKey = [...nextOpenKeys]
         .reverse()
@@ -175,14 +196,17 @@ function AccordionMenu({ children }: { children: ReactElement<Record<string, unk
 export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
     menuItemRender: renderMenuLink,
-    menuContentRender: (_, menuDom) =>
-      isValidElement(menuDom) ? (
-        <AccordionMenu>
+    menuContentRender: ({ menuData }, menuDom) => {
+      const selectedKey = getExactMenuKey(menuData, history.location.pathname);
+
+      return isValidElement(menuDom) ? (
+        <AccordionMenu selectedKeys={selectedKey ? [selectedKey] : undefined}>
           {menuDom as ReactElement<Record<string, unknown>>}
         </AccordionMenu>
       ) : (
         menuDom
-      ),
+      );
+    },
     onPageChange: () => {
       if (!initialState?.currentUser && !isLoginPath(history.location.pathname)) {
         history.replace(loginUrl());

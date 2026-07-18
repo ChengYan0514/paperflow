@@ -50,6 +50,8 @@ public interface KnowledgeGraphMapper {
 
     List<CausalNodeSearchRow> searchNodes(@Param("query") String query, @Param("limit") int limit);
 
+    List<String> searchTerms(@Param("query") String query, @Param("limit") int limit);
+
     List<CausalPaperSearchRow> searchPapers(@Param("query") String query, @Param("limit") int limit);
 
     CausalPaperSummaryRow findPaperSummary(@Param("workId") String workId);

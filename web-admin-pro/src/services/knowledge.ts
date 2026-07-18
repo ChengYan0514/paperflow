@@ -193,6 +193,11 @@ export function searchCausalNodes(q: string, limit = 10) {
   return getJson<CausalNodeSearchResult[]>('/api/knowledge/causal-graph/search/nodes', params);
 }
 
+export function searchCausalTerms(q: string, limit = 10) {
+  const params = new URLSearchParams({ q, limit: String(limit) });
+  return getJson<string[]>('/api/knowledge/causal-graph/search/terms', params);
+}
+
 export function searchCausalPapers(q: string, limit = 10) {
   const params = new URLSearchParams({ q, limit: String(limit) });
   return getJson<CausalPaperSearchResult[]>('/api/knowledge/causal-graph/search/papers', params);

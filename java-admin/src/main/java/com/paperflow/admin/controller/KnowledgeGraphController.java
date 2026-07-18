@@ -56,6 +56,13 @@ public class KnowledgeGraphController {
         return service.searchNodes(q, limit);
     }
 
+    @GetMapping("/search/terms")
+    public List<String> searchTerms(
+            @RequestParam @Size(max = 255) String q,
+            @RequestParam(required = false) @Min(1) @Max(50) Integer limit) {
+        return service.searchTerms(q, limit);
+    }
+
     @GetMapping("/search/papers")
     public List<CausalPaperSearchResultDto> searchPapers(
             @RequestParam @Size(max = 255) String q,

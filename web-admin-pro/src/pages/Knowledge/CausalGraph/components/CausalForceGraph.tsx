@@ -1,3 +1,4 @@
+import { BgColorsOutlined, ExpandOutlined, SwapOutlined } from '@ant-design/icons';
 import { useNavigate } from '@umijs/max';
 import { Spin } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -5,6 +6,13 @@ import type { CausalGraphData } from '@/services/knowledge';
 import { signColor } from './SignBadge';
 
 type ForceGraphComponent = React.ComponentType<any>;
+
+const legendItems = [
+  { color: signColor('positive'), label: '正向因果效应' },
+  { color: signColor('negative'), label: '负向因果效应' },
+  { color: signColor('null'), label: '无显著效应' },
+  { color: signColor('mixed'), label: '混合因果符号' },
+];
 
 function label(value: string, max = 28) {
   return value.length > max ? `${value.slice(0, max - 3)}...` : value;
@@ -30,6 +38,7 @@ export function CausalForceGraph({
   const graphRef = useRef<any>(null);
   const [width, setWidth] = useState(900);
   const [Graph, setGraph] = useState<ForceGraphComponent>();
+  const [legendOpen, setLegendOpen] = useState(true);
 
   useEffect(() => {
     let alive = true;
@@ -95,6 +104,7 @@ export function CausalForceGraph({
         borderRadius: 8,
         height,
         overflow: 'hidden',
+        position: 'relative',
         width: '100%',
       }}
     >
@@ -162,8 +172,68 @@ export function CausalForceGraph({
       ) : (
         <div style={{ alignItems: 'center', display: 'flex', height, justifyContent: 'center' }}>
           <Spin />
-        </div>
-      )}
+          </div>
+        )}
+      <aside
+        aria-label="线色图例"
+        style={{
+          backdropFilter: 'blur(14px)',
+          background: 'rgba(255, 255, 255, 0.72)',
+          border: '1px solid rgba(215, 226, 240, 0.9)',
+          borderRadius: 16,
+          bottom: 16,
+          boxShadow: '0 8px 18px rgba(31, 41, 55, 0.15)',
+          left: 16,
+          maxWidth: 'calc(100% - 32px)',
+          padding: legendOpen ? '16px 18px' : '10px 14px',
+          position: 'absolute',
+          width: legendOpen ? 420 : 'auto',
+          zIndex: 1,
+        }}
+      >
+        <button
+          aria-expanded={legendOpen}
+          onClick={() => setLegendOpen((open) => !open)}
+          style={{
+            alignItems: 'center',
+            background: 'transparent',
+            border: 0,
+            color: '#44546a',
+            cursor: 'pointer',
+            display: 'flex',
+            fontSize: 18,
+            fontWeight: 700,
+            gap: 8,
+            padding: 0,
+            width: '100%',
+          }}
+          type="button"
+        >
+          <BgColorsOutlined style={{ color: '#3978e7' }} />
+          线色图例
+          <span style={{ color: '#8aa0bf', fontSize: 13, fontWeight: 500, marginLeft: 'auto' }}>
+            点击{legendOpen ? '隐藏' : '显示'}
+          </span>
+        </button>
+        {legendOpen ? (
+          <div style={{ borderTop: '1px solid #e3eaf3', marginTop: 12, paddingTop: 12 }}>
+            {legendItems.map((item) => (
+              <div key={item.label} style={{ alignItems: 'center', display: 'flex', gap: 12, marginBottom: 12 }}>
+                <span style={{ background: item.color, borderRadius: 999, height: 8, width: 40 }} />
+                <span style={{ color: '#44546a', fontSize: 17, fontWeight: 650 }}>{item.label}</span>
+              </div>
+            ))}
+            <div style={{ borderTop: '1px solid #e3eaf3', color: '#8aa0bf', fontSize: 14, lineHeight: 1.75, paddingTop: 10 }}>
+              <div style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
+                <ExpandOutlined /> 虚线表示主张的因果影响方向分歧超过 40%
+              </div>
+              <div style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
+                <SwapOutlined /> 边的粗细代表主张在数据库中的重复验证程度
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </aside>
     </div>
   );
 }

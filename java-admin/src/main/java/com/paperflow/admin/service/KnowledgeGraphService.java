@@ -111,6 +111,10 @@ public class KnowledgeGraphService {
                 .toList();
     }
 
+    public List<String> searchTerms(String query, Integer limit) {
+        return mapper.searchTerms(requireText(query), clamp(limit, 10, 1, 50));
+    }
+
     public List<CausalPaperSearchResultDto> searchPapers(String query, Integer limit) {
         return mapper.searchPapers(requireText(query), clamp(limit, 10, 1, 50)).stream()
                 .map(row -> new CausalPaperSearchResultDto(

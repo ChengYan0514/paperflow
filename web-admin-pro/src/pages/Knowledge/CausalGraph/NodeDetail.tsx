@@ -1,6 +1,6 @@
 import { PageContainer } from '@ant-design/pro-components';
 import { Link, useParams } from '@umijs/max';
-import { Card, Col, Row, Space, Statistic, Table } from 'antd';
+import { Card, Col, Row, Space, Statistic, Table, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import type { CausalGraphEdge, CausalNodeDetail } from '@/services/knowledge';
 import { getCausalNode } from '@/services/knowledge';
@@ -20,10 +20,10 @@ function edgeColumns() {
         </Link>
       ),
     },
-    { title: '记录数', dataIndex: 'recordCount', width: 90 },
-    { title: '论文数', dataIndex: 'paperCount', width: 90 },
-    { title: '方法数', dataIndex: 'diversity', width: 90 },
-    { title: '方向', width: 120, render: (_: unknown, edge: CausalGraphEdge) => <SignBadge value={edge.dominantSignCategory} /> },
+    { title: <Tooltip title="聚合关系数量">记录数</Tooltip>, dataIndex: 'recordCount', width: 90 },
+    { title: <Tooltip title="该关系被多少篇论文验证">论文数</Tooltip>, dataIndex: 'paperCount', width: 90 },
+    { title: <Tooltip title="该关系被多少种方法验证">方法数</Tooltip>, dataIndex: 'diversity', width: 90 },
+    { title: '主导方向', width: 120, render: (_: unknown, edge: CausalGraphEdge) => <SignBadge value={edge.dominantSignCategory} /> },
   ];
 }
 

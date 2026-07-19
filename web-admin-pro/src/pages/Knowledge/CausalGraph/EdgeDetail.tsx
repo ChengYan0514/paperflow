@@ -1,12 +1,11 @@
 import { PageContainer } from '@ant-design/pro-components';
 import { Link, useSearchParams } from '@umijs/max';
-import { Card, Col, Empty, Row, Space, Statistic, Typography } from 'antd';
+import { Card, Col, Empty, Row, Space, Statistic, Tooltip, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import type { CausalEdgeDetail } from '@/services/knowledge';
 import { getCausalEdge } from '@/services/knowledge';
 import { QueryState } from '../../businessUtils';
 import { EdgeEvidenceTable } from './components/EdgeEvidenceTable';
-import { SignBadge } from './components/SignBadge';
 
 function isNotFound(error: unknown) {
   return typeof error === 'object'
@@ -53,15 +52,17 @@ export default function CausalEdgeDetailPage() {
                   {' -> '}
                   <Link to={`/knowledge/causal-graph/nodes/${encodeURIComponent(detail.edge.target)}`}>{detail.edge.target}</Link>
                 </Typography.Title>
-                <SignBadge value={detail.edge.dominantSignCategory} />
+                <Typography.Text type="secondary">
+                  <span>负向{detail.edge.signBreakdown.negative ?? 0}条　</span>
+                  <span>正向{detail.edge.signBreakdown.positive ?? 0}条　</span>
+                  <span>不显著{detail.edge.signBreakdown.null ?? 0}条　</span>
+                  <span>混合{detail.edge.signBreakdown.mixed ?? 0}条</span>
+                </Typography.Text>
               </Card>
               <Row gutter={[16, 16]}>
-                <Col xs={12} md={4}><Card size="small"><Statistic title="记录数" value={detail.edge.recordCount} /></Card></Col>
-                <Col xs={12} md={4}><Card size="small"><Statistic title="论文数" value={detail.edge.paperCount} /></Card></Col>
-                <Col xs={12} md={4}><Card size="small"><Statistic title="方法数" value={detail.edge.diversity} /></Card></Col>
-                <Col xs={12} md={4}><Card size="small"><Statistic title="分歧度" value={detail.edge.disagreement} precision={2} /></Card></Col>
-                <Col xs={12} md={4}><Card size="small"><Statistic title="领域扩散" value={detail.stats.spreadSubfield} /></Card></Col>
-                <Col xs={12} md={4}><Card size="small"><Statistic title="时间跨度" value={detail.stats.spreadTime} suffix="年" /></Card></Col>
+                <Col xs={12} md={4}><Card size="small"><Statistic title={<Tooltip title="聚合关系数量">记录数</Tooltip>} value={detail.edge.recordCount} /></Card></Col>
+                <Col xs={12} md={4}><Card size="small"><Statistic title={<Tooltip title="该关系被多少篇论文验证">论文数</Tooltip>} value={detail.edge.paperCount} /></Card></Col>
+                <Col xs={12} md={4}><Card size="small"><Statistic title={<Tooltip title="该关系被多少种方法验证">方法数</Tooltip>} value={detail.edge.diversity} /></Card></Col>
               </Row>
               <Card title="证据记录" size="small">
                 <EdgeEvidenceTable claims={detail.claims} />

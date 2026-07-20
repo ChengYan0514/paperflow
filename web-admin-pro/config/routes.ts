@@ -147,11 +147,6 @@ export default [
         name: '领域分析',
         component: './Knowledge/CausalGraph/Fields',
       },
-      {
-        path: '/knowledge/causal-graph/methodology',
-        name: '方法说明',
-        component: './Knowledge/CausalGraph/Methodology',
-      },
     ],
   },
   {

@@ -129,8 +129,45 @@ export type CausalFieldItem = {
   variableCount: number;
 };
 
+export type CausalMethodCount = {
+  method: string;
+  claimRecordCount: number;
+};
+
+export type CausalVariableCount = {
+  variable: string;
+  claimRecordCount: number;
+};
+
+export type CausalFieldRelation = {
+  cause: string;
+  effect: string;
+  claimRecordCount: number;
+  paperCount: number;
+  methodCount: number;
+  globalClaimRecordCount: number;
+};
+
+export type CausalSubfieldDetail = {
+  paperCount: number;
+  claimRecordCount: number;
+  standardClaimCount: number;
+  variableCount: number;
+  methodCounts: CausalMethodCount[];
+  topVariables: CausalVariableCount[];
+  topRelations: CausalFieldRelation[];
+};
+
+export type CausalFieldOverview = {
+  subfields: string[];
+  topics: string[];
+  matrix: Record<string, Record<string, number>>;
+  details: Record<string, CausalSubfieldDetail>;
+};
+
 export type CausalFieldAnalysis = {
   items: CausalFieldItem[];
+  overview: CausalFieldOverview;
 };
 
 export type CausalNodeSearchResult = {

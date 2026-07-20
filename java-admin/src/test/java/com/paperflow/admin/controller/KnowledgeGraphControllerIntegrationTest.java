@@ -5,10 +5,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.paperflow.admin.PaperflowAdminApplication;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -38,6 +42,139 @@ import org.springframework.test.web.servlet.MockMvc;
 class KnowledgeGraphControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private CacheManager cacheManager;
+
+    @BeforeEach
+    void clearCaches() {
+        cacheManager.getCacheNames().forEach(name -> cacheManager.getCache(name).clear());
+    }
+
+    @Test
+    void defaultGraphKeepsItsFirstResultAfterCausalDataChanges() throws Exception {
+        insertGraphRecords(1, 4, 17);
+
+        mockMvc.perform(get("/api/knowledge/causal-graph/graph")
+                        .param("minRecordCount", "20")
+                        .param("minDiversity", "5")
+                        .param("maxNodes", "300")
+                        .param("maxEdges", "500"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nodes.length()").value(2))
+                .andExpect(jsonPath("$.edges.length()").value(1))
+                .andExpect(jsonPath("$.edges[0].source").value("Education"));
+
+        jdbcTemplate.update("INSERT INTO claim_table (claim_id, cause_standard, effect_standard) VALUES (2, 'Health', 'Income')");
+        insertGraphRecords(2, 21, 21);
+
+        mockMvc.perform(get("/api/knowledge/causal-graph/graph")
+                        .param("minRecordCount", "20")
+                        .param("minDiversity", "5")
+                        .param("maxNodes", "300")
+                        .param("maxEdges", "500"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nodes.length()").value(2))
+                .andExpect(jsonPath("$.edges.length()").value(1))
+                .andExpect(jsonPath("$.edges[0].source").value("Education"));
+    }
+
+    @Test
+    void filteredGraphReadsCausalDataAfterTheDefaultGraphIsCached() throws Exception {
+        insertGraphRecords(1, 4, 17);
+        mockMvc.perform(get("/api/knowledge/causal-graph/graph")
+                        .param("minRecordCount", "20")
+                        .param("minDiversity", "5")
+                        .param("maxNodes", "300")
+                        .param("maxEdges", "500"))
+                .andExpect(status().isOk());
+
+        jdbcTemplate.update("INSERT INTO claim_table (claim_id, cause_standard, effect_standard) VALUES (2, 'Health', 'Income')");
+        insertGraphRecords(2, 21, 21);
+
+        mockMvc.perform(get("/api/knowledge/causal-graph/graph")
+                        .param("minRecordCount", "21")
+                        .param("minDiversity", "5")
+                        .param("maxNodes", "300")
+                        .param("maxEdges", "500"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nodes.length()").value(2))
+                .andExpect(jsonPath("$.edges.length()").value(1))
+                .andExpect(jsonPath("$.edges[0].source").value("Health"));
+    }
+
+    @Test
+    void fieldsReturnAHeatmapAndTheLeadingSubfieldDetail() throws Exception {
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W1', 'Economics', 'Labor')");
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W2', 'Economics', 'Labor')");
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W3', 'Sociology', 'Networks')");
+
+        mockMvc.perform(get("/api/knowledge/causal-graph/fields"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.overview.subfields[0]").value("Economics"))
+                .andExpect(jsonPath("$.overview.topics[0]").value("Labor"))
+                .andExpect(jsonPath("$.overview.matrix.Economics.Labor").value(2))
+                .andExpect(jsonPath("$.overview.details.Economics.claimRecordCount").value(2))
+                .andExpect(jsonPath("$.overview.details.Economics.paperCount").value(2));
+    }
+
+    @Test
+    void fieldsExcludeExplicitUnlabelledValuesFromTheOverviewTopTen() throws Exception {
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W1', '未标注', '未标注')");
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W2', '未标注', '未标注')");
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W3', 'Economics', 'Labor')");
+
+        mockMvc.perform(get("/api/knowledge/causal-graph/fields"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.overview.subfields[0]").value("Economics"))
+                .andExpect(jsonPath("$.overview.topics[0]").value("Labor"));
+    }
+
+    @Test
+    void fieldsIncludeUnlabelledMethodsInTheSelectedSubfieldDetail() throws Exception {
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W1', 'Economics', 'Labor')");
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W2', 'Economics', 'Labor')");
+        jdbcTemplate.update("INSERT INTO paper_claim_table (record_id, claim_id, paper_id, causal_inference_method, sign_of_impact) VALUES (4, 1, 'W1', NULL, 'positive')");
+
+        mockMvc.perform(get("/api/knowledge/causal-graph/fields"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.overview.details.Economics.methodCounts[0].method").value("DID"))
+                .andExpect(jsonPath("$.overview.details.Economics.methodCounts[0].claimRecordCount").value(2))
+                .andExpect(jsonPath("$.overview.details.Economics.methodCounts[1].method").value("未标注方法"))
+                .andExpect(jsonPath("$.overview.details.Economics.methodCounts[1].claimRecordCount").value(1));
+    }
+
+    @Test
+    void fieldsIncludeTheMostFrequentVariablesForTheSelectedSubfield() throws Exception {
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W1', 'Economics', 'Labor')");
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W2', 'Economics', 'Labor')");
+
+        mockMvc.perform(get("/api/knowledge/causal-graph/fields"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.overview.details.Economics.topVariables[0].variable").value("Education"))
+                .andExpect(jsonPath("$.overview.details.Economics.topVariables[0].claimRecordCount").value(2))
+                .andExpect(jsonPath("$.overview.details.Economics.topVariables[1].variable").value("Income"))
+                .andExpect(jsonPath("$.overview.details.Economics.topVariables[1].claimRecordCount").value(2));
+    }
+
+    @Test
+    void fieldsDistinguishSubfieldAndGlobalEvidenceForFrequentRelations() throws Exception {
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W1', 'Economics', 'Labor')");
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W2', 'Economics', 'Labor')");
+        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W3', 'Sociology', 'Networks')");
+
+        mockMvc.perform(get("/api/knowledge/causal-graph/fields"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].cause").value("Education"))
+                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].effect").value("Income"))
+                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].claimRecordCount").value(2))
+                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].paperCount").value(2))
+                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].methodCount").value(1))
+                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].globalClaimRecordCount").value(3));
+    }
 
     @Test
     void graphReturnsTheEligibleEdgeWithAccurateCounts() throws Exception {
@@ -70,5 +207,17 @@ class KnowledgeGraphControllerIntegrationTest {
     void termSearchRejectsBlankQuery() throws Exception {
         mockMvc.perform(get("/api/knowledge/causal-graph/search/terms").param("q", " "))
                 .andExpect(status().isBadRequest());
+    }
+
+    private void insertGraphRecords(long claimId, int firstRecordId, int count) {
+        List<String> methods = List.of("DID", "RDD", "IV", "RCT", "Matching");
+        for (int recordId = firstRecordId; recordId < firstRecordId + count; recordId++) {
+            jdbcTemplate.update(
+                    "INSERT INTO paper_claim_table (record_id, claim_id, paper_id, causal_inference_method, sign_of_impact) VALUES (?, ?, ?, ?, 'positive')",
+                    recordId,
+                    claimId,
+                    "W" + recordId,
+                    methods.get((recordId - firstRecordId) % methods.size()));
+        }
     }
 }

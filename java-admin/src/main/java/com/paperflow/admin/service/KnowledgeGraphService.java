@@ -6,6 +6,10 @@ import com.paperflow.admin.dto.CausalEdgeDetailDto;
 import com.paperflow.admin.dto.CausalEdgeStatsDto;
 import com.paperflow.admin.dto.CausalFieldAnalysisDto;
 import com.paperflow.admin.dto.CausalFieldItemDto;
+import com.paperflow.admin.dto.CausalFieldOverviewDto;
+import com.paperflow.admin.dto.CausalFieldRelationDto;
+import com.paperflow.admin.dto.CausalMethodCountDto;
+import com.paperflow.admin.dto.CausalVariableCountDto;
 import com.paperflow.admin.dto.CausalGraphDataDto;
 import com.paperflow.admin.dto.CausalGraphEdgeDto;
 import com.paperflow.admin.dto.CausalGraphNodeDto;
@@ -17,12 +21,17 @@ import com.paperflow.admin.dto.CausalPaperDetailDto;
 import com.paperflow.admin.dto.CausalPaperInfoDto;
 import com.paperflow.admin.dto.CausalPaperSearchResultDto;
 import com.paperflow.admin.dto.CausalPaperSummaryDto;
+import com.paperflow.admin.dto.CausalSubfieldDetailDto;
 import com.paperflow.admin.mapper.KnowledgeGraphMapper;
 import com.paperflow.admin.model.CausalClaimRecord;
 import com.paperflow.admin.model.CausalCountRow;
 import com.paperflow.admin.model.CausalEdgeAggregateRow;
+import com.paperflow.admin.model.CausalFieldMethodRow;
+import com.paperflow.admin.model.CausalFieldRelationRow;
+import com.paperflow.admin.model.CausalFieldVariableRow;
 import com.paperflow.admin.model.CausalOverviewRow;
 import com.paperflow.admin.model.CausalPaperSummaryRow;
+import com.paperflow.admin.model.CausalSubfieldStatsRow;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +55,10 @@ public class KnowledgeGraphService {
     private static final int MAX_NODES = 1000;
     private static final int MAX_EDGES = 2000;
     private static final int DETAIL_CLAIM_LIMIT = 500;
+    private static final int FIELD_OVERVIEW_LIMIT = 10;
+    private static final int FIELD_METHOD_LIMIT = 10;
+    private static final int FIELD_VARIABLE_LIMIT = 10;
+    private static final int FIELD_RELATION_LIMIT = 8;
 
     private final KnowledgeGraphMapper mapper;
 
@@ -52,6 +66,7 @@ public class KnowledgeGraphService {
         this.mapper = mapper;
     }
 
+    @Cacheable(cacheNames = "causalGraphSummary", sync = true)
     public CausalGraphSummaryDto summary() {
         CausalOverviewRow row = mapper.findOverview(DEFAULT_MIN_RECORD_COUNT);
         return new CausalGraphSummaryDto(
@@ -69,6 +84,11 @@ public class KnowledgeGraphService {
                 new CausalDatasetVersionDto(LocalDate.now().toString(), null));
     }
 
+    @Cacheable(
+            cacheNames = "causalGraphDefault",
+            key = "'default'",
+            condition = "#p0 == 20 && #p1 == null && #p2 == 5 && (#p3 == null || #p3.isEmpty()) && (#p4 == null || #p4.isBlank()) && #p5 == 300 && #p6 == 500",
+            sync = true)
     public CausalGraphDataDto graph(
             Integer minRecordCount,
             Integer minPaperCount,
@@ -198,15 +218,101 @@ public class KnowledgeGraphService {
                 claimCount > 0);
     }
 
+    @Cacheable(cacheNames = "causalGraphFields", sync = true)
     public CausalFieldAnalysisDto fields() {
-        return new CausalFieldAnalysisDto(mapper.listFields(200).stream()
+        List<CausalFieldItemDto> items = mapper.listFields(200).stream()
                 .map(row -> new CausalFieldItemDto(
                         row.getSubfield(),
                         row.getTopic(),
                         row.getClaimRecordCount(),
                         row.getPaperCount(),
                         row.getVariableCount()))
-                .toList());
+                .toList();
+        List<String> subfields = mapper.listTopSubfields(FIELD_OVERVIEW_LIMIT).stream()
+                .map(CausalCountRow::getName)
+                .toList();
+        List<String> topics = mapper.listTopTopics(FIELD_OVERVIEW_LIMIT).stream()
+                .map(CausalCountRow::getName)
+                .toList();
+        Map<String, Map<String, Long>> matrix = emptyMatrix(subfields, topics);
+        if (!subfields.isEmpty() && !topics.isEmpty()) {
+            mapper.listFieldHeatmap(subfields, topics).forEach(row -> matrix
+                    .get(row.getSubfield())
+                    .put(row.getTopic(), row.getClaimRecordCount()));
+        }
+        Map<String, CausalSubfieldDetailDto> details = new LinkedHashMap<>();
+        if (!subfields.isEmpty()) {
+            Map<String, List<CausalFieldMethodRow>> methodsBySubfield = new LinkedHashMap<>();
+            for (CausalFieldMethodRow row : mapper.listSubfieldMethodCounts(subfields)) {
+                methodsBySubfield.computeIfAbsent(row.getSubfield(), ignored -> new ArrayList<>()).add(row);
+            }
+            Map<String, List<CausalFieldVariableRow>> variablesBySubfield = new LinkedHashMap<>();
+            for (CausalFieldVariableRow row : mapper.listSubfieldVariableCounts(subfields)) {
+                variablesBySubfield.computeIfAbsent(row.getSubfield(), ignored -> new ArrayList<>()).add(row);
+            }
+            Map<String, List<CausalFieldRelationRow>> relationsBySubfield = new LinkedHashMap<>();
+            for (CausalFieldRelationRow row : mapper.listSubfieldRelations(subfields)) {
+                relationsBySubfield.computeIfAbsent(row.getSubfield(), ignored -> new ArrayList<>()).add(row);
+            }
+            for (CausalSubfieldStatsRow row : mapper.listSubfieldStats(subfields)) {
+                details.put(row.getSubfield(), new CausalSubfieldDetailDto(
+                        row.getPaperCount(),
+                        row.getClaimRecordCount(),
+                        row.getStandardClaimCount(),
+                        variablesBySubfield.getOrDefault(row.getSubfield(), List.of()).size(),
+                        summarizeMethods(methodsBySubfield.getOrDefault(row.getSubfield(), List.of())),
+                        summarizeVariables(variablesBySubfield.getOrDefault(row.getSubfield(), List.of())),
+                        summarizeRelations(relationsBySubfield.getOrDefault(row.getSubfield(), List.of()))));
+            }
+        }
+        return new CausalFieldAnalysisDto(items, new CausalFieldOverviewDto(subfields, topics, matrix, details));
+    }
+
+    private Map<String, Map<String, Long>> emptyMatrix(List<String> subfields, List<String> topics) {
+        Map<String, Map<String, Long>> matrix = new LinkedHashMap<>();
+        for (String subfield : subfields) {
+            Map<String, Long> row = new LinkedHashMap<>();
+            for (String topic : topics) {
+                row.put(topic, 0L);
+            }
+            matrix.put(subfield, row);
+        }
+        return matrix;
+    }
+
+    private List<CausalMethodCountDto> summarizeMethods(List<CausalFieldMethodRow> rows) {
+        List<CausalMethodCountDto> methods = rows.stream()
+                .limit(FIELD_METHOD_LIMIT)
+                .map(row -> new CausalMethodCountDto(row.getMethod(), row.getClaimRecordCount()))
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+        long otherCount = rows.stream()
+                .skip(FIELD_METHOD_LIMIT)
+                .mapToLong(CausalFieldMethodRow::getClaimRecordCount)
+                .sum();
+        if (otherCount > 0) {
+            methods.add(new CausalMethodCountDto("其他", otherCount));
+        }
+        return methods;
+    }
+
+    private List<CausalVariableCountDto> summarizeVariables(List<CausalFieldVariableRow> rows) {
+        return rows.stream()
+                .limit(FIELD_VARIABLE_LIMIT)
+                .map(row -> new CausalVariableCountDto(row.getVariable(), row.getClaimRecordCount()))
+                .toList();
+    }
+
+    private List<CausalFieldRelationDto> summarizeRelations(List<CausalFieldRelationRow> rows) {
+        return rows.stream()
+                .limit(FIELD_RELATION_LIMIT)
+                .map(row -> new CausalFieldRelationDto(
+                        row.getCause(),
+                        row.getEffect(),
+                        row.getClaimRecordCount(),
+                        row.getPaperCount(),
+                        row.getMethodCount(),
+                        row.getGlobalClaimRecordCount()))
+                .toList();
     }
 
     private CausalEdgeDetailDto edgeDetail(CausalEdgeAggregateRow edge, List<CausalClaimRecord> claimRows) {

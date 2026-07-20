@@ -329,20 +329,195 @@
     </select>
 
     <select id="listFields" resultType="com.paperflow.admin.model.CausalFieldRow">
+        WITH paper_claim_counts AS (
+            SELECT
+                pct.paper_id,
+                COUNT(*) AS claim_record_count
+            FROM paper_claim_table pct
+            GROUP BY pct.paper_id
+        ),
+        paper_fields AS (
+            SELECT DISTINCT
+                pcc.paper_id,
+                COALESCE(wt.subfield_name, '未标注') AS subfield,
+                COALESCE(wt.topic_name, '未标注') AS topic
+            FROM paper_claim_counts pcc
+            LEFT JOIN work_topic wt ON wt.work_id = pcc.paper_id
+        )
         SELECT
-            COALESCE(wt.subfield_name, '未标注') AS subfield,
-            COALESCE(wt.topic_name, '未标注') AS topic,
-            COUNT(DISTINCT pct.record_id) AS claim_record_count,
-            COUNT(DISTINCT pct.paper_id) AS paper_count,
-            COUNT(DISTINCT variable) AS variable_count
-        FROM paper_claim_table pct
-        JOIN claim_table ct ON ct.claim_id = pct.claim_id
-        LEFT JOIN work_topic wt ON wt.work_id = pct.paper_id
-        CROSS JOIN LATERAL (
-            VALUES (ct.cause_standard), (ct.effect_standard)
-        ) AS variables(variable)
-        GROUP BY COALESCE(wt.subfield_name, '未标注'), COALESCE(wt.topic_name, '未标注')
+            pf.subfield,
+            pf.topic,
+            SUM(pcc.claim_record_count) AS claim_record_count,
+            COUNT(*) AS paper_count,
+            0 AS variable_count
+        FROM paper_fields pf
+        JOIN paper_claim_counts pcc ON pcc.paper_id = pf.paper_id
+        GROUP BY pf.subfield, pf.topic
         ORDER BY claim_record_count DESC, subfield ASC, topic ASC
         LIMIT #{limit}
+    </select>
+
+    <select id="listTopSubfields" resultType="com.paperflow.admin.model.CausalCountRow">
+        SELECT wt.subfield_name AS name, COUNT(DISTINCT pct.record_id) AS count
+        FROM paper_claim_table pct
+        JOIN work_topic wt ON wt.work_id = pct.paper_id
+        WHERE wt.subfield_name IS NOT NULL
+          AND TRIM(wt.subfield_name) != ''
+          AND TRIM(wt.subfield_name) != '未标注'
+        GROUP BY wt.subfield_name
+        ORDER BY count DESC, name ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="listTopTopics" resultType="com.paperflow.admin.model.CausalCountRow">
+        SELECT wt.topic_name AS name, COUNT(DISTINCT pct.record_id) AS count
+        FROM paper_claim_table pct
+        JOIN work_topic wt ON wt.work_id = pct.paper_id
+        WHERE wt.topic_name IS NOT NULL
+          AND TRIM(wt.topic_name) != ''
+          AND TRIM(wt.topic_name) != '未标注'
+        GROUP BY wt.topic_name
+        ORDER BY count DESC, name ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="listFieldHeatmap" resultType="com.paperflow.admin.model.CausalFieldRow">
+        SELECT
+            wt.subfield_name AS subfield,
+            wt.topic_name AS topic,
+            COUNT(DISTINCT pct.record_id) AS claim_record_count
+        FROM paper_claim_table pct
+        JOIN work_topic wt ON wt.work_id = pct.paper_id
+        WHERE wt.subfield_name IN
+        <foreach collection="subfields" item="subfield" open="(" separator="," close=")">
+            #{subfield}
+        </foreach>
+        AND wt.topic_name IN
+        <foreach collection="topics" item="topic" open="(" separator="," close=")">
+            #{topic}
+        </foreach>
+        GROUP BY wt.subfield_name, wt.topic_name
+        ORDER BY subfield ASC, topic ASC
+    </select>
+
+    <select id="listSubfieldStats" resultType="com.paperflow.admin.model.CausalSubfieldStatsRow">
+        WITH field_claims AS (
+            SELECT
+                wt.subfield_name AS subfield,
+                pct.record_id,
+                pct.paper_id,
+                pct.claim_id,
+                ct.cause_standard,
+                ct.effect_standard
+            FROM paper_claim_table pct
+            JOIN claim_table ct ON ct.claim_id = pct.claim_id
+            JOIN work_topic wt ON wt.work_id = pct.paper_id
+            WHERE (
+            <foreach collection="subfields" item="subfield" separator=" OR ">
+                wt.subfield_name = #{subfield}
+            </foreach>
+            )
+        )
+        SELECT
+            fc.subfield,
+            COUNT(DISTINCT fc.paper_id) AS paper_count,
+            COUNT(DISTINCT fc.record_id) AS claim_record_count,
+            COUNT(DISTINCT fc.claim_id) AS standard_claim_count,
+            0 AS variable_count
+        FROM field_claims fc
+        GROUP BY fc.subfield
+        ORDER BY fc.subfield ASC
+    </select>
+
+    <select id="listSubfieldMethodCounts" resultType="com.paperflow.admin.model.CausalFieldMethodRow">
+        SELECT
+            wt.subfield_name AS subfield,
+            COALESCE(NULLIF(TRIM(pct.causal_inference_method), ''), '未标注方法') AS method,
+            COUNT(DISTINCT pct.record_id) AS claim_record_count
+        FROM paper_claim_table pct
+        JOIN work_topic wt ON wt.work_id = pct.paper_id
+        WHERE wt.subfield_name IN
+        <foreach collection="subfields" item="subfield" open="(" separator="," close=")">
+            #{subfield}
+        </foreach>
+        GROUP BY wt.subfield_name, COALESCE(NULLIF(TRIM(pct.causal_inference_method), ''), '未标注方法')
+        ORDER BY subfield ASC, claim_record_count DESC, method ASC
+    </select>
+
+    <select id="listSubfieldVariableCounts" resultType="com.paperflow.admin.model.CausalFieldVariableRow">
+        WITH field_variables AS (
+            SELECT wt.subfield_name AS subfield, ct.cause_standard AS variable, pct.record_id
+            FROM paper_claim_table pct
+            JOIN claim_table ct ON ct.claim_id = pct.claim_id
+            JOIN work_topic wt ON wt.work_id = pct.paper_id
+            WHERE wt.subfield_name IN
+            <foreach collection="subfields" item="subfield" open="(" separator="," close=")">
+                #{subfield}
+            </foreach>
+            UNION ALL
+            SELECT wt.subfield_name AS subfield, ct.effect_standard AS variable, pct.record_id
+            FROM paper_claim_table pct
+            JOIN claim_table ct ON ct.claim_id = pct.claim_id
+            JOIN work_topic wt ON wt.work_id = pct.paper_id
+            WHERE wt.subfield_name IN
+            <foreach collection="subfields" item="subfield" open="(" separator="," close=")">
+                #{subfield}
+            </foreach>
+        )
+        SELECT subfield, variable, COUNT(DISTINCT record_id) AS claim_record_count
+        FROM field_variables
+        GROUP BY subfield, variable
+        ORDER BY subfield ASC, claim_record_count DESC, variable ASC
+    </select>
+
+    <select id="listSubfieldRelations" resultType="com.paperflow.admin.model.CausalFieldRelationRow">
+        WITH global_relations AS (
+            SELECT
+                ct.claim_id,
+                COUNT(DISTINCT pct.record_id) AS global_claim_record_count,
+                COUNT(DISTINCT pct.paper_id) AS global_paper_count,
+                COUNT(DISTINCT NULLIF(TRIM(pct.causal_inference_method), '')) AS global_method_count
+            FROM paper_claim_table pct
+            JOIN claim_table ct ON ct.claim_id = pct.claim_id
+            GROUP BY ct.claim_id
+        ),
+        field_relations AS (
+            SELECT
+                wt.subfield_name AS subfield,
+                ct.claim_id,
+                ct.cause_standard AS cause,
+                ct.effect_standard AS effect,
+                COUNT(DISTINCT pct.record_id) AS claim_record_count,
+                COUNT(DISTINCT pct.paper_id) AS paper_count,
+                COUNT(DISTINCT NULLIF(TRIM(pct.causal_inference_method), '')) AS method_count
+            FROM paper_claim_table pct
+            JOIN claim_table ct ON ct.claim_id = pct.claim_id
+            JOIN work_topic wt ON wt.work_id = pct.paper_id
+            WHERE (
+            <foreach collection="subfields" item="subfield" separator=" OR ">
+                wt.subfield_name = #{subfield}
+            </foreach>
+            )
+            GROUP BY wt.subfield_name, ct.claim_id, ct.cause_standard, ct.effect_standard
+        )
+        SELECT
+            fr.subfield,
+            fr.cause,
+            fr.effect,
+            fr.claim_record_count,
+            fr.paper_count,
+            fr.method_count,
+            gr.global_claim_record_count,
+            gr.global_paper_count,
+            gr.global_method_count
+        FROM field_relations fr
+        JOIN global_relations gr ON gr.claim_id = fr.claim_id
+        ORDER BY
+            fr.subfield ASC,
+            fr.claim_record_count DESC,
+            gr.global_method_count DESC,
+            gr.global_paper_count DESC,
+            fr.cause ASC,
+            fr.effect ASC
     </select>
 </mapper>

@@ -185,9 +185,9 @@ export function CausalForceGraph({
           boxShadow: '0 8px 18px rgba(31, 41, 55, 0.15)',
           left: 16,
           maxWidth: 'calc(100% - 32px)',
-          padding: legendOpen ? '16px 18px' : '10px 14px',
+          padding: legendOpen ? '12px 14px' : '8px 10px',
           position: 'absolute',
-          width: legendOpen ? 420 : 'auto',
+          width: legendOpen ? 440 : 'auto',
           zIndex: 1,
         }}
       >
@@ -217,12 +217,14 @@ export function CausalForceGraph({
         </button>
         {legendOpen ? (
           <div style={{ borderTop: '1px solid #e3eaf3', marginTop: 12, paddingTop: 12 }}>
-            {legendItems.map((item) => (
-              <div key={item.label} style={{ alignItems: 'center', display: 'flex', gap: 12, marginBottom: 12 }}>
-                <span style={{ background: item.color, borderRadius: 999, height: 8, width: 40 }} />
-                <span style={{ color: '#44546a', fontSize: 17, fontWeight: 650 }}>{item.label}</span>
-              </div>
-            ))}
+            <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+              {legendItems.map((item) => (
+                <div key={item.label} style={{ alignItems: 'center', display: 'flex', gap: 12 }}>
+                  <span style={{ background: item.color, borderRadius: 999, height: 8, width: 40 }} />
+                  <span style={{ color: '#44546a', fontSize: 17, fontWeight: 650 }}>{item.label}</span>
+                </div>
+              ))}
+            </div>
             <div style={{ borderTop: '1px solid #e3eaf3', color: '#8aa0bf', fontSize: 14, lineHeight: 1.75, paddingTop: 10 }}>
               <div style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
                 <ExpandOutlined /> 虚线表示主张的因果影响方向分歧超过 40%

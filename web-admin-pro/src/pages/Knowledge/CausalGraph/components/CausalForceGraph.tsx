@@ -180,14 +180,14 @@ export function CausalForceGraph({
           backdropFilter: 'blur(14px)',
           background: 'rgba(255, 255, 255, 0.72)',
           border: '1px solid rgba(215, 226, 240, 0.9)',
-          borderRadius: 16,
-          bottom: 16,
-          boxShadow: '0 8px 18px rgba(31, 41, 55, 0.15)',
-          left: 16,
-          maxWidth: 'calc(100% - 32px)',
-          padding: legendOpen ? '12px 14px' : '8px 10px',
+          borderRadius: 13,
+          bottom: 12,
+          boxShadow: '0 6px 14px rgba(31, 41, 55, 0.15)',
+          left: 12,
+          maxWidth: 'calc(100% - 24px)',
+          padding: legendOpen ? '10px 12px' : '6px 8px',
           position: 'absolute',
-          width: legendOpen ? 440 : 'auto',
+          width: legendOpen ? 352 : 'auto',
           zIndex: 1,
         }}
       >
@@ -201,9 +201,9 @@ export function CausalForceGraph({
             color: '#44546a',
             cursor: 'pointer',
             display: 'flex',
-            fontSize: 18,
+            fontSize: 15,
             fontWeight: 700,
-            gap: 8,
+            gap: 6,
             padding: 0,
             width: '100%',
           }}
@@ -211,25 +211,25 @@ export function CausalForceGraph({
         >
           <BgColorsOutlined style={{ color: '#3978e7' }} />
           线色图例
-          <span style={{ color: '#8aa0bf', fontSize: 13, fontWeight: 500, marginLeft: 'auto' }}>
+          <span style={{ color: '#8aa0bf', fontSize: 11, fontWeight: 500, marginLeft: 'auto' }}>
             点击{legendOpen ? '隐藏' : '显示'}
           </span>
         </button>
         {legendOpen ? (
-          <div style={{ borderTop: '1px solid #e3eaf3', marginTop: 12, paddingTop: 12 }}>
-            <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+          <div style={{ borderTop: '1px solid #e3eaf3', marginTop: 10, paddingTop: 10 }}>
+            <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
               {legendItems.map((item) => (
-                <div key={item.label} style={{ alignItems: 'center', display: 'flex', gap: 12 }}>
-                  <span style={{ background: item.color, borderRadius: 999, height: 8, width: 40 }} />
-                  <span style={{ color: '#44546a', fontSize: 17, fontWeight: 650 }}>{item.label}</span>
+                <div key={item.label} style={{ alignItems: 'center', display: 'flex', gap: 10 }}>
+                  <span style={{ background: item.color, borderRadius: 999, height: 6, width: 32 }} />
+                  <span style={{ color: '#44546a', fontSize: 14, fontWeight: 650 }}>{item.label}</span>
                 </div>
               ))}
             </div>
-            <div style={{ borderTop: '1px solid #e3eaf3', color: '#8aa0bf', fontSize: 14, lineHeight: 1.75, paddingTop: 10 }}>
-              <div style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
+            <div style={{ borderTop: '1px solid #e3eaf3', color: '#8aa0bf', fontSize: 12, lineHeight: 1.65, paddingTop: 8 }}>
+              <div style={{ alignItems: 'center', display: 'flex', gap: 6 }}>
                 <ExpandOutlined /> 虚线表示主张的因果影响方向分歧超过 40%
               </div>
-              <div style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
+              <div style={{ alignItems: 'center', display: 'flex', gap: 6 }}>
                 <SwapOutlined /> 边的粗细代表主张在数据库中的重复验证程度
               </div>
             </div>

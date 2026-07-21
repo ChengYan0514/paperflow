@@ -60,10 +60,33 @@ export default function CausalNodeDetailPage() {
           return (
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
               <Row gutter={[16, 16]}>
-                <Col xs={12} md={6}><Card size="small"><Statistic title="总记录" value={detail.totalClaims} /></Card></Col>
-                <Col xs={12} md={6}><Card size="small"><Statistic title="作为原因" value={detail.node.asCauseCount} /></Card></Col>
-                <Col xs={12} md={6}><Card size="small"><Statistic title="作为结果" value={detail.node.asEffectCount} /></Card></Col>
-                <Col xs={12} md={6}><Card size="small"><Statistic title="主领域" value={detail.node.dominantSubfield || '未标注'} /></Card></Col>
+                <Col xs={12} md={6}><Card size="small" style={{ height: 120 }}><Statistic title="总记录" value={detail.totalClaims} /></Card></Col>
+                <Col xs={12} md={6}><Card size="small" style={{ height: 120 }}><Statistic title="作为原因" value={detail.node.asCauseCount} /></Card></Col>
+                <Col xs={12} md={6}><Card size="small" style={{ height: 120 }}><Statistic title="作为结果" value={detail.node.asEffectCount} /></Card></Col>
+                <Col xs={12} md={6}>
+                  <Card size="small" style={{ height: 120 }}>
+                    <Statistic
+                      title="主领域"
+                      value={detail.node.dominantSubfield || '未标注'}
+                      formatter={(value) => (
+                        <Tooltip title={String(value)}>
+                          <span
+                            style={{
+                              display: '-webkit-box',
+                              WebkitBoxOrient: 'vertical',
+                              WebkitLineClamp: 2,
+                              fontSize: 24,
+                              lineHeight: '30px',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {String(value)}
+                          </span>
+                        </Tooltip>
+                      )}
+                    />
+                  </Card>
+                </Col>
               </Row>
               <CausalForceGraph data={graph} height={480} highlightNode={detail.node.id} />
               <Row gutter={[16, 16]}>

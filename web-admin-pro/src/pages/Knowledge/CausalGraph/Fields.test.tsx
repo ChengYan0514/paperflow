@@ -14,7 +14,7 @@ vi.mock('@umijs/max', () => ({
 }));
 
 vi.mock('antd', () => ({
-  Card: ({ children, title }: { children: React.ReactNode; title?: React.ReactNode }) => <section>{title}{children}</section>,
+  Card: ({ children, title, extra }: { children: React.ReactNode; title?: React.ReactNode; extra?: React.ReactNode }) => <section>{title}{extra}{children}</section>,
   Col: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Input: ({ allowClear: _allowClear, ...props }: React.ComponentProps<'input'> & { allowClear?: boolean }) => <input {...props} />,
   Progress: ({ percent }: { percent: number }) => <span>{percent}%</span>,
@@ -35,6 +35,10 @@ vi.mock('antd', () => ({
   ),
   Typography: {
     Text: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
+    Title: ({ children, level = 2 }: { children: React.ReactNode; level?: number }) => {
+      const Heading = `h${level}` as keyof React.JSX.IntrinsicElements;
+      return <Heading>{children}</Heading>;
+    },
   },
 }));
 
@@ -82,10 +86,14 @@ vi.mock('../../businessUtils', () => ({
 }));
 
 describe('CausalFieldsPage', () => {
-  it('shows the heatmap and detail for the leading subfield', async () => {
+  it('shows coverage context and the leading subfield overview', async () => {
     render(<CausalFieldsPage />);
 
-    expect(await screen.findByText('领域与主题热力图')).toBeInTheDocument();
+    expect(await screen.findByText('实际数据包含众多子领域和主题；本页展示声明记录数最多的前 10 个子领域与前 10 个主题。')).toBeInTheDocument();
+    expect(screen.getByLabelText('声明记录数色阶：0、低、中、高')).toBeInTheDocument();
+    expect(screen.getByText('方法分布（Top 10 + 其他）')).toBeInTheDocument();
+    expect(screen.getByText('一篇 Work 可同时带有多个领域和主题标签，因此同一声明记录会计入多个单元格；请勿将行、列或单元格合计与全库总数比较。')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Economics 概览' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Economics/ })).toBeInTheDocument();
     expect(screen.getByText('论文数:3')).toBeInTheDocument();
     expect(screen.getByText('DID')).toBeInTheDocument();
@@ -116,7 +124,7 @@ describe('CausalFieldsPage', () => {
   it('persists the selected heatmap subfield in the URL query', async () => {
     render(<CausalFieldsPage />);
 
-    await screen.findByText('领域与主题热力图');
+    await screen.findByText('实际数据包含众多子领域和主题；本页展示声明记录数最多的前 10 个子领域与前 10 个主题。');
     fireEvent.click(screen.getByRole('button', { name: '选择子领域 Sociology' }));
 
     const selectedParams = setSearchParams.mock.calls.at(-1)?.[0] as URLSearchParams;

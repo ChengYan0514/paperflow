@@ -8,11 +8,10 @@ vi.mock('@ant-design/pro-components', () => ({
 
 vi.mock('@umijs/max', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
-  useSearchParams: () => [new URLSearchParams()],
 }));
 
 vi.mock('antd', () => ({
-  Card: ({ children, title, extra }: { children: React.ReactNode; title?: React.ReactNode; extra?: React.ReactNode }) => <section>{title}{extra}{children}</section>,
+  Card: ({ children, title }: { children: React.ReactNode; title?: React.ReactNode }) => <section>{title}{children}</section>,
   Col: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Input: ({ allowClear: _allowClear, ...props }: React.ComponentProps<'input'> & { allowClear?: boolean }) => <input {...props} />,
   Progress: ({ percent }: { percent: number }) => <span>{percent}%</span>,
@@ -47,33 +46,18 @@ vi.mock('@/services/knowledge', () => ({
       { subfield: 'Economics', topic: 'Macroeconomics', claimRecordCount: 1, paperCount: 1, variableCount: 1 },
       { subfield: 'Sociology', topic: 'Social networks', claimRecordCount: 1, paperCount: 1, variableCount: 1 },
     ],
+    insights: {
+      methodCounts: [{ name: 'DID', count: 5 }, { name: '其他', count: 3 }],
+      topVariables: [{ name: 'Education', count: 6 }],
+      topRelations: [{ cause: 'Education', effect: 'Income', claimRecordCount: 6, paperCount: 4, methodCount: 2 }],
+    },
+  })),
+  getCausalSummary: vi.fn(async () => ({
     overview: {
-      subfields: ['Economics', 'Sociology'],
-      topics: ['Labor economics', 'Social networks'],
-      matrix: {
-        Economics: { 'Labor economics': 4, 'Social networks': 0 },
-        Sociology: { 'Labor economics': 0, 'Social networks': 2 },
-      },
-      details: {
-        Economics: {
-          paperCount: 3,
-          claimRecordCount: 4,
-          standardClaimCount: 2,
-          variableCount: 5,
-          methodCounts: [{ method: 'DID', claimRecordCount: 3 }, { method: '未标注方法', claimRecordCount: 1 }],
-          topVariables: [{ variable: 'Education', claimRecordCount: 3 }],
-          topRelations: [{ cause: 'Education', effect: 'Income', claimRecordCount: 3, paperCount: 2, methodCount: 2, globalClaimRecordCount: 8 }],
-        },
-        Sociology: {
-          paperCount: 2,
-          claimRecordCount: 2,
-          standardClaimCount: 1,
-          variableCount: 3,
-          methodCounts: [{ method: 'RCT', claimRecordCount: 2 }],
-          topVariables: [{ variable: 'Trust', claimRecordCount: 2 }],
-          topRelations: [{ cause: 'Trust', effect: 'Participation', claimRecordCount: 2, paperCount: 2, methodCount: 1, globalClaimRecordCount: 2 }],
-        },
-      },
+      totalClaimRecords: 8,
+      totalStandardClaims: 4,
+      totalPapers: 5,
+      totalNodes: 6,
     },
   })),
 }));
@@ -84,22 +68,30 @@ vi.mock('../../businessUtils', () => ({
 }));
 
 describe('CausalFieldsPage', () => {
-  it('shows the leading subfield detail without section headings', async () => {
+  it('labels the complete field analysis table', async () => {
     render(<CausalFieldsPage />);
 
-    await screen.findByText('论文数:3');
+    await screen.findByText('论文数:5');
+    expect(screen.getByRole('heading', { name: '领域明细' })).toBeInTheDocument();
+  });
+
+  it('shows global relationship, variable, and method insights without a selected subfield', async () => {
+    render(<CausalFieldsPage />);
+
+    await screen.findByText('抽取记录:8');
+    expect(screen.getByText('标准关系:4')).toBeInTheDocument();
+    expect(screen.getByText('论文数:5')).toBeInTheDocument();
+    expect(screen.getByText('变量数:6')).toBeInTheDocument();
+    expect(screen.getByText('高频关系（Top 1）')).toBeInTheDocument();
+    expect(screen.getByText('高频变量（Top 1）')).toBeInTheDocument();
     expect(screen.getByText('方法分布（Top 10 + 其他）')).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Economics 概览' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: /完整明细/ })).not.toBeInTheDocument();
-    expect(screen.getByText('论文数:3')).toBeInTheDocument();
-    expect(screen.getByText('DID')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Education 3' })).toHaveAttribute(
-      'href',
-      '/knowledge/causal-graph/nodes/Education',
-    );
     expect(screen.getByRole('link', { name: 'Education -> Income' })).toHaveAttribute(
       'href',
       '/knowledge/causal-graph/edges?cause=Education&effect=Income',
+    );
+    expect(screen.getByRole('link', { name: 'Education 6' })).toHaveAttribute(
+      'href',
+      '/knowledge/causal-graph/nodes/Education',
     );
   });
 

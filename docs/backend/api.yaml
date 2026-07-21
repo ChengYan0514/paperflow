@@ -2541,12 +2541,56 @@ components:
           type: boolean
     CausalFieldAnalysis:
       type: object
-      required: [items]
+      required: [items, insights]
       properties:
         items:
           type: array
           items:
             $ref: "#/components/schemas/CausalFieldItem"
+        insights:
+          $ref: "#/components/schemas/CausalFieldInsights"
+    CausalFieldInsights:
+      type: object
+      required: [methodCounts, topVariables, topRelations]
+      properties:
+        methodCounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/CausalNamedCount"
+        topVariables:
+          type: array
+          items:
+            $ref: "#/components/schemas/CausalNamedCount"
+        topRelations:
+          type: array
+          items:
+            $ref: "#/components/schemas/CausalGlobalRelation"
+    CausalNamedCount:
+      type: object
+      required: [name, count]
+      properties:
+        name:
+          type: string
+        count:
+          type: integer
+          format: int64
+    CausalGlobalRelation:
+      type: object
+      required: [cause, effect, claimRecordCount, paperCount, methodCount]
+      properties:
+        cause:
+          type: string
+        effect:
+          type: string
+        claimRecordCount:
+          type: integer
+          format: int64
+        paperCount:
+          type: integer
+          format: int64
+        methodCount:
+          type: integer
+          format: int64
     CausalFieldItem:
       type: object
       required: [subfield, topic, claimRecordCount, paperCount, variableCount]

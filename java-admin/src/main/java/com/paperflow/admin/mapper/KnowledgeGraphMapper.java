@@ -4,14 +4,11 @@ import com.paperflow.admin.model.CausalClaimRecord;
 import com.paperflow.admin.model.CausalCountRow;
 import com.paperflow.admin.model.CausalEdgeAggregateRow;
 import com.paperflow.admin.model.CausalFieldRow;
-import com.paperflow.admin.model.CausalFieldMethodRow;
-import com.paperflow.admin.model.CausalFieldRelationRow;
-import com.paperflow.admin.model.CausalFieldVariableRow;
+import com.paperflow.admin.model.CausalGlobalRelationRow;
 import com.paperflow.admin.model.CausalNodeSearchRow;
 import com.paperflow.admin.model.CausalOverviewRow;
 import com.paperflow.admin.model.CausalPaperSearchRow;
 import com.paperflow.admin.model.CausalPaperSummaryRow;
-import com.paperflow.admin.model.CausalSubfieldStatsRow;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
@@ -62,19 +59,10 @@ public interface KnowledgeGraphMapper {
 
     List<CausalFieldRow> listFields(@Param("limit") int limit);
 
-    List<CausalCountRow> listTopSubfields(@Param("limit") int limit);
+    List<CausalCountRow> listGlobalMethodCounts();
 
-    List<CausalCountRow> listTopTopics(@Param("limit") int limit);
+    List<CausalCountRow> listGlobalVariableCounts();
 
-    List<CausalFieldRow> listFieldHeatmap(
-            @Param("subfields") List<String> subfields,
-            @Param("topics") List<String> topics);
+    List<CausalGlobalRelationRow> listGlobalRelations();
 
-    List<CausalSubfieldStatsRow> listSubfieldStats(@Param("subfields") List<String> subfields);
-
-    List<CausalFieldMethodRow> listSubfieldMethodCounts(@Param("subfields") List<String> subfields);
-
-    List<CausalFieldVariableRow> listSubfieldVariableCounts(@Param("subfields") List<String> subfields);
-
-    List<CausalFieldRelationRow> listSubfieldRelations(@Param("subfields") List<String> subfields);
 }

@@ -107,73 +107,36 @@ class KnowledgeGraphControllerIntegrationTest {
     }
 
     @Test
-    void fieldsReturnAHeatmapAndTheLeadingSubfieldDetail() throws Exception {
+    void fieldsReturnTheCompleteFieldAuditItems() throws Exception {
         jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W1', 'Economics', 'Labor')");
         jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W2', 'Economics', 'Labor')");
         jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W3', 'Sociology', 'Networks')");
 
         mockMvc.perform(get("/api/knowledge/causal-graph/fields"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.overview.subfields[0]").value("Economics"))
-                .andExpect(jsonPath("$.overview.topics[0]").value("Labor"))
-                .andExpect(jsonPath("$.overview.matrix.Economics.Labor").value(2))
-                .andExpect(jsonPath("$.overview.details.Economics.claimRecordCount").value(2))
-                .andExpect(jsonPath("$.overview.details.Economics.paperCount").value(2));
+                .andExpect(jsonPath("$.items.length()").value(2))
+                .andExpect(jsonPath("$.items[0].subfield").value("Economics"))
+                .andExpect(jsonPath("$.items[0].topic").value("Labor"))
+                .andExpect(jsonPath("$.items[0].claimRecordCount").value(2))
+                .andExpect(jsonPath("$.items[0].paperCount").value(2))
+                .andExpect(jsonPath("$.items[0].variableCount").value(2))
+                .andExpect(jsonPath("$.insights.topRelations[0].cause").value("Education"))
+                .andExpect(jsonPath("$.insights.topRelations[0].effect").value("Income"))
+                .andExpect(jsonPath("$.insights.topRelations[0].claimRecordCount").value(3))
+                .andExpect(jsonPath("$.insights.topVariables[0].name").value("Education"))
+                .andExpect(jsonPath("$.insights.topVariables[0].count").value(3))
+                .andExpect(jsonPath("$.insights.methodCounts[0].name").value("DID"))
+                .andExpect(jsonPath("$.insights.methodCounts[0].count").value(3));
     }
 
     @Test
-    void fieldsExcludeExplicitUnlabelledValuesFromTheOverviewTopTen() throws Exception {
-        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W1', '未标注', '未标注')");
-        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W2', '未标注', '未标注')");
-        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W3', 'Economics', 'Labor')");
-
+    void fieldsReturnGlobalInsightsForUntaggedRecords() throws Exception {
         mockMvc.perform(get("/api/knowledge/causal-graph/fields"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.overview.subfields[0]").value("Economics"))
-                .andExpect(jsonPath("$.overview.topics[0]").value("Labor"));
-    }
-
-    @Test
-    void fieldsIncludeUnlabelledMethodsInTheSelectedSubfieldDetail() throws Exception {
-        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W1', 'Economics', 'Labor')");
-        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W2', 'Economics', 'Labor')");
-        jdbcTemplate.update("INSERT INTO paper_claim_table (record_id, claim_id, paper_id, causal_inference_method, sign_of_impact) VALUES (4, 1, 'W1', NULL, 'positive')");
-
-        mockMvc.perform(get("/api/knowledge/causal-graph/fields"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.overview.details.Economics.methodCounts[0].method").value("DID"))
-                .andExpect(jsonPath("$.overview.details.Economics.methodCounts[0].claimRecordCount").value(2))
-                .andExpect(jsonPath("$.overview.details.Economics.methodCounts[1].method").value("未标注方法"))
-                .andExpect(jsonPath("$.overview.details.Economics.methodCounts[1].claimRecordCount").value(1));
-    }
-
-    @Test
-    void fieldsIncludeTheMostFrequentVariablesForTheSelectedSubfield() throws Exception {
-        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W1', 'Economics', 'Labor')");
-        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W2', 'Economics', 'Labor')");
-
-        mockMvc.perform(get("/api/knowledge/causal-graph/fields"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.overview.details.Economics.topVariables[0].variable").value("Education"))
-                .andExpect(jsonPath("$.overview.details.Economics.topVariables[0].claimRecordCount").value(2))
-                .andExpect(jsonPath("$.overview.details.Economics.topVariables[1].variable").value("Income"))
-                .andExpect(jsonPath("$.overview.details.Economics.topVariables[1].claimRecordCount").value(2));
-    }
-
-    @Test
-    void fieldsDistinguishSubfieldAndGlobalEvidenceForFrequentRelations() throws Exception {
-        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W1', 'Economics', 'Labor')");
-        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W2', 'Economics', 'Labor')");
-        jdbcTemplate.update("INSERT INTO work_topic (work_id, subfield_name, topic_name) VALUES ('W3', 'Sociology', 'Networks')");
-
-        mockMvc.perform(get("/api/knowledge/causal-graph/fields"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].cause").value("Education"))
-                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].effect").value("Income"))
-                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].claimRecordCount").value(2))
-                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].paperCount").value(2))
-                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].methodCount").value(1))
-                .andExpect(jsonPath("$.overview.details.Economics.topRelations[0].globalClaimRecordCount").value(3));
+                .andExpect(jsonPath("$.items[0].subfield").value("未标注"))
+                .andExpect(jsonPath("$.insights.topRelations[0].claimRecordCount").value(3))
+                .andExpect(jsonPath("$.insights.topVariables[0].count").value(3))
+                .andExpect(jsonPath("$.insights.methodCounts[0].count").value(3));
     }
 
     @Test

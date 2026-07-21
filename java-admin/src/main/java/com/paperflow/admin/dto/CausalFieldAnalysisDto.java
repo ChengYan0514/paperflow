@@ -2,4 +2,4 @@ package com.paperflow.admin.dto;
 
 import java.util.List;
 
-public record CausalFieldAnalysisDto(List<CausalFieldItemDto> items, CausalFieldOverviewDto overview) {}
+public record CausalFieldAnalysisDto(List<CausalFieldItemDto> items, CausalFieldInsightsDto insights) {}

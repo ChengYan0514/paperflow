@@ -3,140 +3,9 @@
   gap: 16px;
 }
 
-.coverage-card .ant-card-head-title {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-}
-
-.heatmap-legend {
-  display: inline-flex;
-  gap: 5px;
-  align-items: center;
-  color: #5f6b7a;
-  font-size: 12px;
-}
-
-.heatmap-legend i {
-  width: 12px;
-  height: 12px;
-  border: 1px solid rgba(31, 41, 55, 0.12);
-  border-radius: 2px;
-}
-
-.legend-empty { background: #f5f7fa; }
-.legend-low { background: #dcebff; }
-.legend-medium { background: #91c8ff; }
-.legend-high { background: #1d5fa7; }
-
-.heatmap-scroll {
-  overflow-x: auto;
-}
-
-.heatmap-grid,
-.heatmap-row {
-  min-width: 708px;
-}
-
-.heatmap-grid {
-  display: grid;
-  gap: 2px;
-  margin-bottom: 2px;
-}
-
-.heatmap-corner,
-.heatmap-topic {
-  min-height: 32px;
-  padding: 6px 8px;
-  color: #5f6b7a;
-  font-size: 12px;
-  line-height: 20px;
-}
-
-.heatmap-corner,
-.heatmap-subfield {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background: #fff;
-  box-shadow: 6px 0 8px -8px rgba(31, 41, 55, 0.45);
-}
-
-.heatmap-row {
-  display: grid;
-  width: 100%;
-  gap: 2px;
-  padding: 0;
-  border: 0;
-  border-left: 3px solid transparent;
-  background: transparent;
-  color: #1f2937;
-  cursor: pointer;
-  text-align: left;
-}
-
-.heatmap-row:hover .heatmap-cell,
-.heatmap-row:focus-visible .heatmap-cell {
-  outline: 1px solid #1677ff;
-  outline-offset: -1px;
-}
-
-.heatmap-row:focus-visible {
-  outline: 2px solid #1677ff;
-  outline-offset: 3px;
-}
-
-.heatmap-row.is-selected {
-  border-left-color: #1677ff;
-}
-
-.heatmap-row.is-selected .heatmap-subfield {
-  background: #eaf3ff;
-  font-weight: 600;
-}
-
-.heatmap-subfield,
-.heatmap-cell {
-  min-height: 40px;
-  box-sizing: border-box;
-}
-
-.heatmap-subfield {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  font-size: 13px;
-  overflow-wrap: anywhere;
-}
-
-.heatmap-cell {
-  display: grid;
-  place-items: center;
-  padding: 6px;
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
-
-.level-empty { background: #f5f7fa; color: #5f6b7a; }
-.level-low { background: #dcebff; color: #1f2937; }
-.level-medium { background: #91c8ff; color: #1f2937; }
-.level-high { background: #3b82d0; color: #fff; }
-.level-highest { background: #1d5fa7; color: #fff; }
-
-.coverage-note {
-  display: block;
-  margin-top: 12px;
-}
-
-.field-detail > .ant-typography,
-.field-audit .ant-typography {
-  margin: 0;
-}
-
 .summary-band {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  margin-top: 12px;
   border: 1px solid #e5eaf0;
   border-radius: 6px;
   background: #fff;
@@ -210,16 +79,13 @@
 }
 
 .field-audit {
-  padding-top: 24px;
-  border-top: 1px solid #e5eaf0;
+  padding-top: 12px;
 }
 
 .audit-heading {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 16px;
+  justify-content: flex-end;
+  margin-bottom: 12px;
 }
 
 .field-audit .ant-table-cell {
@@ -242,19 +108,8 @@
 }
 
 @media (max-width: 767px) {
-  .coverage-card .ant-card-head {
-    min-height: auto;
-    padding: 12px 16px;
-  }
-
-  .coverage-card .ant-card-head-wrapper,
   .audit-heading {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .heatmap-legend {
-    margin-top: 4px;
+    justify-content: flex-start;
   }
 
   .audit-heading .ant-space {

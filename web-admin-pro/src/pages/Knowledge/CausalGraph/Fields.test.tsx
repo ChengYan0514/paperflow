@@ -6,11 +6,9 @@ vi.mock('@ant-design/pro-components', () => ({
   PageContainer: ({ children }: { children: React.ReactNode }) => <main>{children}</main>,
 }));
 
-const setSearchParams = vi.fn();
-
 vi.mock('@umijs/max', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
-  useSearchParams: () => [new URLSearchParams(), setSearchParams],
+  useSearchParams: () => [new URLSearchParams()],
 }));
 
 vi.mock('antd', () => ({
@@ -86,15 +84,13 @@ vi.mock('../../businessUtils', () => ({
 }));
 
 describe('CausalFieldsPage', () => {
-  it('shows coverage context and the leading subfield overview', async () => {
+  it('shows the leading subfield detail without section headings', async () => {
     render(<CausalFieldsPage />);
 
-    expect(await screen.findByText('实际数据包含众多子领域和主题；本页展示声明记录数最多的前 10 个子领域与前 10 个主题。')).toBeInTheDocument();
-    expect(screen.getByLabelText('声明记录数色阶：0、低、中、高')).toBeInTheDocument();
+    await screen.findByText('论文数:3');
     expect(screen.getByText('方法分布（Top 10 + 其他）')).toBeInTheDocument();
-    expect(screen.getByText('一篇 Work 可同时带有多个领域和主题标签，因此同一声明记录会计入多个单元格；请勿将行、列或单元格合计与全库总数比较。')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Economics 概览' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Economics/ })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Economics 概览' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /完整明细/ })).not.toBeInTheDocument();
     expect(screen.getByText('论文数:3')).toBeInTheDocument();
     expect(screen.getByText('DID')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Education 3' })).toHaveAttribute(
@@ -121,13 +117,4 @@ describe('CausalFieldsPage', () => {
     expect(within(screen.getByTestId('field-items')).queryByText('Labor economics')).not.toBeInTheDocument();
   });
 
-  it('persists the selected heatmap subfield in the URL query', async () => {
-    render(<CausalFieldsPage />);
-
-    await screen.findByText('实际数据包含众多子领域和主题；本页展示声明记录数最多的前 10 个子领域与前 10 个主题。');
-    fireEvent.click(screen.getByRole('button', { name: '选择子领域 Sociology' }));
-
-    const selectedParams = setSearchParams.mock.calls.at(-1)?.[0] as URLSearchParams;
-    expect(selectedParams.get('subfield')).toBe('Sociology');
-  });
 });

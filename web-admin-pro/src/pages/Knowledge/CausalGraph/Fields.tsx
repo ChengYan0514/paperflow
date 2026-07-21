@@ -7,17 +7,8 @@ import { getCausalFields } from '@/services/knowledge';
 import { QueryState } from '../../businessUtils';
 import './Fields.less';
 
-function heatmapLevel(value: number, maximum: number) {
-  if (!value || !maximum) return 'empty';
-  const ratio = value / maximum;
-  if (ratio <= 0.25) return 'low';
-  if (ratio <= 0.6) return 'medium';
-  if (ratio <= 0.85) return 'high';
-  return 'highest';
-}
-
 export default function CausalFieldsPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [data, setData] = useState<CausalFieldAnalysis>();
   const [error, setError] = useState<unknown>();
   const [loading, setLoading] = useState(true);
@@ -28,12 +19,6 @@ export default function CausalFieldsPage() {
     getCausalFields().then(setData).catch(setError).finally(() => setLoading(false));
   }, []);
 
-  function selectSubfield(subfield: string) {
-    const next = new URLSearchParams(searchParams);
-    next.set('subfield', subfield);
-    setSearchParams(next);
-  }
-
   return (
     <PageContainer title="领域分析">
       <QueryState loading={loading} error={error} data={data}>
@@ -43,67 +28,15 @@ export default function CausalFieldsPage() {
             ? requestedSubfield
             : fields.overview.subfields[0];
           const detail = selectedSubfield ? fields.overview.details[selectedSubfield] : undefined;
-          const maxCell = Math.max(
-            0,
-            ...fields.overview.subfields.flatMap((subfield) =>
-              fields.overview.topics.map((topic) => fields.overview.matrix[subfield]?.[topic] ?? 0),
-            ),
-          );
           const filteredItems = fields.items.filter((item) =>
             item.subfield.toLowerCase().includes(subfieldSearch.trim().toLowerCase())
             && item.topic.toLowerCase().includes(topicSearch.trim().toLowerCase()),
           );
-          const gridColumns = `188px repeat(${fields.overview.topics.length}, minmax(104px, 1fr))`;
 
           return (
             <div className="causal-fields-page">
-              <Card
-                className="coverage-card"
-                size="small"
-                title="实际数据包含众多子领域和主题；本页展示声明记录数最多的前 10 个子领域与前 10 个主题。"
-                extra={<span className="heatmap-legend" role="img" aria-label="声明记录数色阶：0、低、中、高"><i className="legend-empty" />0<i className="legend-low" />低<i className="legend-medium" />中<i className="legend-high" />高</span>}
-              >
-                <div className="heatmap-scroll">
-                  <div className="heatmap-grid" style={{ gridTemplateColumns: gridColumns }}>
-                    <span className="heatmap-corner">子领域 / 主题</span>
-                    {fields.overview.topics.map((topic) => <span className="heatmap-topic" key={topic}>{topic}</span>)}
-                  </div>
-                  <div className="heatmap-rows">
-                    {fields.overview.subfields.map((subfield) => (
-                      <button
-                        className={`heatmap-row${selectedSubfield === subfield ? ' is-selected' : ''}`}
-                        key={subfield}
-                        type="button"
-                        onClick={() => selectSubfield(subfield)}
-                        aria-label={`选择子领域 ${subfield}`}
-                        aria-pressed={selectedSubfield === subfield}
-                        style={{ gridTemplateColumns: gridColumns }}
-                      >
-                        <span className="heatmap-subfield">{subfield}</span>
-                        {fields.overview.topics.map((topic) => {
-                          const value = fields.overview.matrix[subfield]?.[topic] ?? 0;
-                          return (
-                            <span
-                              className={`heatmap-cell level-${heatmapLevel(value, maxCell)}`}
-                              key={topic}
-                              title={`${subfield}，${topic}，${value} 条声明记录`}
-                              role="img"
-                              aria-label={`${subfield}，${topic}，${value} 条声明记录`}
-                            >
-                              {value || '-'}
-                            </span>
-                          );
-                        })}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <Typography.Text className="coverage-note" type="secondary">一篇 Work 可同时带有多个领域和主题标签，因此同一声明记录会计入多个单元格；请勿将行、列或单元格合计与全库总数比较。</Typography.Text>
-              </Card>
-
               {detail ? (
-                <section className="field-detail" aria-labelledby="field-overview-title">
-                  <Typography.Title id="field-overview-title" level={2}>{selectedSubfield} 概览</Typography.Title>
+                <section className="field-detail">
                   <div className="summary-band">
                     <Statistic title="论文数" value={detail.paperCount} />
                     <Statistic title="声明记录数" value={detail.claimRecordCount} />
@@ -156,9 +89,8 @@ export default function CausalFieldsPage() {
                 </section>
               ) : null}
 
-              <section className="field-audit" aria-labelledby="field-audit-title">
+              <section className="field-audit">
                 <div className="audit-heading">
-                  <Typography.Title id="field-audit-title" level={2}>完整明细（{filteredItems.length}）</Typography.Title>
                   <Space wrap>
                     <Input allowClear aria-label="筛选子领域" placeholder="筛选子领域" value={subfieldSearch} onChange={(event) => setSubfieldSearch(event.target.value)} />
                     <Input allowClear aria-label="筛选主题" placeholder="筛选主题" value={topicSearch} onChange={(event) => setTopicSearch(event.target.value)} />

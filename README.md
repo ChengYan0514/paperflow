@@ -22,6 +22,8 @@ Current management features include:
 - CSV export for Source, Work, and Original File lists using current filters.
 - Read-only failure task guidance with CLI retry commands for Matching, Text Parsing,
   and Block Import failures.
+- Causal knowledge graph exploration: graph filtering, relation and variable details,
+  paper evidence, and field/topic analysis.
 
 ## Configure
 
@@ -30,6 +32,9 @@ The database account needs read access to Paperflow business tables and read/wri
 access to `admin_user` and `admin_audit_log`.
 If the causal knowledge graph is stored in a different PostgreSQL database, also set
 `CAUSAL_DB_*` so the knowledge-graph endpoints use that separate connection.
+
+`CAUSAL_DB_*` is optional: each variable falls back to the corresponding
+`PAPERFLOW_DB_*` value when it is unset.
 
 ```bash
 cp .env.example .env

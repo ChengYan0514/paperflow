@@ -1140,6 +1140,41 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "500":
           $ref: "#/components/responses/InternalError"
+  /api/knowledge/causal-graph/search/terms:
+    get:
+      tags: [Knowledge Causal Graph]
+      operationId: searchCausalTerms
+      summary: Search causal graph terms for graph filtering.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        "200":
+          description: Matching causal graph terms.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
   /api/knowledge/causal-graph/search/papers:
     get:
       tags: [Knowledge Causal Graph]

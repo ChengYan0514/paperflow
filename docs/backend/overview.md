@@ -5,7 +5,7 @@
 
 ## 目标
 
-Java 后端只做六件事：
+Java 后端只做七件事：
 
 1. 从 Paperflow 项目库读取 `source`、`work`、`original_file`、
    `original_file_job`、`text_file`、`block*` 表。
@@ -15,6 +15,8 @@ Java 后端只做六件事：
 4. 通过本地 Admin User 账号提供后台登录、退出、当前用户和用户管理接口。
 5. 提供服务状态、最近错误摘要和结构化操作审计查询。
 6. 为 Source、Work、Original File 列表提供按当前筛选导出 CSV。
+7. 从独立或同库的 causal 数据源提供只读因果知识图谱查询，包括总览、关系、变量、
+   论文证据和领域分析。
 
 Python 项目继续负责所有数据生产：
 
@@ -33,7 +35,7 @@ Python 项目继续负责所有数据生产：
 - 触发 Python CLI 或 MinerU。
 - 读取配置的 `DATA_ROOT` 之外的磁盘文件、下载远程 PDF、生成或修改 parsed
   图片。
-- JWT、SSO、自注册、动态权限矩阵、CORS、缓存。
+- JWT、SSO、自注册、动态权限矩阵和 CORS。
 - 前端页面。
 
 Paperflow 业务数据仍然不通过 Java 后端写入。
@@ -68,6 +70,17 @@ GET /api/original-files/export
 GET /api/original-files/{fileId}
 GET /api/original-files/{fileId}/blocks
 GET /api/assets/**
+GET /api/knowledge/causal-graph/summary
+GET /api/knowledge/causal-graph/graph
+GET /api/knowledge/causal-graph/search/nodes
+GET /api/knowledge/causal-graph/search/terms
+GET /api/knowledge/causal-graph/search/papers
+GET /api/knowledge/causal-graph/nodes/{variable}
+GET /api/knowledge/causal-graph/edges
+GET /api/knowledge/causal-graph/claims/{claimId}
+GET /api/knowledge/causal-graph/papers/{workId}
+GET /api/knowledge/causal-graph/papers/{workId}/summary
+GET /api/knowledge/causal-graph/fields
 ```
 
 API 契约见 `docs/backend/api.yaml`。

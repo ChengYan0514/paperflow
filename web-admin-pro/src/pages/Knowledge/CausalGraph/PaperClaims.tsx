@@ -7,7 +7,24 @@ import type { CausalClaim, CausalPaperDetail } from '@/services/knowledge';
 import { getCausalPaper } from '@/services/knowledge';
 import { QueryState } from '../../businessUtils';
 import { CausalForceGraph } from './components/CausalForceGraph';
+import { CausalInferenceMethod } from './components/CausalInferenceMethod';
 import { SignBadge } from './components/SignBadge';
+
+const mainContributionRowStyle = {
+  backgroundColor: '#ffffff',
+  color: '#1e293b',
+  opacity: 1,
+};
+
+const auxiliaryClaimRowStyle = {
+  backgroundColor: '#f8fafc',
+  color: '#94a3b8',
+  opacity: 0.8,
+};
+
+function isMainContribution(claim: CausalClaim) {
+  return claim.isMainContribution === true;
+}
 
 export default function CausalPaperClaimsPage() {
   const { workId = '' } = useParams();
@@ -19,6 +36,12 @@ export default function CausalPaperClaimsPage() {
     setLoading(true);
     getCausalPaper(workId).then(setData).catch(setError).finally(() => setLoading(false));
   }, [workId]);
+
+  const claims = data
+    ? [...data.claims].sort(
+        (left, right) => Number(isMainContribution(right)) - Number(isMainContribution(left)),
+      )
+    : [];
 
   return (
     <PageContainer title="论文因果声明" subTitle={workId}>
@@ -48,9 +71,17 @@ export default function CausalPaperClaimsPage() {
             </Row>
             <CausalForceGraph data={detail.paperGraph} height={420} />
             <Card title="声明明细" size="small">
+              <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 12 }}>
+                高亮行（核心发现）浅色行（非核心发现）
+              </Typography.Text>
               <Table<CausalClaim>
-                dataSource={detail.claims}
+                dataSource={claims}
                 expandable={{ expandedRowRender: (claim) => <Typography.Paragraph>{claim.evidence || '-'}</Typography.Paragraph> }}
+                onRow={(claim) => ({
+                  style: isMainContribution(claim)
+                    ? mainContributionRowStyle
+                    : auxiliaryClaimRowStyle,
+                })}
                 pagination={{ pageSize: 10 }}
                 rowKey="recordId"
                 scroll={{ x: 1080 }}
@@ -59,7 +90,10 @@ export default function CausalPaperClaimsPage() {
                     title: '标准关系',
                     width: 260,
                     render: (_, claim) => (
-                      <Link to={`/knowledge/causal-graph/edges?cause=${encodeURIComponent(claim.causeStandard)}&effect=${encodeURIComponent(claim.effectStandard)}`}>
+                      <Link
+                        style={{ color: isMainContribution(claim) ? '#2563eb' : '#60a5fa' }}
+                        to={`/knowledge/causal-graph/edges?cause=${encodeURIComponent(claim.causeStandard)}&effect=${encodeURIComponent(claim.effectStandard)}`}
+                      >
                         {claim.causeStandard}
                         {' -> '}
                         {claim.effectStandard}
@@ -67,7 +101,12 @@ export default function CausalPaperClaimsPage() {
                     ),
                   },
                   { title: '方向', width: 120, render: (_, claim) => <SignBadge value={claim.signCategory} /> },
-                  { title: '方法', dataIndex: 'causalInferenceMethod', width: 180 },
+                  {
+                    title: '方法',
+                    dataIndex: 'causalInferenceMethod',
+                    width: 180,
+                    render: (_, claim) => <CausalInferenceMethod method={claim.causalInferenceMethod} otherDescription={claim.evidenceMethodOtherDescription} />,
+                  },
                   { title: '显著性', dataIndex: 'statisticalSignificance', width: 130 },
                   { title: '原始主张', dataIndex: 'claim', width: 360 },
                 ]}

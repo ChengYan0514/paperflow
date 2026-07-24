@@ -1,6 +1,6 @@
 # 因果知识图谱无数据库改动加速方案
 
-状态：计划中，尚未实现。
+状态：已实施。
 
 ## 目标与边界
 
@@ -20,17 +20,23 @@
 
 缓存命中时不查询 causal 数据库；首次请求、服务重启后的首次请求仍会执行实时聚合。因此它解决的是重复访问，不是冷启动。
 
-## 开发步骤
+## 实施状态
+
+已完成：Spring Cache 已启用，进程内 `ConcurrentMapCacheManager` 注册了
+`causalGraphSummary`、`causalGraphFields` 与 `causalGraphDefault` 三个缓存；
+`summary()` 和 `fields()` 使用 `sync = true` 缓存，相关集成测试会在每例开始前清空缓存。
+
+前端总览会显式发送 `minRecordCount=20`、`minDiversity=5`、`maxNodes=300` 和
+`maxEdges=500`，因此命中 `causalGraphDefault`。未带参数的 API 调用使用服务层的
+宽松默认值 `3` 和 `1`，不属于前端默认视图，也不会进入该缓存。带筛选条件或不同阈值
+的图谱请求继续实时查询。
+
+## 已实施步骤
 
 1. 在 `java-admin` 启用 Spring Cache，并注册三个命名的本地 `ConcurrentMapCache`。
-2. 在 `KnowledgeGraphService` 的 `summary()` 和 `fields()` 上缓存结果；使用 `sync = true`，防止并发首访重复执行同一慢查询。
-3. 仅在图谱参数完全匹配上述默认值时缓存 `graph()` 结果；其他参数绕过缓存。
-4. 不改变 Controller 路径、DTO、前端请求参数或 MyBatis SQL。
-5. 在 `KnowledgeGraphControllerIntegrationTest` 中按 TDD 添加测试：
-   - 首次 HTTP 请求得到图谱/领域数据；
-   - 修改测试 causal 数据后再次请求，默认页面仍返回首次结果；
-   - 非默认图谱请求仍返回修改后的实时结果。
-6. 运行相关 Java 集成测试和完整 `mvn test`；在实际 causal 数据库上复测端点耗时与 `EXPLAIN ANALYZE`。
+2. 在 `KnowledgeGraphService` 的 `summary()` 和 `fields()` 上使用 `sync = true` 缓存结果。
+3. 保持 Controller 路径、DTO、前端请求参数和 MyBatis SQL 不因缓存而改变。
+4. 在 `KnowledgeGraphCacheIntegrationTest` 中覆盖 summary、fields 和筛选图谱的缓存边界。
 
 ## 失效与发布
 

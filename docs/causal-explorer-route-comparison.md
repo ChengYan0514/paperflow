@@ -8,7 +8,7 @@
 | `/node/$variable` | `/knowledge/causal-graph/nodes/:variable` | 都展示变量的入/出边和一跳图谱。原项目有领域饼图、年份柱图与卡片列表；当前改为统计卡和表格。后端仍返回领域、年份统计，但前端未展示。 |
 | `/edge/$cause/$effect` | `/knowledge/causal-graph/edges?cause=…&effect=…` | 都展示关系、方向、证据和详情跳转。原项目有方法/方向/年份图、跨领域指标、本地图和证据筛选排序；当前只展示记录数、论文数、方法数和证据表，且接入论文管理。 |
 | `/paper/$paperId` | `/knowledge/causal-graph/papers/:workId` | 都展示论文的因果声明与论文内图谱。原项目会请求 OpenAlex 补充摘要、外链和完整声明卡；当前使用本地 `work` 数据，新增“论文详情 / 全文 Blocks”跳转，声明详情收敛为可展开表格。 |
-| `/fields` | `/knowledge/causal-graph/fields` | 都按子领域/主题分析。原项目是 Top 10×10 热力图，选领域后展示方法占比、变量、关系；当前是可排序、分页的完整聚合表，并可按子领域、主题筛选。已确定以“概览 + 领域详情 + 完整明细表”的方式补齐，详见[领域分析增强方案](causal-graph-fields-plan.md)。 |
+| `/fields` | `/knowledge/causal-graph/fields` | 都按子领域/主题分析。原项目是 Top 10×10 热力图和选中领域详情；当前以全库统计、高频关系/变量/方法分布和可筛选、分页的完整聚合表呈现，不维护选中子领域状态。 |
 
 共同的核心图谱交互也基本保留：关系颜色表示方向、线宽表示重复证据、分歧超过 40% 用虚线，点击节点/边进入详情；可对照原版 [ForceGraph.tsx](../causal-explorer/causal-explorer/src/components/ForceGraph.tsx) 与现版 [CausalForceGraph.tsx](../web-admin-pro/src/pages/Knowledge/CausalGraph/components/CausalForceGraph.tsx)。
 

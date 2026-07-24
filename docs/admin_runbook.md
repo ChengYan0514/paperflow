@@ -42,6 +42,10 @@ ANALYZE work_topic;
 如果修改了 causal 查询账号的 `work_mem` 或 `statement_timeout`，重启后端或排空
 连接池后再验收，确保新连接继承角色配置。
 
+因果图谱的总览与领域分析使用进程内缓存。外部 causal ETL 成功后，重启
+`paperflow-admin`，使下一次访问从已完成的 ETL 结果重建缓存；不要在 ETL 尚未完整
+落库时重启服务。
+
 在仓库根目录执行：
 
 ```bash
@@ -232,6 +236,8 @@ password: admin
 - `/sources`、`/works`、`/original-files` 可按当前筛选导出 CSV。
 - `/service-status` 展示 Java 后端、数据库、`DATA_ROOT`、磁盘空间和最近错误。
 - `/failure-tasks` 展示失败状态解释和可复制 CLI 命令；页面只读，不触发 pipeline。
+- `/knowledge/causal-graph` 可加载总览、变量/关系详情、论文证据和领域分析；若在
+  causal ETL 后验收，先重启后端以清空进程内缓存。
 - `SUPER_ADMIN` 可访问 `/audit-logs` 查询登录、退出、创建用户、更新用户、重置密码、
   修改密码等审计事件；`ADMIN` 和 `USER` 不可访问。
 - Swagger 菜单打开 `/swagger-ui/index.html`。

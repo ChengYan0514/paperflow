@@ -155,6 +155,15 @@ class KnowledgeGraphControllerIntegrationTest {
     }
 
     @Test
+    void paperSummaryCountsEachClaimRecordOnce() throws Exception {
+        mockMvc.perform(get("/api/knowledge/causal-graph/papers/W1/summary"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.claimRecordCount").value(1))
+                .andExpect(jsonPath("$.standardClaimCount").value(1))
+                .andExpect(jsonPath("$.variableCount").value(2));
+    }
+
+    @Test
     void termSearchUsesDistinctStwLabelsWithPrefixPriorityAndLimit() throws Exception {
         mockMvc.perform(get("/api/knowledge/causal-graph/search/terms")
                         .param("q", "CONSU")

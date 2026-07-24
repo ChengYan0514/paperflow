@@ -317,14 +317,25 @@
     <select id="findPaperSummary" resultType="com.paperflow.admin.model.CausalPaperSummaryRow">
         SELECT
             #{workId} AS work_id,
-            COUNT(pct.record_id) AS claim_record_count,
+            COUNT(DISTINCT pct.record_id) AS claim_record_count,
             COUNT(DISTINCT pct.claim_id) AS standard_claim_count,
-            COUNT(DISTINCT variable) AS variable_count
+            (
+                SELECT COUNT(*) FROM (
+                    SELECT ct_variable.cause_standard AS standard_variable
+                    FROM paper_claim_table pct_variable
+                    JOIN claim_table ct_variable ON ct_variable.claim_id = pct_variable.claim_id
+                    WHERE pct_variable.paper_id = #{workId}
+                      AND ct_variable.cause_standard IS NOT NULL
+                    UNION
+                    SELECT ct_variable.effect_standard AS standard_variable
+                    FROM paper_claim_table pct_variable
+                    JOIN claim_table ct_variable ON ct_variable.claim_id = pct_variable.claim_id
+                    WHERE pct_variable.paper_id = #{workId}
+                      AND ct_variable.effect_standard IS NOT NULL
+                ) standard_variables
+            ) AS variable_count
         FROM paper_claim_table pct
         JOIN claim_table ct ON ct.claim_id = pct.claim_id
-        CROSS JOIN LATERAL (
-            VALUES (ct.cause_standard), (ct.effect_standard)
-        ) AS variables(variable)
         WHERE pct.paper_id = #{workId}
     </select>
 

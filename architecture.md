@@ -64,6 +64,17 @@ GET /api/original-files/export
 GET /api/original-files/{fileId}
 GET /api/original-files/{fileId}/blocks
 GET /api/assets/**
+GET /api/knowledge/causal-graph/summary
+GET /api/knowledge/causal-graph/graph
+GET /api/knowledge/causal-graph/search/nodes
+GET /api/knowledge/causal-graph/search/terms
+GET /api/knowledge/causal-graph/search/papers
+GET /api/knowledge/causal-graph/nodes/{variable}
+GET /api/knowledge/causal-graph/edges
+GET /api/knowledge/causal-graph/claims/{claimId}
+GET /api/knowledge/causal-graph/papers/{workId}
+GET /api/knowledge/causal-graph/papers/{workId}/summary
+GET /api/knowledge/causal-graph/fields
 ```
 
 `docs/backend/api.yaml` is packaged by `java-admin/pom.xml` as the runtime
@@ -73,7 +84,12 @@ Swagger UI require login in production.
 
 `src/main/resources/application.yml` loads `.env` from `java-admin/.env` or the
 project root `../.env`. Database schema selection is controlled by PostgreSQL
-JDBC `currentSchema`.
+JDBC `currentSchema`. Causal graph queries use `CAUSAL_DB_*` when configured,
+otherwise the corresponding `PAPERFLOW_DB_*` connection values.
+
+The graph summary and field-analysis responses use process-local caches. After
+an external causal ETL succeeds, restart the Java service before using the
+refreshed graph data.
 
 ## Web Frontend
 

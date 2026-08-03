@@ -53,13 +53,30 @@ import org.springframework.test.web.servlet.MockMvc;
     "INSERT INTO block (block_id, file_id, block_type, block_text, pdf_page, pdf_bbox, block_seq, parent_title_block_id, title_level) VALUES ('B21', 'F2', 'title', 'XML title', 0, NULL, 0, NULL, 0)",
     "INSERT INTO block (block_id, file_id, block_type, block_text, pdf_page, pdf_bbox, block_seq, parent_title_block_id, title_level) VALUES ('B22', 'F2', 'text', 'XML body', 0, NULL, 1, 'B21', NULL)"
 })
-class OriginalFileControllerIntegrationTest {
+class PaperControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
     @Test
+    void listsUnmatchedOriginalFilesAsPaperManagementRecords() throws Exception {
+        mockMvc.perform(get("/api/papers").param("page", "1").param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(3))
+                .andExpect(jsonPath("$.items[2].fileId").value("F3"))
+                .andExpect(jsonPath("$.items[2].flagMatch").value(-1));
+    }
+
+    @Test
+    void searchesOriginalMetadataByAuthor() throws Exception {
+        mockMvc.perform(get("/api/papers").param("q", "Ada"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].fileId").value("F1"));
+    }
+
+    @Test
     void listsOriginalFilesWithFilters() throws Exception {
-        mockMvc.perform(get("/api/original-files")
+        mockMvc.perform(get("/api/papers")
                         .param("sourceId", "S1")
                         .param("flagText", "-2")
                         .param("page", "1")
@@ -77,7 +94,7 @@ class OriginalFileControllerIntegrationTest {
 
     @Test
     void filtersOriginalFilesByMatchedWorkId() throws Exception {
-        mockMvc.perform(get("/api/original-files").param("matchedWorkId", "W1"))
+        mockMvc.perform(get("/api/papers").param("matchedWorkId", "W1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.total").value(1))
                 .andExpect(jsonPath("$.items[0].fileId").value("F1"))
@@ -86,7 +103,7 @@ class OriginalFileControllerIntegrationTest {
 
     @Test
     void filtersOriginalFilesByManagementFieldsAndRanges() throws Exception {
-        mockMvc.perform(get("/api/original-files")
+        mockMvc.perform(get("/api/papers")
                         .param("fileId", "F3")
                         .param("sourceName", "two")
                         .param("provider", "ELSEVIER")
@@ -97,55 +114,41 @@ class OriginalFileControllerIntegrationTest {
                 .andExpect(jsonPath("$.total").value(1))
                 .andExpect(jsonPath("$.items[0].fileId").value("F3"));
 
-        mockMvc.perform(get("/api/original-files").param("yearFrom", "2024").param("yearTo", "2023"))
+        mockMvc.perform(get("/api/papers").param("yearFrom", "2024").param("yearTo", "2023"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
     @Test
     void sortsOriginalFilesByWhitelistedSortsAndRejectsUnknownSort() throws Exception {
-        mockMvc.perform(get("/api/original-files").param("sort", "yearDesc"))
+        mockMvc.perform(get("/api/papers").param("sort", "yearDesc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].fileId").value("F1"))
                 .andExpect(jsonPath("$.items[1].fileId").value("F2"))
                 .andExpect(jsonPath("$.items[2].fileId").value("F3"));
 
-        mockMvc.perform(get("/api/original-files").param("sort", "fileSizeAsc"))
+        mockMvc.perform(get("/api/papers").param("sort", "fileSizeAsc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].fileId").value("F2"))
                 .andExpect(jsonPath("$.items[1].fileId").value("F1"))
                 .andExpect(jsonPath("$.items[2].fileId").value("F3"));
 
-        mockMvc.perform(get("/api/original-files").param("sort", "providerAsc"))
+        mockMvc.perform(get("/api/papers").param("sort", "providerAsc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].fileId").value("F3"));
 
-        mockMvc.perform(get("/api/original-files").param("sort", "textStatusIssueFirst"))
+        mockMvc.perform(get("/api/papers").param("sort", "textStatusIssueFirst"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].fileId").value("F3"));
 
-        mockMvc.perform(get("/api/original-files").param("sort", "fileIdDesc"))
+        mockMvc.perform(get("/api/papers").param("sort", "fileIdDesc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
     @Test
-    void returnsOriginalFileDetailWithTextFiles() throws Exception {
-        mockMvc.perform(get("/api/original-files/F1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.fileId").value("F1"))
-                .andExpect(jsonPath("$.originalFilePath").value("openalex/original/S1/F1.pdf"))
-                .andExpect(jsonPath("$.originalFileUrl").value("/api/assets/openalex/original/S1/F1.pdf"))
-                .andExpect(jsonPath("$.flagMatch").value(1))
-                .andExpect(jsonPath("$.flagText").value(2))
-                .andExpect(jsonPath("$.flagBlock").value(1))
-                .andExpect(jsonPath("$.textFiles[0].fileType").value("JSON"))
-                .andExpect(jsonPath("$.textFiles[1].fileType").value("MD"));
-    }
-
-    @Test
     void listsOriginalFileBlocksForParsedXmlFiles() throws Exception {
-        mockMvc.perform(get("/api/original-files/F2/blocks"))
+        mockMvc.perform(get("/api/papers/F2/blocks"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.total").value(2))
                 .andExpect(jsonPath("$.items[0].blockText").value("XML title"))
@@ -153,23 +156,23 @@ class OriginalFileControllerIntegrationTest {
     }
 
     @Test
-    void returnsOriginalFileNotFound() throws Exception {
-        mockMvc.perform(get("/api/original-files/missing"))
+    void returnsPaperNotFound() throws Exception {
+        mockMvc.perform(get("/api/papers/missing"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("ORIGINAL_FILE_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("Original File not found"));
+                .andExpect(jsonPath("$.code").value("PAPER_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Paper not found"));
     }
 
     @Test
     void rejectsInvalidFlagFilter() throws Exception {
-        mockMvc.perform(get("/api/original-files").param("flagText", "99"))
+        mockMvc.perform(get("/api/papers").param("flagText", "99"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
     @Test
     void exportsFilteredOriginalFilesAsCsvWithChineseFlagLabels() throws Exception {
-        mockMvc.perform(get("/api/original-files/export").param("flagText", "-2"))
+        mockMvc.perform(get("/api/papers/export").param("flagText", "-2"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/csv;charset=UTF-8"))
                 .andExpect(content().string(containsString("原始文件ID,原始文件名,论文标题")))

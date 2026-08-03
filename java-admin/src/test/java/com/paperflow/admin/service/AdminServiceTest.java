@@ -18,7 +18,8 @@ class AdminServiceTest {
                     mock(AdminMapper.class),
                     PROPERTIES,
                     new ObjectMapper(),
-                    new AssetService(PROPERTIES));
+                    new AssetService(PROPERTIES),
+                    mock(KnowledgeGraphService.class));
 
     @Test
     void derivesProcessingStatusFromMatchedJobFlags() {

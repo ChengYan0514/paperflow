@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { tableMarkup, WorkBlocksPage } from './BlocksReader';
-import { listWorkBlocks } from '@/services/business';
+import { tableMarkup, PaperBlocksPage } from './BlocksReader';
+import { listPaperBlocks } from '@/services/business';
 
 vi.mock('@umijs/max', () => ({
-  useParams: () => ({ workId: 'W1' }),
+  useParams: () => ({ fileId: 'F1' }),
   useSearchParams: () => [
     new URLSearchParams('includeDiscarded=true'),
     vi.fn(),
@@ -23,7 +23,7 @@ vi.mock('@ant-design/pro-components', () => ({
 
 vi.mock('@/services/business', async () => ({
   assetUrl: (path?: string | null) => path,
-  listWorkBlocks: vi.fn(async () => ({
+  listPaperBlocks: vi.fn(async () => ({
     items: [
       {
         blockId: 'B1',
@@ -83,15 +83,15 @@ describe('BlocksReader', () => {
     vi.clearAllMocks();
   });
 
-  it('loads all work blocks with includeDiscarded and renders block types', async () => {
-    render(<WorkBlocksPage />);
+  it('loads all paper blocks with includeDiscarded and renders block types', async () => {
+    render(<PaperBlocksPage />);
 
     expect(await screen.findByText('Introduction')).toBeInTheDocument();
-    expect(listWorkBlocks).toHaveBeenCalledWith(
-      'W1',
+    expect(listPaperBlocks).toHaveBeenCalledWith(
+      'F1',
       expect.objectContaining({}),
     );
-    const params = vi.mocked(listWorkBlocks).mock.calls[0][1];
+    const params = vi.mocked(listPaperBlocks).mock.calls[0][1];
     expect(params?.get('includeDiscarded')).toBe('true');
     expect(screen.getByText('Cell')).toBeInTheDocument();
     expect(screen.getByText('Figure 1')).toBeInTheDocument();

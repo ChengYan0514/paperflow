@@ -30,10 +30,10 @@ describe('business service', () => {
   });
 
   it('builds export URLs without pagination', async () => {
-    const { originalFilesExportUrl } = await import('./business');
+    const { papersExportUrl } = await import('./business');
     const params = new URLSearchParams('sourceId=S1&page=3&size=20&flagText=-1');
 
-    expect(originalFilesExportUrl(params)).toBe('/api/original-files/export?sourceId=S1&flagText=-1');
+    expect(papersExportUrl(params)).toBe('/api/papers/export?sourceId=S1&flagText=-1');
   });
 
   it('gets service status', async () => {
@@ -46,14 +46,14 @@ describe('business service', () => {
     });
   });
 
-  it('passes includeDiscarded to work block calls', async () => {
-    const { listWorkBlocks } = await import('./business');
+  it('passes includeDiscarded to paper block calls', async () => {
+    const { listPaperBlocks } = await import('./business');
     const params = new URLSearchParams('includeDiscarded=true&size=500');
 
-    await listWorkBlocks('W1', params);
+    await listPaperBlocks('F1', params);
 
     expect(requestMock).toHaveBeenCalledWith(
-      '/api/works/W1/blocks?includeDiscarded=true&size=500&page=1',
+      '/api/papers/F1/blocks?includeDiscarded=true&size=500&page=1',
       { method: 'GET' },
     );
   });

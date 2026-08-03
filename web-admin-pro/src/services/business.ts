@@ -76,16 +76,6 @@ export type ServiceStatus = {
   recentErrors: RecentError[];
 };
 
-export type ProcessingStatus =
-  | 'NO_MATCHED_FILE'
-  | 'MATCHED'
-  | 'PARSING'
-  | 'PARSE_FAILED'
-  | 'UNSUPPORTED_TEXT_INPUT'
-  | 'PARSED'
-  | 'BLOCK_FAILED'
-  | 'READY';
-
 export type WorkMetadata = {
   workId: string;
   title?: string | null;
@@ -94,17 +84,6 @@ export type WorkMetadata = {
   publicationDate?: string | null;
   type?: string | null;
   language?: string | null;
-};
-
-export type WorkListItem = WorkMetadata & {
-  sourceIds: string[];
-  sourceNames?: string | null;
-  sources: SourceBrief[];
-  processingStatus: ProcessingStatus;
-  matchedFileId?: string | null;
-  flagMatch?: number | null;
-  flagText?: number | null;
-  flagBlock?: number | null;
 };
 
 export type SourceBrief = {
@@ -150,12 +129,29 @@ export type OriginalFile = {
   textFiles: TextFile[];
 };
 
-export type WorkDetail = {
-  work: WorkMetadata;
+export type PaperTaskStatus = {
+  flagMatch: number;
+  flagText: number;
+  flagBlock: number;
+};
+
+export type OpenAlexMetadata = WorkMetadata & {
   sources: SourceBrief[];
   authors: Author[];
-  matchedFile?: OriginalFile | null;
-  processingStatus: ProcessingStatus;
+};
+
+export type PaperDetail = {
+  originalFile: Omit<OriginalFile, 'flagMatch' | 'matchedWorkId' | 'flagText' | 'flagBlock' | 'textFiles'>;
+  taskStatus: PaperTaskStatus;
+  openAlex?: OpenAlexMetadata | null;
+  textFiles: TextFile[];
+  causalSummary?: {
+    workId: string;
+    claimRecordCount: number;
+    standardClaimCount: number;
+    variableCount: number;
+    hasCausalClaims: boolean;
+  } | null;
 };
 
 export type Block = {
@@ -237,39 +233,22 @@ export function getSource(sourceId: string) {
   return getJson<SourceSummary>(`/api/sources/${sourceId}`);
 }
 
-export function listWorks(params?: URLSearchParams) {
-  return getJson<Page<WorkListItem>>('/api/works', withDefaults(params));
+export function listPapers(params?: URLSearchParams) {
+  return getJson<Page<OriginalFile>>('/api/papers', withDefaults(params));
 }
 
-export function worksExportUrl(params?: URLSearchParams) {
+export function papersExportUrl(params?: URLSearchParams) {
   const query = withoutPagination(params).toString();
-  return `${apiBaseUrl}/api/works/export${query ? `?${query}` : ''}`;
+  return `${apiBaseUrl}/api/papers/export${query ? `?${query}` : ''}`;
 }
 
-export function getWork(workId: string) {
-  return getJson<WorkDetail>(`/api/works/${workId}`);
+export function getPaper(fileId: string) {
+  return getJson<PaperDetail>(`/api/papers/${fileId}`);
 }
 
-export function listOriginalFiles(params?: URLSearchParams) {
-  return getJson<Page<OriginalFile>>('/api/original-files', withDefaults(params));
-}
-
-export function originalFilesExportUrl(params?: URLSearchParams) {
-  const query = withoutPagination(params).toString();
-  return `${apiBaseUrl}/api/original-files/export${query ? `?${query}` : ''}`;
-}
-
-export function getOriginalFile(fileId: string) {
-  return getJson<OriginalFile>(`/api/original-files/${fileId}`);
-}
-
-export function listWorkBlocks(workId: string, params?: URLSearchParams) {
-  return getJson<Page<Block>>(`/api/works/${workId}/blocks`, withDefaults(params));
-}
-
-export function listOriginalFileBlocks(fileId: string, params?: URLSearchParams) {
+export function listPaperBlocks(fileId: string, params?: URLSearchParams) {
   return getJson<Page<Block>>(
-    `/api/original-files/${fileId}/blocks`,
+    `/api/papers/${fileId}/blocks`,
     withDefaults(params),
   );
 }

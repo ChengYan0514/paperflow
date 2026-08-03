@@ -39,10 +39,7 @@ export default function SourceDetailPage() {
               </Space>
             </Card>
             <Space>
-              <Link to={`/works?sourceId=${encodeURIComponent(data.sourceId)}`}>查看论文</Link>
-              <Link to={`/original-files?sourceId=${encodeURIComponent(data.sourceId)}`}>
-                查看论文全文文件
-              </Link>
+              <Link to={`/papers?sourceId=${encodeURIComponent(data.sourceId)}`}>查看论文</Link>
             </Space>
           </Space>
         )}

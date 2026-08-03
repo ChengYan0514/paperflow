@@ -7,9 +7,14 @@ import com.paperflow.admin.config.PaperflowApiProperties;
 import com.paperflow.admin.dto.AuthorDto;
 import com.paperflow.admin.dto.BlockPage;
 import com.paperflow.admin.dto.BlockDto;
+import com.paperflow.admin.dto.CausalPaperSummaryDto;
 import com.paperflow.admin.dto.ErrorCode;
 import com.paperflow.admin.dto.MatchedFileDto;
 import com.paperflow.admin.dto.OriginalFilePage;
+import com.paperflow.admin.dto.OpenAlexMetadata;
+import com.paperflow.admin.dto.PaperDetail;
+import com.paperflow.admin.dto.PaperOriginalFile;
+import com.paperflow.admin.dto.PaperTaskStatus;
 import com.paperflow.admin.dto.ProcessingStatus;
 import com.paperflow.admin.dto.SourcePage;
 import com.paperflow.admin.dto.SourceBrief;
@@ -46,16 +51,19 @@ public class AdminService {
     private final PaperflowApiProperties properties;
     private final ObjectMapper objectMapper;
     private final AssetService assetService;
+    private final KnowledgeGraphService knowledgeGraphService;
 
     public AdminService(
             AdminMapper mapper,
             PaperflowApiProperties properties,
             ObjectMapper objectMapper,
-            AssetService assetService) {
+            AssetService assetService,
+            KnowledgeGraphService knowledgeGraphService) {
         this.mapper = mapper;
         this.properties = properties;
         this.objectMapper = objectMapper;
         this.assetService = assetService;
+        this.knowledgeGraphService = knowledgeGraphService;
     }
 
     public SourcePage listSources(
@@ -298,6 +306,7 @@ public class AdminService {
 
     public OriginalFilePage listOriginalFiles(
             String sourceId,
+            String q,
             String fileId,
             String sourceName,
             String provider,
@@ -322,6 +331,7 @@ public class AdminService {
         return new OriginalFilePage(
                 mapper.listOriginalFiles(
                                 sourceId,
+                                blankToNull(q),
                                 blankToNull(fileId),
                                 blankToNull(sourceName),
                                 blankToNull(provider),
@@ -342,6 +352,7 @@ public class AdminService {
                 request.size(),
                 mapper.countOriginalFiles(
                         sourceId,
+                        blankToNull(q),
                         blankToNull(fileId),
                         blankToNull(sourceName),
                         blankToNull(provider),
@@ -362,8 +373,40 @@ public class AdminService {
         return toMatchedFile(row);
     }
 
+    public PaperDetail getPaper(String fileId) {
+        MatchedFileRow row = mapper.findOriginalFile(fileId);
+        if (row == null) {
+            throw new NotFoundException(ErrorCode.PAPER_NOT_FOUND, "Paper not found");
+        }
+        OpenAlexMetadata openAlex = null;
+        CausalPaperSummaryDto causalSummary = null;
+        if (row.getMatchedWorkId() != null) {
+            WorkRow work = mapper.findWork(row.getMatchedWorkId());
+            if (work != null) {
+                openAlex = new OpenAlexMetadata(
+                        work.getWorkId(),
+                        work.getTitle(),
+                        work.getDoi(),
+                        work.getPublicationYear(),
+                        work.getPublicationDate(),
+                        work.getType(),
+                        work.getLanguage(),
+                        mapper.findWorkSources(work.getWorkId()).stream().map(this::toSourceBrief).toList(),
+                        mapper.findWorkAuthors(work.getWorkId()).stream().map(this::toAuthor).toList());
+                causalSummary = knowledgeGraphService.paperSummary(work.getWorkId());
+            }
+        }
+        return new PaperDetail(
+                toPaperOriginalFile(row),
+                new PaperTaskStatus(row.getFlagMatch(), row.getFlagText(), row.getFlagBlock()),
+                openAlex,
+                mapper.findTextFiles(row.getFileId()).stream().map(this::toTextFile).toList(),
+                causalSummary);
+    }
+
     public byte[] exportOriginalFiles(
             String sourceId,
+            String q,
             String fileId,
             String sourceName,
             String provider,
@@ -384,6 +427,7 @@ public class AdminService {
         String normalizedSort = originalFileSort(sort);
         List<List<String>> rows = mapper.listOriginalFiles(
                         sourceId,
+                        blankToNull(q),
                         blankToNull(fileId),
                         blankToNull(sourceName),
                         blankToNull(provider),
@@ -453,7 +497,7 @@ public class AdminService {
 
     public BlockPage listOriginalFileBlocks(String fileId, Boolean includeDiscarded, Integer page, Integer size) {
         if (mapper.findOriginalFile(fileId) == null) {
-            throw new NotFoundException(ErrorCode.ORIGINAL_FILE_NOT_FOUND, "Original File not found");
+            throw new NotFoundException(ErrorCode.PAPER_NOT_FOUND, "Paper not found");
         }
         PageRequest request =
                 PageRequest.of(page, size, properties.defaultBlockPageSize(), properties.maxBlockPageSize());
@@ -603,6 +647,24 @@ public class AdminService {
                 row.getFlagText(),
                 row.getFlagBlock(),
                 mapper.findTextFiles(row.getFileId()).stream().map(this::toTextFile).toList());
+    }
+
+    private PaperOriginalFile toPaperOriginalFile(MatchedFileRow row) {
+        return new PaperOriginalFile(
+                row.getFileId(),
+                row.getSourceId(),
+                row.getSourceName(),
+                row.getYear(),
+                row.getPaperTitle(),
+                row.getAuthors(),
+                row.getDoi(),
+                row.getUrl(),
+                row.getProvider(),
+                row.getOriginalFileName(),
+                row.getOriginalFilePath(),
+                assetService.assetUrl(row.getOriginalFilePath()),
+                row.getOriginalFileType(),
+                row.getFileSize());
     }
 
     private TextFileDto toTextFile(TextFileRow row) {

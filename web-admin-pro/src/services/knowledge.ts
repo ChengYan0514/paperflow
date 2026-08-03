@@ -188,11 +188,11 @@ export function getCausalClaim(claimId: number) {
 }
 
 export function getCausalPaper(workId: string) {
-  return getJson<CausalPaperDetail>(`/api/knowledge/causal-graph/papers/${workId}`);
+  return getJson<CausalPaperDetail>(`/api/knowledge/causal-graph/causal-claims/${workId}`);
 }
 
 export function getCausalPaperSummary(workId: string) {
-  return getJson<CausalPaperSummary>(`/api/knowledge/causal-graph/papers/${workId}/summary`);
+  return getJson<CausalPaperSummary>(`/api/knowledge/causal-graph/causal-claims/${workId}/summary`);
 }
 
 export function getCausalFields() {

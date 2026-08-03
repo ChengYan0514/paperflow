@@ -428,6 +428,14 @@
             <if test="sourceId != null">
                 f.source_id = #{sourceId}
             </if>
+            <if test="q != null">
+                AND (
+                    LOWER(f.file_id) LIKE CONCAT('%', LOWER(#{q}), '%')
+                    OR LOWER(f.paper_title) LIKE CONCAT('%', LOWER(#{q}), '%')
+                    OR LOWER(f.authors) LIKE CONCAT('%', LOWER(#{q}), '%')
+                    OR LOWER(f.doi) LIKE CONCAT('%', LOWER(#{q}), '%')
+                )
+            </if>
             <if test="fileId != null">
                 AND f.file_id = #{fileId}
             </if>
@@ -495,7 +503,7 @@
                     f.file_id ASC
             </when>
             <otherwise>
-                ORDER BY f.source_id ASC, f.file_id ASC
+                ORDER BY f.year DESC NULLS LAST, f.file_id ASC
             </otherwise>
         </choose>
         LIMIT #{limit} OFFSET #{offset}

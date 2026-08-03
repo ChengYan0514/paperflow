@@ -34,7 +34,7 @@ export function EdgeEvidenceTable({ claims }: { claims: CausalClaim[] }) {
           width: 260,
           render: (_, claim) => (
             <div>
-              <Link to={`/knowledge/causal-graph/papers/${claim.workId}`}>
+              <Link to={`/knowledge/causal-graph/causal-claims/${claim.workId}`}>
                 {claim.title || claim.workId}
               </Link>
               <div style={{ color: '#8c8c8c', fontSize: 12 }}>
@@ -63,15 +63,6 @@ export function EdgeEvidenceTable({ claims }: { claims: CausalClaim[] }) {
         },
         { title: '显著性', dataIndex: 'statisticalSignificance', width: 130 },
         { title: '领域', dataIndex: 'subfieldName', width: 180 },
-        {
-          title: '操作',
-          width: 150,
-          render: (_, claim) => (
-            <Button size="small" type="link">
-              <Link to={`/works/${claim.workId}`}>查看论文详情</Link>
-            </Button>
-          ),
-        },
       ]}
     />
   );

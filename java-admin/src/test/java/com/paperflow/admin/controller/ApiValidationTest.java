@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paperflow.admin.PaperflowAdminApplication;
 import com.paperflow.admin.mapper.AdminMapper;
 import com.paperflow.admin.model.SourceRow;
-import com.paperflow.admin.model.WorkRow;
+import com.paperflow.admin.model.MatchedFileRow;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -43,8 +43,8 @@ class ApiValidationTest {
     private AdminMapper adminMapper;
 
     @Test
-    void rejectsInvalidWorkIdWithApiError() throws Exception {
-        mockMvc.perform(get("/api/works/not-a-work"))
+    void rejectsOversizedPaperSearchWithApiError() throws Exception {
+        mockMvc.perform(get("/api/papers").param("q", "x".repeat(501)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message").value("Invalid request"))
@@ -115,31 +115,30 @@ class ApiValidationTest {
     }
 
     @Test
-    void returnsWorkPageWithProcessingStatusDto() throws Exception {
-        WorkRow work = new WorkRow();
-        work.setWorkId("W1");
-        work.setTitle("A Work");
-        work.setSourceIds("S1,S2");
-        work.setMatchedFileId("F1");
-        work.setFlagMatch(1);
-        work.setFlagText(2);
-        work.setFlagBlock(1);
-        when(adminMapper.listWorks(
+    void returnsPaperPageDtoShape() throws Exception {
+        MatchedFileRow paper = new MatchedFileRow();
+        paper.setFileId("F1");
+        paper.setPaperTitle("A Paper");
+        paper.setSourceId("S1");
+        paper.setOriginalFilePath("original/F1.pdf");
+        paper.setFlagMatch(1);
+        paper.setFlagText(2);
+        paper.setFlagBlock(1);
+        when(adminMapper.listOriginalFiles(
                         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                         anyInt(), anyInt()))
-                .thenReturn(List.of(work));
-        when(adminMapper.countWorks(
+                .thenReturn(List.of(paper));
+        when(adminMapper.countOriginalFiles(
                         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(1L);
 
-        mockMvc.perform(get("/api/works"))
+        mockMvc.perform(get("/api/papers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page").value(1))
                 .andExpect(jsonPath("$.size").value(20))
                 .andExpect(jsonPath("$.total").value(1))
-                .andExpect(jsonPath("$.items[0].workId").value("W1"))
-                .andExpect(jsonPath("$.items[0].sourceIds[0]").value("S1"))
-                .andExpect(jsonPath("$.items[0].sourceIds[1]").value("S2"))
-                .andExpect(jsonPath("$.items[0].processingStatus").value("READY"));
+                .andExpect(jsonPath("$.items[0].fileId").value("F1"))
+                .andExpect(jsonPath("$.items[0].paperTitle").value("A Paper"))
+                .andExpect(jsonPath("$.items[0].flagText").value(2));
     }
 }

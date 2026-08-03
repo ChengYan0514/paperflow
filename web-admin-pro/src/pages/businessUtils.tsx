@@ -18,6 +18,7 @@ import { useState, type ReactNode } from 'react';
 import { assetUrl, type Page } from '@/services/business';
 
 export const fieldLabels: Record<string, string> = {
+  q: '检索',
   sourceId: '来源期刊 ID',
   sourceName: '来源期刊名称',
   provider: '平台',
@@ -142,6 +143,23 @@ export const flagLabels: Record<string, Record<string, string>> = {
 };
 
 const statusColors: Record<string, Record<string, string>> = {
+  flagMatch: {
+    '-1': 'error',
+    '0': 'default',
+    '1': 'success',
+  },
+  flagText: {
+    '-2': 'warning',
+    '-1': 'error',
+    '0': 'default',
+    '1': 'processing',
+    '2': 'success',
+  },
+  flagBlock: {
+    '-1': 'error',
+    '0': 'default',
+    '1': 'success',
+  },
   processingStatus: {
     NO_MATCHED_FILE: 'default',
     MATCHED: 'cyan',
@@ -485,24 +503,14 @@ export function SourceLink({
   );
 }
 
-export function WorkLink({
-  workId,
-  children,
-}: {
-  workId: string;
-  children?: ReactNode;
-}) {
-  return <Link to={`/works/${workId}`}>{children ?? workId}</Link>;
-}
-
-export function OriginalFileLink({
+export function PaperLink({
   fileId,
   children,
 }: {
   fileId: string;
   children?: ReactNode;
 }) {
-  return <Link to={`/original-files/${fileId}`}>{children ?? fileId}</Link>;
+  return <Link to={`/papers/${fileId}`}>{children ?? fileId}</Link>;
 }
 
 export function DetailGrid({

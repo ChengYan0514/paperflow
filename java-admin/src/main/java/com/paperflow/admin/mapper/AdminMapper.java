@@ -83,6 +83,7 @@ public interface AdminMapper {
 
     long countOriginalFiles(
             @Param("sourceId") String sourceId,
+            @Param("q") String q,
             @Param("fileId") String fileId,
             @Param("sourceName") String sourceName,
             @Param("provider") String provider,
@@ -96,6 +97,7 @@ public interface AdminMapper {
 
     List<MatchedFileRow> listOriginalFiles(
             @Param("sourceId") String sourceId,
+            @Param("q") String q,
             @Param("fileId") String fileId,
             @Param("sourceName") String sourceName,
             @Param("provider") String provider,

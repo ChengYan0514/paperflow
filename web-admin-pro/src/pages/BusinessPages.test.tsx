@@ -1,22 +1,17 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import OriginalFileDetailPage from './OriginalFileDetail';
-import OriginalFilesPage from './OriginalFiles';
+import PaperDetailPage from './PaperDetail';
+import PapersPage from './Papers';
 import FailureTasksPage from './FailureTasks';
 import ServiceStatusPage from './ServiceStatus';
 import SourceDetailPage from './SourceDetail';
 import SourcesPage from './Sources';
-import WorkDetailPage from './WorkDetail';
-import WorksPage from './Works';
-import { statusColor } from './businessUtils';
 import {
-  getOriginalFile,
+  getPaper,
   getServiceStatus,
   getSource,
-  getWork,
-  listOriginalFiles,
+  listPapers,
   listSources,
-  listWorks,
 } from '@/services/business';
 
 let searchParams = new URLSearchParams();
@@ -145,18 +140,20 @@ vi.mock('@/services/business', () => ({
   listSources: vi.fn(async () => ({ items: [source], page: 1, size: 10, total: 1 })),
   sourcesExportUrl: vi.fn((params?: URLSearchParams) => `/api/sources/export?${params}`),
   getSource: vi.fn(async () => source),
-  listWorks: vi.fn(async () => ({ items: [work], page: 1, size: 10, total: 1 })),
-  worksExportUrl: vi.fn((params?: URLSearchParams) => `/api/works/export?${params}`),
-  getWork: vi.fn(async () => ({
-    work,
-    sources: [{ sourceId: 'S1', sourceName: 'Nature', provider: 'OpenAlex' }],
-    authors: [{ authorId: 'A1', authorName: 'Ada', authorPosition: 'first' }],
-    matchedFile: file,
-    processingStatus: 'READY',
+  listPapers: vi.fn(async () => ({ items: [file], page: 1, size: 10, total: 1 })),
+  papersExportUrl: vi.fn((params?: URLSearchParams) => `/api/papers/export?${params}`),
+  getPaper: vi.fn(async () => ({
+    originalFile: {
+      fileId: file.fileId, sourceId: file.sourceId, sourceName: file.sourceName, year: file.year,
+      paperTitle: file.paperTitle, authors: file.authors, doi: file.doi, url: file.url, provider: file.provider,
+      originalFileName: file.originalFileName, originalFilePath: file.originalFilePath,
+      originalFileUrl: file.originalFileUrl, originalFileType: file.originalFileType, fileSize: file.fileSize,
+    },
+    taskStatus: { flagMatch: file.flagMatch, flagText: file.flagText, flagBlock: file.flagBlock },
+    openAlex: null,
+    textFiles: file.textFiles,
+    causalSummary: null,
   })),
-  listOriginalFiles: vi.fn(async () => ({ items: [file], page: 1, size: 10, total: 1 })),
-  originalFilesExportUrl: vi.fn((params?: URLSearchParams) => `/api/original-files/export?${params}`),
-  getOriginalFile: vi.fn(async () => file),
   getServiceStatus: vi.fn(async () => ({
     status: 'UP',
     version: '0.1.0',
@@ -167,10 +164,6 @@ vi.mock('@/services/business', () => ({
     disk: { name: '磁盘空间', ok: true, message: '可用 100 GB / 总计 200 GB' },
     recentErrors: [],
   })),
-}));
-
-vi.mock('@/services/knowledge', () => ({
-  getCausalPaperSummary: vi.fn(async () => ({ hasCausalClaims: false })),
 }));
 
 describe('business pages', () => {
@@ -220,107 +213,99 @@ describe('business pages', () => {
   });
 
   it('renders advanced filters separately from the primary search', async () => {
-    searchParams = new URLSearchParams('title=AI&yearFrom=2020&yearTo=2024');
-    render(<WorksPage />);
+    searchParams = new URLSearchParams('q=AI&yearFrom=2020&yearTo=2024');
+    render(<PapersPage />);
 
     expect(await screen.findByDisplayValue('AI')).toBeInTheDocument();
     expect(screen.getByText('年份范围: 2020-2024')).toBeInTheDocument();
-    expect(screen.queryByLabelText('类型')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('语言')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('匹配文件 ID')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('来源期刊名称')).toBeInTheDocument();
+    expect(screen.getByLabelText('平台')).toBeInTheDocument();
   });
 
   it('shows source detail actions', async () => {
     render(<SourceDetailPage />);
 
     expect(getSource).toHaveBeenCalledWith('S1');
-    expect(await screen.findByText('查看论文')).toHaveAttribute('href', '/works?sourceId=S1');
-    expect(screen.getByText('查看论文全文文件')).toHaveAttribute(
-      'href',
-      '/original-files?sourceId=S1',
-    );
+    expect(await screen.findByText('查看论文')).toHaveAttribute('href', '/papers?sourceId=S1');
   });
 
-  it('lists works in the configured order with colored full-text-file statuses', async () => {
-    searchParams = new URLSearchParams('authorName=Ada&sort=titleAsc');
-    render(<WorksPage />);
-
-    expect(await screen.findByText('Work title')).toHaveAttribute('href', '/original-files/F1');
-    expect(listWorks).toHaveBeenCalledWith(searchParams);
-    expect(screen.getByText('Nature')).toHaveAttribute('href', '/sources/S1');
-    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
-      '标题',
-      '发表年份',
-      '来源期刊',
-      '全文文件状态',
-    ]);
-    expect(statusColor('processingStatus', 'READY')).toBe('success');
-    expect(statusColor('processingStatus', 'PARSE_FAILED')).toBe('error');
-    expect(screen.getByRole('link', { name: /导出 CSV/ })).toHaveAttribute(
-      'href',
-      '/api/works/export?authorName=Ada&sort=titleAsc',
-    );
-  });
-
-  it('shows work detail metadata and content-block entry', async () => {
-    render(<WorkDetailPage />);
-
-    expect(getWork).toHaveBeenCalledWith('W1');
-    expect(await screen.findByText('Work title')).toBeInTheDocument();
-    expect(screen.getAllByText('Ada').length).toBeGreaterThan(0);
-    expect(screen.getByText('Nature (S1)')).toHaveAttribute('href', '/sources/S1');
-    expect(screen.getByText('查看解析后全文')).toHaveAttribute('href', '/works/W1/blocks');
-    expect(screen.getByText('查看匹配论文全文文件')).toHaveAttribute('href', '/original-files/F1');
-  });
-
-  it('lists original files and links related entities', async () => {
+  it('lists papers in the configured order', async () => {
     searchParams = new URLSearchParams('sourceName=Nature&sort=yearDesc');
-    render(<OriginalFilesPage />);
+    render(<PapersPage />);
 
-    expect(await screen.findByText('Paper title')).toHaveAttribute('href', '/original-files/F1');
-    expect(listOriginalFiles).toHaveBeenCalledWith(searchParams);
+    expect(await screen.findByText('Paper title')).toHaveAttribute('href', '/papers/F1');
+    expect(listPapers).toHaveBeenCalledWith(searchParams);
     expect(screen.getByText('Nature')).toHaveAttribute('href', '/sources/S1');
     expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       '标题',
+      '作者',
       '来源期刊',
-      '论文全文文件类型',
-      '文件大小',
-      '匹配状态',
-      '文本解析状态',
-      '内容块入库状态',
-      '平台',
       '年份',
+      '平台',
+      '文本解析状态',
     ]);
     expect(screen.getByRole('link', { name: /导出 CSV/ })).toHaveAttribute(
       'href',
-      '/api/original-files/export?sourceName=Nature&sort=yearDesc',
+      '/api/papers/export?sourceName=Nature&sort=yearDesc',
     );
   });
 
-  it('shows original file status filters in Chinese', async () => {
+  it('shows paper status filters in Chinese', async () => {
     searchParams = new URLSearchParams('flagMatch=1&flagText=-1&flagBlock=0');
-    render(<OriginalFilesPage />);
+    render(<PapersPage />);
 
     expect(await screen.findByText('匹配状态: 已匹配')).toBeInTheDocument();
     expect(screen.getByText('文本解析状态: 解析失败')).toBeInTheDocument();
     expect(screen.getByText('内容块入库状态: 未入库')).toBeInTheDocument();
   });
 
-  it('shows original file detail metadata and asset links', async () => {
-    render(<OriginalFileDetailPage />);
+  it('shows paper detail metadata and content-block entry', async () => {
+    render(<PaperDetailPage />);
 
-    expect(getOriginalFile).toHaveBeenCalledWith('F1');
+    expect(getPaper).toHaveBeenCalledWith('F1');
+    expect(await screen.findByText('Paper title')).toBeInTheDocument();
+    expect(screen.getByText('查看解析后全文')).toHaveAttribute('href', '/papers/F1/blocks');
+  });
+
+  it('shows the causal summary before linking to causal claims', async () => {
+    vi.mocked(getPaper).mockResolvedValueOnce({
+      originalFile: {
+        fileId: file.fileId, sourceId: file.sourceId, sourceName: file.sourceName, year: file.year,
+        paperTitle: file.paperTitle, authors: file.authors, doi: file.doi, url: file.url, provider: file.provider,
+        originalFileName: file.originalFileName, originalFilePath: file.originalFilePath,
+        originalFileUrl: file.originalFileUrl, originalFileType: file.originalFileType, fileSize: file.fileSize,
+      },
+      taskStatus: { flagMatch: file.flagMatch, flagText: file.flagText, flagBlock: file.flagBlock },
+      openAlex: {
+        workId: 'W1', title: 'OpenAlex Paper', sources: [], authors: [],
+      },
+      textFiles: file.textFiles,
+      causalSummary: {
+        workId: 'W1', claimRecordCount: 8, standardClaimCount: 4, variableCount: 5, hasCausalClaims: true,
+      },
+    } as any);
+
+    render(<PaperDetailPage />);
+
+    expect(await screen.findByText('声明记录')).toBeInTheDocument();
+    expect(screen.getByText('标准变量对')).toBeInTheDocument();
+    expect(screen.getByText('变量数')).toBeInTheDocument();
+    expect(screen.getByText('8')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '查看因果声明' })).toHaveAttribute(
+      'href',
+      '/knowledge/causal-graph/causal-claims/W1',
+    );
+  });
+
+  it('shows paper detail asset links', async () => {
+    render(<PaperDetailPage />);
+
+    expect(getPaper).toHaveBeenCalledWith('F1');
     expect(
       await screen.findByRole('link', { name: '查看论文全文文件：paper.pdf' }),
     ).toHaveAttribute('href', '/api/assets/openalex/original/S1/F1.pdf');
-    expect(screen.getByRole('link', { name: 'openalex/original/S1/F1.pdf' })).toHaveAttribute(
-      'href',
-      '/api/assets/openalex/original/S1/F1.pdf',
-    );
     expect(screen.getByText('paper.md')).toBeInTheDocument();
-    expect(screen.getByText('查看解析后全文')).toHaveAttribute('href', '/original-files/F1/blocks');
-    expect(screen.getByText('查看匹配论文')).toHaveAttribute('href', '/works/W1');
-    expect(screen.getByText('查看匹配论文详情')).toHaveAttribute('href', '/works/W1');
+    expect(screen.getByText('查看解析后全文')).toHaveAttribute('href', '/papers/F1/blocks');
   });
 
   it('shows real service status', async () => {
@@ -336,7 +321,7 @@ describe('business pages', () => {
     render(<FailureTasksPage />);
 
     expect(await screen.findByText('全文入库失败：文件已解析，但内容块未成功入库。')).toBeInTheDocument();
-    const requestParams = vi.mocked(listOriginalFiles).mock.calls[0][0] as URLSearchParams;
+    const requestParams = vi.mocked(listPapers).mock.calls[0][0] as URLSearchParams;
     expect(requestParams.toString()).toBe('sourceId=S1&sort=textStatusIssueFirst&flagText=2&flagBlock=-1');
     expect(screen.getByText('uv run paperflow import-blocks --file-id F1 --retry-failed')).toBeInTheDocument();
   });

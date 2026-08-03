@@ -9,5 +9,6 @@ public enum ErrorCode {
     SOURCE_NOT_FOUND,
     WORK_NOT_FOUND,
     ORIGINAL_FILE_NOT_FOUND,
+    PAPER_NOT_FOUND,
     INTERNAL_ERROR
 }

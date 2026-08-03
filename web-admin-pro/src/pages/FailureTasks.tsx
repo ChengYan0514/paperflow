@@ -3,7 +3,7 @@ import { Link, useSearchParams } from '@umijs/max';
 import { Alert, Space, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import type { OriginalFile, Page } from '@/services/business';
-import { listOriginalFiles } from '@/services/business';
+import { listPapers } from '@/services/business';
 import {
   fieldLabel,
   QueryBar,
@@ -12,7 +12,6 @@ import {
   StatusTag,
   tablePagination,
   valueLabel,
-  WorkLink,
 } from './businessUtils';
 
 type FailureStage = 'MATCHING' | 'TEXT_PARSING' | 'BLOCK_IMPORT';
@@ -89,7 +88,7 @@ export default function FailureTasksPage() {
 
   useEffect(() => {
     setLoading(true);
-    listOriginalFiles(failureParams(searchParams))
+    listPapers(failureParams(searchParams))
       .then(setData)
       .catch(setError)
       .finally(() => setLoading(false));
@@ -125,7 +124,7 @@ export default function FailureTasksPage() {
                 title: fieldLabel('fileId'),
                 dataIndex: 'fileId',
                 width: 130,
-                render: (_, file) => <Link to={`/original-files/${file.fileId}`}>{file.fileId}</Link>,
+                render: (_, file) => <Link to={`/papers/${file.fileId}`}>{file.fileId}</Link>,
               },
               { title: fieldLabel('originalFileName'), dataIndex: 'originalFileName', width: 180 },
               {
@@ -133,12 +132,6 @@ export default function FailureTasksPage() {
                 dataIndex: 'sourceId',
                 width: 130,
                 render: (_, file) => <SourceLink sourceId={file.sourceId} />,
-              },
-              {
-                title: fieldLabel('matchedWorkId'),
-                dataIndex: 'matchedWorkId',
-                width: 140,
-                render: (_, file) => (file.matchedWorkId ? <WorkLink workId={file.matchedWorkId} /> : '-'),
               },
               {
                 title: fieldLabel('flagMatch'),
@@ -172,8 +165,7 @@ export default function FailureTasksPage() {
                 width: 180,
                 render: (_, file) => (
                   <Space>
-                    <Link to={`/original-files/${file.fileId}`}>论文全文文件</Link>
-                    {file.matchedWorkId ? <Link to={`/works/${file.matchedWorkId}`}>论文</Link> : null}
+                    <Link to={`/papers/${file.fileId}`}>论文详情</Link>
                   </Space>
                 ),
               },

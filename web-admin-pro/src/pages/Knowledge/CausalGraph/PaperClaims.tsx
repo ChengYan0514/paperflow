@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, FileTextOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { Link, useParams } from '@umijs/max';
 import { Button, Card, Col, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
@@ -58,8 +58,7 @@ export default function CausalPaperClaimsPage() {
               </Space>
               <div style={{ marginTop: 16 }}>
                 <Space wrap>
-                  <Button icon={<ArrowLeftOutlined />}><Link to={`/works/${workId}`}>返回论文详情</Link></Button>
-                  <Button icon={<FileTextOutlined />}><Link to={`/works/${workId}/blocks`}>查看全文 Blocks</Link></Button>
+                  <Button icon={<ArrowLeftOutlined />}><Link to="/knowledge/causal-graph">返回因果图谱</Link></Button>
                 </Space>
               </div>
             </Card>

@@ -7,7 +7,8 @@ Paperflow is an offline processing pipeline that prepares OpenAlex work metadata
 **Work**:
 An OpenAlex paper work identified by `work_id`. A matched **Work** may be
 referenced by at most one **Original File Job**.
-_Avoid_: Paper, article, document when referring to the OpenAlex entity.
+_Avoid_: Paper, article, document when referring to the OpenAlex entity. Use
+**Paper Management Record** for the admin-facing `file_id` resource.
 
 **Source**:
 An OpenAlex publication source such as a journal, identified by `source_id`.
@@ -34,6 +35,14 @@ A database record for an **Original File**, including file metadata. Matching
 state is stored on the related **Original File Job**. Repeated imports for the
 same File Hash may upgrade the file type, choosing PDF before XML before HTML.
 _Avoid_: Processing job, Work job.
+
+**Paper Management Record (Paper)**:
+The read-only admin-facing resource identified by `file_id`. It is backed by
+one **Original File Record** and its **Original File Job**. A matched **Work**
+supplements it with OpenAlex metadata but does not replace its identity or
+original-file metadata.
+_Avoid_: Work when referring to the Paper Management Record; Paper when
+referring to an OpenAlex Work.
 
 **File Hash**:
 The extensionless value of `original_file_name`, used as the import identity for an **Original File Record**. Despite the name, it is not a file-content hash in the current domain.

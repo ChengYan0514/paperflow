@@ -493,319 +493,47 @@ paths:
                     requestId: 9c0d2d7e3f1a4b61
         "500":
           $ref: "#/components/responses/InternalError"
-  /api/works:
+  /api/papers:
     get:
-      tags: [Works]
-      operationId: searchWorks
-      summary: Search Works with simple filters and stable pagination.
-      description: >
-        Default sort is publicationYear DESC NULLS LAST, then workId ASC.
-        processingStatus filters by the matched Original File Job of each Work.
-        The filter is inclusive for higher-level states: MATCHED includes all
-        Works with a matched job, and PARSED includes READY and BLOCK_FAILED.
-        Original Files can be parsed without Matching; use /api/original-files
-        flag filters to inspect unmatched file parsing state.
+      tags: [Papers]
+      operationId: listPapers
+      summary: List Paper management records by Original File.
+      description: Default sort is year DESC NULLS LAST, then fileId ASC. The optional q filter searches Original File title, authors, DOI, and file ID.
       parameters:
-        - name: sourceId
-          in: query
-          required: false
-          schema:
-            type: string
-            pattern: "^S.+"
-        - name: workId
-          in: query
-          required: false
-          description: Exact Work ID match.
-          schema:
-            type: string
-            pattern: "^W.+"
-        - name: sourceName
-          in: query
-          required: false
-          description: Case-insensitive contains match over linked Source names.
-          schema:
-            type: string
-            maxLength: 200
-        - name: authorName
-          in: query
-          required: false
-          description: Case-insensitive contains match over linked Work authors.
-          schema:
-            type: string
-            maxLength: 200
-        - name: title
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 200
-        - name: doi
+        - name: q
           in: query
           required: false
           schema:
             type: string
             maxLength: 500
-        - name: yearFrom
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: yearTo
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: processingStatus
-          in: query
-          required: false
-          schema:
-            $ref: "#/components/schemas/ProcessingStatus"
-        - name: type
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 100
-        - name: language
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 100
-        - name: matchedFileId
-          in: query
-          required: false
-          schema:
-            type: string
-            minLength: 1
-        - name: sort
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - publicationYearDesc
-              - publicationYearAsc
-              - titleAsc
-              - workIdAsc
-              - statusIssueFirst
-              - statusReadyFirst
-            default: publicationYearDesc
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Size"
-      responses:
-        "200":
-          description: Work page.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WorkPage"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/InternalError"
-  /api/works/export:
-    get:
-      tags: [Works]
-      operationId: exportWorks
-      summary: Export Works matching current filters as UTF-8 CSV.
-      parameters:
         - name: sourceId
           in: query
           required: false
           schema:
             type: string
             pattern: "^S.+"
-        - name: workId
-          in: query
-          required: false
-          schema:
-            type: string
-            pattern: "^W.+"
         - name: sourceName
           in: query
           required: false
-          schema:
-            type: string
-            maxLength: 200
-        - name: authorName
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 200
-        - name: title
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 200
-        - name: doi
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 500
-        - name: yearFrom
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: yearTo
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: processingStatus
-          in: query
-          required: false
-          schema:
-            $ref: "#/components/schemas/ProcessingStatus"
-        - name: type
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 100
-        - name: language
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 100
-        - name: matchedFileId
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: sort
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - publicationYearDesc
-              - publicationYearAsc
-              - titleAsc
-              - workIdAsc
-              - statusIssueFirst
-              - statusReadyFirst
-      responses:
-        "200":
-          description: CSV export.
-          content:
-            text/csv:
-              schema:
-                type: string
-                format: binary
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "500":
-          $ref: "#/components/responses/InternalError"
-  /api/works/{workId}:
-    get:
-      tags: [Works]
-      operationId: getWork
-      summary: Get Work metadata, sources, authors, matched file, and status.
-      parameters:
-        - $ref: "#/components/parameters/WorkId"
-      responses:
-        "200":
-          description: Work detail.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WorkDetail"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "404":
-          $ref: "#/components/responses/WorkNotFound"
-        "500":
-          $ref: "#/components/responses/InternalError"
-  /api/works/{workId}/blocks:
-    get:
-      tags: [Works]
-      operationId: listWorkBlocks
-      summary: List blocks for the matched Original File of a Work.
-      description: Returns actual block rows when present. It does not require processingStatus=READY.
-      parameters:
-        - $ref: "#/components/parameters/WorkId"
-        - name: includeDiscarded
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - name: page
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-        - name: size
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 500
-            default: 100
-      responses:
-        "200":
-          description: Block page ordered by blockSeq ASC.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BlockPage"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "404":
-          $ref: "#/components/responses/WorkNotFound"
-        "500":
-          $ref: "#/components/responses/InternalError"
-  /api/original-files:
-    get:
-      tags: [Original Files]
-      operationId: listOriginalFiles
-      summary: List Original Files with job status filters.
-      description: Default sort is sourceId ASC, then fileId ASC.
-      parameters:
-        - name: sourceId
-          in: query
-          required: false
-          schema:
-            type: string
-            pattern: "^S.+"
-        - name: fileId
-          in: query
-          required: false
-          description: Exact Original File ID match.
-          schema:
-            type: string
-            minLength: 1
-        - name: sourceName
-          in: query
-          required: false
-          description: Case-insensitive contains match over source.source_name.
           schema:
             type: string
             maxLength: 200
         - name: provider
           in: query
           required: false
-          description: Case-insensitive contains match over original_file.provider.
           schema:
             type: string
             maxLength: 200
-        - name: matchedWorkId
+        - name: yearFrom
           in: query
           required: false
           schema:
-            type: string
-            pattern: "^W.+"
+            type: integer
+        - name: yearTo
+          in: query
+          required: false
+          schema:
+            type: integer
         - name: flagMatch
           in: query
           required: false
@@ -824,127 +552,22 @@ paths:
           schema:
             type: integer
             enum: [-1, 0, 1]
-        - name: originalFileType
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [PDF, XML, HTML]
-        - name: yearFrom
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: yearTo
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: sort
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - sourceIdAsc
-              - yearDesc
-              - fileSizeAsc
-              - providerAsc
-              - textStatusIssueFirst
-            default: sourceIdAsc
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Size"
       responses:
         "200":
-          description: Original File page.
+          description: Paper page.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OriginalFilePage"
+                $ref: "#/components/schemas/PaperPage"
         "400":
           $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/InternalError"
-  /api/original-files/export:
+  /api/papers/export:
     get:
-      tags: [Original Files]
-      operationId: exportOriginalFiles
-      summary: Export Original Files matching current filters as UTF-8 CSV.
-      parameters:
-        - name: sourceId
-          in: query
-          required: false
-          schema:
-            type: string
-            pattern: "^S.+"
-        - name: fileId
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: sourceName
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 200
-        - name: provider
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 200
-        - name: matchedWorkId
-          in: query
-          required: false
-          schema:
-            type: string
-            pattern: "^W.+"
-        - name: flagMatch
-          in: query
-          required: false
-          schema:
-            type: integer
-            enum: [-1, 0, 1]
-        - name: flagText
-          in: query
-          required: false
-          schema:
-            type: integer
-            enum: [-2, -1, 0, 1, 2]
-        - name: flagBlock
-          in: query
-          required: false
-          schema:
-            type: integer
-            enum: [-1, 0, 1]
-        - name: originalFileType
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [PDF, XML, HTML]
-        - name: yearFrom
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: yearTo
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: sort
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - sourceIdAsc
-              - yearDesc
-              - fileSizeAsc
-              - providerAsc
-              - textStatusIssueFirst
+      tags: [Papers]
+      operationId: exportPapers
+      summary: Export Paper management records as UTF-8 CSV.
       responses:
         "200":
           description: CSV export.
@@ -955,36 +578,27 @@ paths:
                 format: binary
         "400":
           $ref: "#/components/responses/ValidationError"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "500":
-          $ref: "#/components/responses/InternalError"
-  /api/original-files/{fileId}:
+  /api/papers/{fileId}:
     get:
-      tags: [Original Files]
-      operationId: getOriginalFile
-      summary: Get one Original File with job status and text files.
+      tags: [Papers]
+      operationId: getPaper
+      summary: Get Original File metadata, task status, optional OpenAlex metadata, text files, and causal summary.
       parameters:
         - $ref: "#/components/parameters/FileId"
       responses:
         "200":
-          description: Original File detail.
+          description: Paper detail.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OriginalFile"
-        "400":
-          $ref: "#/components/responses/ValidationError"
+                $ref: "#/components/schemas/PaperDetail"
         "404":
-          $ref: "#/components/responses/OriginalFileNotFound"
-        "500":
-          $ref: "#/components/responses/InternalError"
-  /api/original-files/{fileId}/blocks:
+          $ref: "#/components/responses/PaperNotFound"
+  /api/papers/{fileId}/blocks:
     get:
-      tags: [Original Files]
-      operationId: listOriginalFileBlocks
-      summary: List blocks for one Original File.
-      description: Returns parsed block rows ordered by blockSeq ASC for PDF, XML, HTML, or any Original File with imported blocks.
+      tags: [Papers]
+      operationId: listPaperBlocks
+      summary: List blocks imported for a Paper's Original File.
       parameters:
         - $ref: "#/components/parameters/FileId"
         - name: includeDiscarded
@@ -993,21 +607,8 @@ paths:
           schema:
             type: boolean
             default: false
-        - name: page
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-        - name: size
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 500
-            default: 100
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
       responses:
         "200":
           description: Block page ordered by blockSeq ASC.
@@ -1015,12 +616,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BlockPage"
-        "400":
-          $ref: "#/components/responses/ValidationError"
         "404":
-          $ref: "#/components/responses/OriginalFileNotFound"
-        "500":
-          $ref: "#/components/responses/InternalError"
+          $ref: "#/components/responses/PaperNotFound"
   /api/knowledge/causal-graph/summary:
     get:
       tags: [Knowledge Causal Graph]
@@ -1298,7 +895,7 @@ paths:
           $ref: "#/components/responses/ValidationError"
         "500":
           $ref: "#/components/responses/InternalError"
-  /api/knowledge/causal-graph/papers/{workId}:
+  /api/knowledge/causal-graph/causal-claims/{workId}:
     get:
       tags: [Knowledge Causal Graph]
       operationId: getCausalPaperDetail
@@ -1318,7 +915,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "500":
           $ref: "#/components/responses/InternalError"
-  /api/knowledge/causal-graph/papers/{workId}/summary:
+  /api/knowledge/causal-graph/causal-claims/{workId}/summary:
     get:
       tags: [Knowledge Causal Graph]
       operationId: getCausalPaperSummary
@@ -1524,6 +1121,18 @@ components:
                 code: ORIGINAL_FILE_NOT_FOUND
                 message: Original File not found
                 requestId: 9c0d2d7e3f1a4b61
+    PaperNotFound:
+      description: Paper management record not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            paperNotFound:
+              value:
+                code: PAPER_NOT_FOUND
+                message: Paper not found
+                requestId: 9c0d2d7e3f1a4b61
     InternalError:
       description: Internal server error.
       content:
@@ -1552,6 +1161,7 @@ components:
             - SOURCE_NOT_FOUND
             - WORK_NOT_FOUND
             - ORIGINAL_FILE_NOT_FOUND
+            - PAPER_NOT_FOUND
             - INTERNAL_ERROR
         message:
           type: string
@@ -2167,9 +1777,40 @@ components:
         total:
           type: integer
           format: int64
+    PaperPage:
+      allOf:
+        - $ref: "#/components/schemas/OriginalFilePage"
     OriginalFile:
       allOf:
         - $ref: "#/components/schemas/MatchedFile"
+    PaperDetail:
+      type: object
+      required: [originalFile, taskStatus, textFiles]
+      properties:
+        originalFile:
+          $ref: "#/components/schemas/OriginalFile"
+        taskStatus:
+          type: object
+          required: [flagMatch, flagText, flagBlock]
+          properties:
+            flagMatch:
+              type: integer
+            flagText:
+              type: integer
+            flagBlock:
+              type: integer
+        openAlex:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/WorkMetadata"
+        textFiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/TextFile"
+        causalSummary:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/CausalPaperSummary"
     TextFile:
       type: object
       required: [fileId, fileType, fileName, filePath, fileUrl, fileSize]

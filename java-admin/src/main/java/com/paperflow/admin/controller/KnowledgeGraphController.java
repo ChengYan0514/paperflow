@@ -87,12 +87,12 @@ public class KnowledgeGraphController {
         return service.edgeDetailByClaimId(claimId);
     }
 
-    @GetMapping("/papers/{workId}")
+    @GetMapping("/causal-claims/{workId}")
     public CausalPaperDetailDto paper(@PathVariable @Pattern(regexp = "^W.+") String workId) {
         return service.paperDetail(workId);
     }
 
-    @GetMapping("/papers/{workId}/summary")
+    @GetMapping("/causal-claims/{workId}/summary")
     public CausalPaperSummaryDto paperSummary(@PathVariable @Pattern(regexp = "^W.+") String workId) {
         return service.paperSummary(workId);
     }

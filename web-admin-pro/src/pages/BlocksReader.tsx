@@ -6,8 +6,7 @@ import 'katex/dist/katex.min.css';
 import type { Block, Page } from '@/services/business';
 import {
   assetUrl,
-  listOriginalFileBlocks,
-  listWorkBlocks,
+  listPaperBlocks,
 } from '@/services/business';
 import { createElement, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -242,24 +241,13 @@ function BlocksReaderPage({
   );
 }
 
-export function WorkBlocksPage() {
-  const { workId = '' } = useParams();
-  return (
-    <BlocksReaderPage
-      title="论文全文"
-      meta={workId}
-      listBlocks={(params) => listWorkBlocks(workId, params)}
-    />
-  );
-}
-
-export function OriginalFileBlocksPage() {
+export function PaperBlocksPage() {
   const { fileId = '' } = useParams();
   return (
     <BlocksReaderPage
       title="解析后全文"
       meta={fileId}
-      listBlocks={(params) => listOriginalFileBlocks(fileId, params)}
+      listBlocks={(params) => listPaperBlocks(fileId, params)}
     />
   );
 }

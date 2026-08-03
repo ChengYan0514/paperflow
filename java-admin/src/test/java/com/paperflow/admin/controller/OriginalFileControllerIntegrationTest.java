@@ -70,6 +70,7 @@ class OriginalFileControllerIntegrationTest {
                 .andExpect(jsonPath("$.total").value(1))
                 .andExpect(jsonPath("$.items[0].fileId").value("F2"))
                 .andExpect(jsonPath("$.items[0].sourceId").value("S1"))
+                .andExpect(jsonPath("$.items[0].sourceName").value("Source One"))
                 .andExpect(jsonPath("$.items[0].flagText").value(-2))
                 .andExpect(jsonPath("$.items[0].textFiles").isArray());
     }

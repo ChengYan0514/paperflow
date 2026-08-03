@@ -49,12 +49,12 @@ export default [
       },
       {
         path: '/original-files',
-        name: '原始文件',
+        name: '论文全文文件',
         component: './OriginalFiles',
       },
       {
         path: '/original-files/:fileId',
-        name: '原始文件详情',
+        name: '论文全文文件详情',
         hideInMenu: true,
         component: './OriginalFileDetail',
       },

@@ -551,6 +551,8 @@ public class AdminService {
                 row.getType(),
                 row.getLanguage(),
                 splitSourceIds(row.getSourceIds()),
+                row.getSourceNames(),
+                mapper.findWorkSources(row.getWorkId()).stream().map(this::toSourceBrief).toList(),
                 deriveStatus(toMatchedStatusRow(row)),
                 row.getMatchedFileId(),
                 row.getFlagMatch(),
@@ -584,6 +586,7 @@ public class AdminService {
         return new MatchedFileDto(
                 row.getFileId(),
                 row.getSourceId(),
+                row.getSourceName(),
                 row.getYear(),
                 row.getPaperTitle(),
                 row.getAuthors(),

@@ -22,7 +22,7 @@ export default function Login() {
     >
       <Card style={{ width: 'min(100%, 360px)' }}>
         <Typography.Title level={3} style={{ marginTop: 0 }}>
-          PaperFlow 管理台
+          AI Economist
         </Typography.Title>
         <Form
           layout="vertical"

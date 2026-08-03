@@ -28,7 +28,7 @@ export default function OriginalFileDetailPage() {
   }, [fileId]);
 
   return (
-    <PageContainer title="原始文件详情">
+    <PageContainer title="论文全文文件详情">
       <QueryState loading={loading} error={error} data={file}>
         {(data) => (
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
@@ -68,7 +68,7 @@ export default function OriginalFileDetailPage() {
               />
             </div>
             <AssetLink url={data.originalFileUrl}>
-              {`查看原始文件：${data.originalFileName}`}
+              {`查看论文全文文件：${data.originalFileName}`}
             </AssetLink>
           </Space>
         )}

@@ -22,7 +22,7 @@ export const fieldLabels: Record<string, string> = {
   sourceName: '来源期刊名称',
   provider: '平台',
   workCount: '论文数',
-  originalFileCount: '原始文件数',
+  originalFileCount: '论文全文文件数',
   matchedFileCount: '已匹配文件数',
   parsedFileCount: '已解析文件数',
   readyFileCount: '就绪文件数',
@@ -40,10 +40,12 @@ export const fieldLabels: Record<string, string> = {
   type: '类型',
   language: '语言',
   sourceIds: '来源期刊 ID',
-  processingStatus: '匹配文件状态',
+  sourceNames: '来源期刊名称',
+  workSourceNames: '来源期刊',
+  processingStatus: '全文文件状态',
   matchedFileId: '匹配文件 ID',
   matchedWorkId: '匹配论文 ID',
-  hasOriginalFiles: '有原始文件',
+  hasOriginalFiles: '有论文全文文件',
   hasFailures: '有失败',
   stage: '阶段',
   sort: '排序',
@@ -54,9 +56,9 @@ export const fieldLabels: Record<string, string> = {
   authorName: '作者姓名',
   authorPosition: '作者位置',
   fileId: '文件 ID',
-  originalFileType: '原始文件类型',
-  originalFileName: '原始文件名',
-  originalFilePath: '原始文件路径',
+  originalFileType: '论文全文文件类型',
+  originalFileName: '论文全文文件名',
+  originalFilePath: '论文全文文件路径',
   fileSize: '文件大小',
   paperTitle: '论文标题',
   authors: '作者',
@@ -82,7 +84,7 @@ export const fieldLabels: Record<string, string> = {
 };
 
 const valueLabels: Record<string, string> = {
-  NO_MATCHED_FILE: '未匹配原始文件',
+  NO_MATCHED_FILE: '未匹配论文全文文件',
   MATCHED: '已匹配',
   PARSING: '解析中',
   PARSE_FAILED: '解析失败',
@@ -108,7 +110,7 @@ const valueLabels: Record<string, string> = {
   fileSizeAsc: '文件大小升序',
   providerAsc: '平台升序',
   textStatusIssueFirst: '解析异常优先',
-  originalFileCountDesc: '原始文件数降序',
+  originalFileCountDesc: '论文全文文件数降序',
   matchedProgressAsc: '匹配进度升序',
   parsedProgressAsc: '解析进度升序',
   blockImportedProgressAsc: '入库进度升序',
@@ -137,6 +139,19 @@ export const flagLabels: Record<string, Record<string, string>> = {
     '2': '解析完成',
   },
   flagBlock: { '-1': '入库失败', '0': '未入库', '1': '入库完成' },
+};
+
+const statusColors: Record<string, Record<string, string>> = {
+  processingStatus: {
+    NO_MATCHED_FILE: 'default',
+    MATCHED: 'cyan',
+    PARSING: 'processing',
+    PARSE_FAILED: 'error',
+    UNSUPPORTED_TEXT_INPUT: 'warning',
+    PARSED: 'purple',
+    BLOCK_FAILED: 'error',
+    READY: 'success',
+  },
 };
 
 export function fieldLabel(value: string) {
@@ -400,6 +415,10 @@ export function statusLabel(kind: string | undefined, value: string | number | n
   return flagLabels[kind ?? '']?.[String(value)] ?? valueLabel(value);
 }
 
+export function statusColor(kind: string | undefined, value: string | number | null | undefined) {
+  return value === null || value === undefined ? undefined : statusColors[kind ?? '']?.[String(value)];
+}
+
 export function StatusTag({
   value,
   kind,
@@ -407,7 +426,7 @@ export function StatusTag({
   value: string | number | null | undefined;
   kind?: string;
 }) {
-  return <Tag>{statusLabel(kind, value)}</Tag>;
+  return <Tag color={statusColor(kind, value)}>{statusLabel(kind, value)}</Tag>;
 }
 
 export function QueryState<T>({
@@ -453,13 +472,15 @@ export function AssetLink({
 export function SourceLink({
   sourceId,
   sourceName,
+  showId = true,
 }: {
   sourceId: string;
   sourceName?: string | null;
+  showId?: boolean;
 }) {
   return (
     <Link to={`/sources/${sourceId}`}>
-      {sourceName ? `${sourceName} (${sourceId})` : sourceId}
+      {sourceName ? (showId ? `${sourceName} (${sourceId})` : sourceName) : sourceId}
     </Link>
   );
 }

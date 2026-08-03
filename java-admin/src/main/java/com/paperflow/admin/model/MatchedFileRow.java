@@ -3,6 +3,7 @@ package com.paperflow.admin.model;
 public class MatchedFileRow {
     private String fileId;
     private String sourceId;
+    private String sourceName;
     private Integer year;
     private String paperTitle;
     private String authors;
@@ -32,6 +33,14 @@ public class MatchedFileRow {
 
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
     }
 
     public Integer getYear() {

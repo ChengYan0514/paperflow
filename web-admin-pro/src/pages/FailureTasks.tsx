@@ -72,12 +72,12 @@ function command(currentStage: FailureStage, file: OriginalFile) {
 
 function stageDescription(currentStage: FailureStage) {
   if (currentStage === 'MATCHING') {
-    return '论文匹配失败：原始文件未能匹配到 Work。';
+    return '论文匹配失败：论文全文文件未能匹配到 Work。';
   }
   if (currentStage === 'BLOCK_IMPORT') {
     return '全文入库失败：文件已解析，但内容块未成功入库。';
   }
-  return '文件解析失败：原始文件文本解析未成功。';
+  return '文件解析失败：论文全文文件文本解析未成功。';
 }
 
 export default function FailureTasksPage() {
@@ -172,7 +172,7 @@ export default function FailureTasksPage() {
                 width: 180,
                 render: (_, file) => (
                   <Space>
-                    <Link to={`/original-files/${file.fileId}`}>原始文件</Link>
+                    <Link to={`/original-files/${file.fileId}`}>论文全文文件</Link>
                     {file.matchedWorkId ? <Link to={`/works/${file.matchedWorkId}`}>论文</Link> : null}
                   </Space>
                 ),

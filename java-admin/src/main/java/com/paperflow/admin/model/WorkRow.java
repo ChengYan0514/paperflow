@@ -9,6 +9,7 @@ public class WorkRow {
     private String type;
     private String language;
     private String sourceIds;
+    private String sourceNames;
     private String matchedFileId;
     private Integer flagMatch;
     private Integer flagText;
@@ -76,6 +77,14 @@ public class WorkRow {
 
     public void setSourceIds(String sourceIds) {
         this.sourceIds = sourceIds;
+    }
+
+    public String getSourceNames() {
+        return sourceNames;
+    }
+
+    public void setSourceNames(String sourceNames) {
+        this.sourceNames = sourceNames;
     }
 
     public String getMatchedFileId() {

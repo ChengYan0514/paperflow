@@ -38,6 +38,8 @@ logging:
     root: INFO
     com.paperflow.admin: INFO
 paperflow:
+  cache:
+    causal-graph-ttl: ${CAUSAL_GRAPH_CACHE_TTL:PT12H}
   database:
     schema: paperflow
   api:

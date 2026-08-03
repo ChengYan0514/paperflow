@@ -1,15 +1,15 @@
 import { DownloadOutlined } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { Link, useSearchParams } from '@umijs/max';
-import { Button } from 'antd';
+import { Button, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import type { Page, WorkListItem } from '@/services/business';
 import { listWorks, worksExportUrl } from '@/services/business';
 import {
   fieldLabel,
-  OriginalFileLink,
   QueryBar,
   QueryState,
+  SourceLink,
   StatusTag,
   tablePagination,
   valueLabel,
@@ -85,54 +85,46 @@ export default function WorksPage() {
             scroll={{ x: 1080 }}
             columns={[
               {
-                title: fieldLabel('workId'),
-                dataIndex: 'workId',
-                width: 130,
-                render: (_, work) => <Link to={`/works/${work.workId}`}>{work.workId}</Link>,
+                title: fieldLabel('title'),
+                dataIndex: 'title',
+                width: 210,
+                render: (_, work) =>
+                  work.matchedFileId ? (
+                    <Link to={`/original-files/${work.matchedFileId}`}>{work.title || '-'}</Link>
+                  ) : (
+                    work.title || '-'
+                  ),
               },
-              { title: fieldLabel('title'), dataIndex: 'title', width: 210 },
-              { title: fieldLabel('doi'), dataIndex: 'doi', width: 130 },
               {
                 title: fieldLabel('publicationYear'),
                 dataIndex: 'publicationYear',
                 width: 90,
               },
               {
-                title: fieldLabel('sourceIds'),
-                dataIndex: 'sourceIds',
-                width: 130,
-                render: (_, work) => work.sourceIds.join(', '),
+                title: fieldLabel('workSourceNames'),
+                dataIndex: 'sources',
+                width: 180,
+                render: (_, work) =>
+                  work.sources.length ? (
+                    <Space size={8} wrap>
+                      {work.sources.map((source) => (
+                        <SourceLink
+                          key={source.sourceId}
+                          sourceId={source.sourceId}
+                          sourceName={source.sourceName}
+                          showId={false}
+                        />
+                      ))}
+                    </Space>
+                  ) : (
+                    '-'
+                  ),
               },
               {
                 title: fieldLabel('processingStatus'),
                 dataIndex: 'processingStatus',
                 width: 120,
-                render: (_, work) => <StatusTag value={work.processingStatus} />,
-              },
-              {
-                title: fieldLabel('matchedFileId'),
-                dataIndex: 'matchedFileId',
-                width: 130,
-                render: (_, work) =>
-                  work.matchedFileId ? <OriginalFileLink fileId={work.matchedFileId} /> : '-',
-              },
-              {
-                title: fieldLabel('flagMatch'),
-                dataIndex: 'flagMatch',
-                width: 110,
-                render: (_, work) => <StatusTag kind="flagMatch" value={work.flagMatch} />,
-              },
-              {
-                title: fieldLabel('flagText'),
-                dataIndex: 'flagText',
-                width: 120,
-                render: (_, work) => <StatusTag kind="flagText" value={work.flagText} />,
-              },
-              {
-                title: fieldLabel('flagBlock'),
-                dataIndex: 'flagBlock',
-                width: 120,
-                render: (_, work) => <StatusTag kind="flagBlock" value={work.flagBlock} />,
+                render: (_, work) => <StatusTag kind="processingStatus" value={work.processingStatus} />,
               },
             ]}
           />

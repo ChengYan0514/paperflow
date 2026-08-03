@@ -5,6 +5,7 @@ import java.util.List;
 public record MatchedFileDto(
         String fileId,
         String sourceId,
+        String sourceName,
         Integer year,
         String paperTitle,
         String authors,

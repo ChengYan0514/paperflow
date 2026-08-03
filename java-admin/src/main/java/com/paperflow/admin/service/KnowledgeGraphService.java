@@ -27,7 +27,8 @@ import com.paperflow.admin.model.CausalEdgeAggregateRow;
 import com.paperflow.admin.model.CausalGlobalRelationRow;
 import com.paperflow.admin.model.CausalOverviewRow;
 import com.paperflow.admin.model.CausalPaperSummaryRow;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -75,13 +76,33 @@ public class KnowledgeGraphService {
                         DEFAULT_MIN_RECORD_COUNT),
                 mapper.listSubfields(),
                 mapper.listMethods(),
-                new CausalDatasetVersionDto(LocalDate.now().toString(), null));
+                // The causal dataset carries no version column, so this timestamp reflects when
+                // this cached snapshot was computed. With the cache TTL it is recomputed
+                // periodically, giving clients a truthful "as of" marker for the data they see.
+                snapshotVersion());
+    }
+
+    /**
+     * Builds a version marker for the causal dataset. The underlying tables carry no version
+     * or update-timestamp column, so the value reflects the moment this snapshot was computed.
+     * Because {@link #summary()} is cached with a TTL, the timestamp is refreshed each time the
+     * cache is recomputed, giving clients an honest "as of" marker rather than a fabricated
+     * version identity.
+     */
+    private CausalDatasetVersionDto snapshotVersion() {
+        LocalDateTime now = LocalDateTime.now();
+        String refreshedAt = now.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String versionName = "snapshot-" + now.format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"));
+        return new CausalDatasetVersionDto(versionName, refreshedAt);
     }
 
     @Cacheable(
             cacheNames = "causalGraphDefault",
             key = "'default'",
-            condition = "#p0 == 20 && #p1 == null && #p2 == 5 && (#p3 == null || #p3.isEmpty()) && (#p4 == null || #p4.isBlank()) && #p5 == 300 && #p6 == 500",
+            condition = "#minRecordCount == 20 && #minPaperCount == null && #minDiversity == 5"
+                    + " && (#subfields == null || #subfields.isEmpty())"
+                    + " && (#query == null || #query.isBlank())"
+                    + " && #maxNodes == 300 && #maxEdges == 500",
             sync = true)
     public CausalGraphDataDto graph(
             Integer minRecordCount,

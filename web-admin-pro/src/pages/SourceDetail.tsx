@@ -41,7 +41,7 @@ export default function SourceDetailPage() {
             <Space>
               <Link to={`/works?sourceId=${encodeURIComponent(data.sourceId)}`}>查看论文</Link>
               <Link to={`/original-files?sourceId=${encodeURIComponent(data.sourceId)}`}>
-                查看原始文件
+                查看论文全文文件
               </Link>
             </Space>
           </Space>

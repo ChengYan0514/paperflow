@@ -98,6 +98,8 @@ export type WorkMetadata = {
 
 export type WorkListItem = WorkMetadata & {
   sourceIds: string[];
+  sourceNames?: string | null;
+  sources: SourceBrief[];
   processingStatus: ProcessingStatus;
   matchedFileId?: string | null;
   flagMatch?: number | null;
@@ -129,6 +131,7 @@ export type TextFile = {
 export type OriginalFile = {
   fileId: string;
   sourceId: string;
+  sourceName?: string | null;
   year?: number | null;
   paperTitle?: string | null;
   authors?: string | null;

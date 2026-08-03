@@ -79,8 +79,8 @@ export default function WorkDetailPage() {
               />
             </div>
             <div>
-              <h2>匹配的原始文件</h2>
-              {data.matchedFile ? <OriginalFileSummary file={data.matchedFile} /> : '未匹配原始文件'}
+              <h2>匹配的论文全文文件</h2>
+              {data.matchedFile ? <OriginalFileSummary file={data.matchedFile} /> : '未匹配论文全文文件'}
             </div>
             <div>
               <h2>因果声明</h2>
@@ -102,7 +102,9 @@ export default function WorkDetailPage() {
             <Space>
               <Link to={`/works/${workId}/blocks`}>查看解析后全文</Link>
               {data.matchedFile ? (
-                <OriginalFileLink fileId={data.matchedFile.fileId}>查看匹配原始文件</OriginalFileLink>
+                <OriginalFileLink fileId={data.matchedFile.fileId}>
+                  查看匹配论文全文文件
+                </OriginalFileLink>
               ) : null}
             </Space>
           </Space>

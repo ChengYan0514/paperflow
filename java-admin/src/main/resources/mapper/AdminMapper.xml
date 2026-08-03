@@ -276,6 +276,12 @@
                 FROM work_source ws
                 WHERE ws.work_id = w.work_id
             ) AS source_ids,
+            (
+                SELECT STRING_AGG(s.source_name, ', ' ORDER BY ws.source_id)
+                FROM work_source ws
+                JOIN source s ON s.source_id = ws.source_id
+                WHERE ws.work_id = w.work_id
+            ) AS source_names,
             j.file_id AS matched_file_id,
             j.flag_match,
             j.flag_text,
@@ -329,6 +335,12 @@
                 FROM work_source ws
                 WHERE ws.work_id = w.work_id
             ) AS source_ids,
+            (
+                SELECT STRING_AGG(s.source_name, ', ' ORDER BY ws.source_id)
+                FROM work_source ws
+                JOIN source s ON s.source_id = ws.source_id
+                WHERE ws.work_id = w.work_id
+            ) AS source_names,
             j.file_id AS matched_file_id,
             j.flag_match,
             j.flag_text,
@@ -394,6 +406,7 @@
     <sql id="OriginalFileSelect">
         f.file_id,
         f.source_id,
+        s.source_name,
         f.year,
         f.paper_title,
         f.authors,
@@ -463,6 +476,7 @@
         SELECT <include refid="OriginalFileSelect"/>
         FROM original_file f
         JOIN original_file_job j ON j.file_id = f.file_id
+        LEFT JOIN source s ON s.source_id = f.source_id
         <include refid="OriginalFileFilters"/>
         <choose>
             <when test="sort == 'yearDesc'">
@@ -491,6 +505,7 @@
         SELECT <include refid="OriginalFileSelect"/>
         FROM original_file f
         JOIN original_file_job j ON j.file_id = f.file_id
+        LEFT JOIN source s ON s.source_id = f.source_id
         WHERE f.file_id = #{fileId}
     </select>
 

@@ -1997,6 +1997,13 @@ components:
           type: array
           items:
             type: string
+        sourceNames:
+          type: string
+          nullable: true
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceBrief"
         processingStatus:
           $ref: "#/components/schemas/ProcessingStatus"
         matchedFileId:
@@ -2099,6 +2106,9 @@ components:
           type: string
         sourceId:
           type: string
+        sourceName:
+          type: string
+          nullable: true
         year:
           type: integer
           nullable: true

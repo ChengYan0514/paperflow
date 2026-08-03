@@ -8,6 +8,7 @@ import SourceDetailPage from './SourceDetail';
 import SourcesPage from './Sources';
 import WorkDetailPage from './WorkDetail';
 import WorksPage from './Works';
+import { statusColor } from './businessUtils';
 import {
   getOriginalFile,
   getServiceStatus,
@@ -93,6 +94,7 @@ const source = {
 const file = {
   fileId: 'F1',
   sourceId: 'S1',
+  sourceName: 'Nature',
   year: 2024,
   paperTitle: 'Paper title',
   authors: 'Ada',
@@ -129,6 +131,8 @@ const work = {
   type: 'article',
   language: 'en',
   sourceIds: ['S1'],
+  sourceNames: 'Nature',
+  sources: [{ sourceId: 'S1', sourceName: 'Nature', provider: 'OpenAlex' }],
   processingStatus: 'READY' as const,
   matchedFileId: 'F1',
   flagMatch: 1,
@@ -231,19 +235,27 @@ describe('business pages', () => {
 
     expect(getSource).toHaveBeenCalledWith('S1');
     expect(await screen.findByText('查看论文')).toHaveAttribute('href', '/works?sourceId=S1');
-    expect(screen.getByText('查看原始文件')).toHaveAttribute(
+    expect(screen.getByText('查看论文全文文件')).toHaveAttribute(
       'href',
       '/original-files?sourceId=S1',
     );
   });
 
-  it('lists works and links matched files', async () => {
+  it('lists works in the configured order with colored full-text-file statuses', async () => {
     searchParams = new URLSearchParams('authorName=Ada&sort=titleAsc');
     render(<WorksPage />);
 
-    expect(await screen.findByText('W1')).toHaveAttribute('href', '/works/W1');
+    expect(await screen.findByText('Work title')).toHaveAttribute('href', '/original-files/F1');
     expect(listWorks).toHaveBeenCalledWith(searchParams);
-    expect(screen.getByText('F1')).toHaveAttribute('href', '/original-files/F1');
+    expect(screen.getByText('Nature')).toHaveAttribute('href', '/sources/S1');
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      '标题',
+      '发表年份',
+      '来源期刊',
+      '全文文件状态',
+    ]);
+    expect(statusColor('processingStatus', 'READY')).toBe('success');
+    expect(statusColor('processingStatus', 'PARSE_FAILED')).toBe('error');
     expect(screen.getByRole('link', { name: /导出 CSV/ })).toHaveAttribute(
       'href',
       '/api/works/export?authorName=Ada&sort=titleAsc',
@@ -258,17 +270,27 @@ describe('business pages', () => {
     expect(screen.getAllByText('Ada').length).toBeGreaterThan(0);
     expect(screen.getByText('Nature (S1)')).toHaveAttribute('href', '/sources/S1');
     expect(screen.getByText('查看解析后全文')).toHaveAttribute('href', '/works/W1/blocks');
-    expect(screen.getByText('查看匹配原始文件')).toHaveAttribute('href', '/original-files/F1');
+    expect(screen.getByText('查看匹配论文全文文件')).toHaveAttribute('href', '/original-files/F1');
   });
 
   it('lists original files and links related entities', async () => {
     searchParams = new URLSearchParams('sourceName=Nature&sort=yearDesc');
     render(<OriginalFilesPage />);
 
-    expect(await screen.findByText('F1')).toHaveAttribute('href', '/original-files/F1');
+    expect(await screen.findByText('Paper title')).toHaveAttribute('href', '/original-files/F1');
     expect(listOriginalFiles).toHaveBeenCalledWith(searchParams);
-    expect(screen.getAllByText('S1')[0]).toHaveAttribute('href', '/sources/S1');
-    expect(screen.getByText('W1')).toHaveAttribute('href', '/works/W1');
+    expect(screen.getByText('Nature')).toHaveAttribute('href', '/sources/S1');
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      '标题',
+      '来源期刊',
+      '论文全文文件类型',
+      '文件大小',
+      '匹配状态',
+      '文本解析状态',
+      '内容块入库状态',
+      '平台',
+      '年份',
+    ]);
     expect(screen.getByRole('link', { name: /导出 CSV/ })).toHaveAttribute(
       'href',
       '/api/original-files/export?sourceName=Nature&sort=yearDesc',
@@ -289,7 +311,7 @@ describe('business pages', () => {
 
     expect(getOriginalFile).toHaveBeenCalledWith('F1');
     expect(
-      await screen.findByRole('link', { name: '查看原始文件：paper.pdf' }),
+      await screen.findByRole('link', { name: '查看论文全文文件：paper.pdf' }),
     ).toHaveAttribute('href', '/api/assets/openalex/original/S1/F1.pdf');
     expect(screen.getByRole('link', { name: 'openalex/original/S1/F1.pdf' })).toHaveAttribute(
       'href',

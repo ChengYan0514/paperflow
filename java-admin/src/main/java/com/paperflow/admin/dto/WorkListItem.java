@@ -11,6 +11,8 @@ public record WorkListItem(
         String type,
         String language,
         List<String> sourceIds,
+        String sourceNames,
+        List<SourceBrief> sources,
         ProcessingStatus processingStatus,
         String matchedFileId,
         Integer flagMatch,

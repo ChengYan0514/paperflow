@@ -15,7 +15,6 @@ import {
   StatusTag,
   tablePagination,
   valueLabel,
-  WorkLink,
 } from './businessUtils';
 
 const primaryField = { name: 'sourceName', placeholder: '按来源期刊名称检索' };
@@ -64,7 +63,7 @@ export default function OriginalFilesPage() {
   }, [searchParams]);
 
   return (
-    <PageContainer title="原始文件列表">
+    <PageContainer title="论文全文文件列表">
       <QueryBar
         primaryField={primaryField}
         advancedFields={advancedFields}
@@ -91,18 +90,22 @@ export default function OriginalFilesPage() {
             scroll={{ x: 1080 }}
             columns={[
               {
-                title: fieldLabel('fileId'),
-                dataIndex: 'fileId',
-                width: 130,
+                title: fieldLabel('title'),
+                dataIndex: 'paperTitle',
+                width: 210,
                 render: (_, file) => (
-                  <Link to={`/original-files/${file.fileId}`}>{file.fileId}</Link>
+                  <Link to={`/original-files/${file.fileId}`}>
+                    {file.paperTitle || file.originalFileName}
+                  </Link>
                 ),
               },
               {
-                title: fieldLabel('sourceId'),
-                dataIndex: 'sourceId',
-                width: 120,
-                render: (_, file) => <SourceLink sourceId={file.sourceId} />,
+                title: fieldLabel('workSourceNames'),
+                dataIndex: 'sourceName',
+                width: 180,
+                render: (_, file) => (
+                  <SourceLink sourceId={file.sourceId} sourceName={file.sourceName} showId={false} />
+                ),
               },
               {
                 title: fieldLabel('originalFileType'),
@@ -111,22 +114,10 @@ export default function OriginalFilesPage() {
                 render: (_, file) => <StatusTag value={file.originalFileType} />,
               },
               {
-                title: fieldLabel('originalFileName'),
-                dataIndex: 'originalFileName',
-                width: 180,
-              },
-              {
                 title: fieldLabel('fileSize'),
                 dataIndex: 'fileSize',
                 width: 100,
                 render: (_, file) => bytes(file.fileSize),
-              },
-              {
-                title: fieldLabel('matchedWorkId'),
-                dataIndex: 'matchedWorkId',
-                width: 130,
-                render: (_, file) =>
-                  file.matchedWorkId ? <WorkLink workId={file.matchedWorkId} /> : '-',
               },
               {
                 title: fieldLabel('flagMatch'),

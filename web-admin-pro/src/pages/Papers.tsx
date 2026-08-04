@@ -1,10 +1,10 @@
 import { DownloadOutlined } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { Link, useSearchParams } from '@umijs/max';
-import { Button } from 'antd';
+import { Button, Space, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import type { OriginalFile, Page } from '@/services/business';
-import { listPapers, papersExportUrl } from '@/services/business';
+import type { OriginalFile, Page, SourceSummary } from '@/services/business';
+import { getSource, listPapers, papersExportUrl } from '@/services/business';
 import {
   fieldLabel,
   flagLabels,
@@ -45,8 +45,10 @@ const sortOptions = ['yearDesc', 'providerAsc', 'textStatusIssueFirst'].map(
 export default function PapersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<Page<OriginalFile>>();
+  const [source, setSource] = useState<SourceSummary>();
   const [error, setError] = useState<unknown>();
   const [loading, setLoading] = useState(true);
+  const sourceId = searchParams.get('sourceId')?.trim() || undefined;
 
   useEffect(() => {
     setLoading(true);
@@ -56,8 +58,50 @@ export default function PapersPage() {
       .finally(() => setLoading(false));
   }, [searchParams]);
 
+  useEffect(() => {
+    setSource(undefined);
+    if (!sourceId) {
+      return;
+    }
+    getSource(sourceId).then(setSource).catch(() => undefined);
+  }, [sourceId]);
+
+  const clearSourceScope = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('sourceId');
+    next.delete('page');
+    setSearchParams(next);
+  };
+  const sourceTitle = source?.sourceName || sourceId;
+
   return (
-    <PageContainer title="论文管理">
+    <PageContainer title={sourceTitle ? `${sourceTitle} 的论文` : '论文管理'}>
+      {sourceId ? (
+        <div
+          style={{
+            alignItems: 'center',
+            borderBottom: '1px solid #e5e7eb',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 12,
+            justifyContent: 'space-between',
+            marginBottom: 16,
+            paddingBottom: 12,
+          }}
+        >
+          <Space wrap size={[8, 8]}>
+            <Typography.Text type="secondary">当前范围</Typography.Text>
+            <Tag color="blue">来源期刊</Tag>
+            <Typography.Text>{sourceTitle}</Typography.Text>
+            <Typography.Text type="secondary">{sourceId}</Typography.Text>
+            {source?.provider ? <Typography.Text type="secondary">{source.provider}</Typography.Text> : null}
+          </Space>
+          <Space>
+            <Button href={`/sources/${encodeURIComponent(sourceId)}`}>返回来源详情</Button>
+            <Button onClick={clearSourceScope}>清除期刊筛选</Button>
+          </Space>
+        </div>
+      ) : null}
       <QueryBar
         primaryField={primaryField}
         advancedFields={advancedFields}
@@ -94,14 +138,16 @@ export default function PapersPage() {
                 ),
               },
               { title: fieldLabel('authors'), dataIndex: 'authors', width: 180, ellipsis: true },
-              {
-                title: fieldLabel('workSourceNames'),
-                dataIndex: 'sourceName',
-                width: 180,
-                render: (_, file) => (
-                  <SourceLink sourceId={file.sourceId} sourceName={file.sourceName} showId={false} />
-                ),
-              },
+              ...(sourceId
+                ? []
+                : [{
+                    title: fieldLabel('workSourceNames'),
+                    dataIndex: 'sourceName',
+                    width: 180,
+                    render: (_: unknown, file: OriginalFile) => (
+                      <SourceLink sourceId={file.sourceId} sourceName={file.sourceName} showId={false} />
+                    ),
+                  }]),
               { title: fieldLabel('year'), dataIndex: 'year', width: 80 },
               { title: fieldLabel('provider'), dataIndex: 'provider', width: 100 },
               {

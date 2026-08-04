@@ -250,6 +250,28 @@ describe('business pages', () => {
     );
   });
 
+  it('keeps the source journal visible when listing papers from a source detail page', async () => {
+    searchParams = new URLSearchParams('sourceId=S1&sort=yearDesc');
+    render(<PapersPage />);
+
+    expect(await screen.findByRole('heading', { name: 'Nature 的论文' })).toBeInTheDocument();
+    expect(getSource).toHaveBeenCalledWith('S1');
+    expect(screen.getByText('当前范围')).toBeInTheDocument();
+    expect(screen.getAllByText('OpenAlex')).toHaveLength(2);
+    expect(screen.getByRole('link', { name: '返回来源详情' })).toHaveAttribute('href', '/sources/S1');
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      '标题',
+      '作者',
+      '年份',
+      '平台',
+      '文本解析状态',
+    ]);
+
+    fireEvent.click(screen.getByRole('button', { name: '清除期刊筛选' }));
+    const next = setSearchParams.mock.calls[0][0] as URLSearchParams;
+    expect(next.toString()).toBe('sort=yearDesc');
+  });
+
   it('shows paper status filters in Chinese', async () => {
     searchParams = new URLSearchParams('flagMatch=1&flagText=-1&flagBlock=0');
     render(<PapersPage />);

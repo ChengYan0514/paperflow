@@ -1,0 +1,105 @@
+{
+  "paper_title": "Competitive Intensity and Its Two-Sided Effect on the Boundaries of Firm Performance",
+  "block_set": [
+    {
+      "block_id": "2016410573260067228",
+      "title": "1. Introduction",
+      "sub_firstblock": "Today, strategy boasts a rich and growing vein of theoretical findings based on the application of coalitional game theory.1 This growth is due to a number of important features of the coalitional game formalism, including its explicit distinction between the value creation and capture aspects of market transactions, ability to represent the sort of unstructured dealings that are typical in real-world markets, built-in scalability with respect to market size, and operation at a level of abstraction that frees theorists from the need to commit to a myriad of special assumptions on the underlying details of value creation. The findings in this stream have resulted in numerous insights into the central question in strategy: What drives the economic performance of agents in competitive markets?2 Of course, new insights invariably lead to new questions. In this paper, we tackle several such questions with the aim of providing further contributions. While our focus is on the stream within strategy proper, we believe several of our findings will be of interest to researchers outside of the field. Let us begin by identifying our motivating research questions. "
+    },
+    {
+      "block_id": "2016410573260067252",
+      "title": "2. Coalitional Games in Strategy: Added Value vs. the Core",
+      "sub_firstblock": "By way of selective literature review and an introduction to coalitional game theory (CGT), we use this section to discuss added value and the core—the two points on the dimension of theoretical complexity that bound the middle ground we wish to explore later in the paper. Essentially, all applications of coalitional game theory in strategy adopt one or the other of these two concepts as the foundation of their analyses. Both approaches have been used to provide important economic insights for strategy research. We highlight several of these as the discussion unfolds. "
+    },
+    {
+      "block_id": "2016410573260067279",
+      "title": "3. Value Partitions",
+      "sub_firstblock": "We begin our analysis with a practical observation. When the agents engaged in one set of economic activities contemplate reorganizing to engage in some other, they must consider all of the costs associated with that reorganization. Unfortunately, this distinction is not always explicated in a cooperative game setting. In a model, $V$ and $v ( G )$ are typically said to be \"the\" economic value that can be created by $N$ and $G ,$ respectively. In a real-world empirical setting, $V$ is data— value actually created. If the agents in $G$ transacted among themselves to contribute to $V$ (say, as a supply chain), then $v ( G )$ is also data. However, if the agents in G did not transact with one another, then $v ( G )$ is a counterfactual, the outcome of transaction possibilities that could have occurred but did not. In the latter case, $v ( G )$ must account for all of the economic costs associated with its production (e.g., switching costs). Thus, the real-world analyst must identify those groups actively engaged in the production of $V$ versus those that do not form but could have done (and ensure that the values of $v$ reflect these distinctions). "
+    },
+    {
+      "block_id": "2016410573260067285",
+      "title": "4. Quantifying Three Shades of \"Competitive Intensity\"",
+      "sub_firstblock": "We build on the idea of a focal value partition, which is amenable to real-world interpretation and useful in accounting for the relative frictions faced by agents considering alternatives to some status quo market structure. Our initial notion of direct competitive intensity is the simplest and, we conjecture, most useful idea from the standpoint of empirical applications. We expand this idea to indirect intensity which, while somewhat more complex, highlights an important implication of direct competitive intensity. Extending these implications to the theoretically maximum number of groups leads to our most general version of competitive intensity. This sequence of definitions is increasing in both computational difficulty and refinement of the bounds on a firm's range of competitive interval. "
+    },
+    {
+      "block_id": "2016410573260067287",
+      "title": "4.1. Direct Competitive Intensity",
+      "sub_firstblock": "Assume $\\mathcal { P } ^ { * }$ is given. Using this as our guide and retaining added-value constraints (1) and (2), we wish to identify a further subset of core constraints (3) that provides meaningful analytical traction while yet retaining much of the simplicity of the added-value construct. Obvious first candidates are those associated with the focal value networks themselves: "
+    },
+    {
+      "block_id": "2016410573260067340",
+      "title": "4.2. Indirect Competitive Intensity",
+      "sub_firstblock": "Once the effect of competitive intensity is grasped, a further insight arises. Suppose a firm and a rival operate in separate value networks. The firm adds no value to the rival's network and, hence, enjoys no benefit of competitive intensity. Even so, what if the competitive intensity for the rival is so strong that the rival captures the lion's share of the value produced in its network? If the firm can create value with some of the rival's transaction partners above and beyond the meager amount that they must receive once the DCI for the rival is taken into account, then competition for the firm does, in fact, exist. If the firm is offered less value in its own network than the difference between the value it can create with its rival's transaction and the amount they look to capture in their own network, then the firm can cut a deal with them that makes them all strictly better off. Competition for the rival indirectly creates competition for the firm. "
+    },
+    {
+      "block_id": "2016410573260067372",
+      "title": "4.3. Generalized Competitive Intensity",
+      "sub_firstblock": "Thus far, we have considered competition for an agent generated by external networks (direct competitive intensity) and by subsets of such networks affected by competitive intensities (indirect competitive intensity). We believe that this way of conceptualizing the effects of competition is natural, straightforward, and enlightening. Yet, as we saw in the immediately preceding example, these definitions fail to account for some forms of competition (e.g., within-network competition). Therefore, we now drop the requirement for a value partition and focus, instead, on the entire set of subsets of $N$ . This extension approaches the core in its information demands and, as a result, is unlikely to be especially useful in real-world applications. That said, we present it now for theorists who may be interested in seeing a generalization of the basic ideas presented in Sections 4.1 and 4.2. Readers uninterested in these technical theoretical details may wish to skip this section. "
+    },
+    {
+      "block_id": "2016410573260067413",
+      "title": "4.4. Caveats",
+      "sub_firstblock": "Earlier, we motivated the development of these notions of competitive intensity by asserting their usefulness on both empirical and theoretical grounds. We speculate that direct competitive intensity, the simplest of our objects, will be most useful for empirical work. For example, even when the added values to all of the value networks cannot be estimated, every added value that can be estimated has implications for value capture (i.e., our approach may provide useful empirical traction, even though implementation falls well short of its ideal). On the theoretical side, the core's implicit, abstract, and complex notion of competition often obscures the economics driving its conclusions. Our simpler concepts are more transparent and, as a result, may illuminate counterintuitive outcomes or bring newcomers to a speedier grasp of the essential economics associated with the core. "
+    },
+    {
+      "block_id": "2016410573260067426",
+      "title": "5. Application: Competition in a Duopolistic Market",
+      "sub_firstblock": "We now employ a standard version of the Hotelling model of duopolistic competition, augmented to permit vertical differentiation and capacity constraints. We explore the implications of competitive intensity in this setting, the relationship between added value and firm performance, and how competitive intensity clarifies the effects of capacity constraints on firm performance. "
+    },
+    {
+      "block_id": "2016410573260067431",
+      "title": "5.1. Setup",
+      "sub_firstblock": "On the supply side, there are two single-product firms, labeled $a$ and $b$ , that have the same constant marginal cost of production, normalized to zero. The range of possible product types is represented by the interval [0, 1]. Denote the firms' product types as $y _ { a }$ and $y _ { b } ,$ respectively. Assume $y _ { a } = 0$ and $y _ { b } = 1$ .Also assume that capacities are denominated in whole units. We adopt the following notational conventions to simplify the discussion. Firm $r \\in \\{ a , b \\}$ has capacity $q _ { r }$ . In addition, $\\Pi _ { r } \\equiv \\left[ \\pi _ { r } ^ { \\mathrm { m i n } } , \\pi _ { r } ^ { \\mathrm { m a x } } \\right]$ denotes its competitive interval; $W _ { r } ^ { * } \\equiv \\left[ w _ { r } ^ { * } , w _ { - r } ^ { * } \\right]$ its interval of value capture implied by DCI/DCR; and $S _ { r } ^ { * } \\equiv \\left[ s _ { r } ^ { * } , s _ { - r } ^ { * } \\right]$ the interval implied by ICI/ICR. "
+    },
+    {
+      "block_id": "2016410573260067435",
+      "title": "5.2. Preliminary Results",
+      "sub_firstblock": "With three buyers, it suffices to consider capacity levels of 1, 2, or 3 for each firm. Limiting attention to the cases in which both firms operate and all buyers purchase results in six capacity scenarios: $( q _ { a } , q _ { b } ) \\in$ $\\{ ( 1 , \\dot { 2 } ) , ( 2 , 1 ) , ( 2 , 2 ) , ( 3 , 2 ) , ( 2 , 3 \\bar { ) } , ( 3 , \\dot { 3 } ) \\}$ 30 The aggregate value produced in this market depends on the firm capacities;, let $V _ { q _ { a } , q _ { b } }$ nario $( q _ { a } , q _ { b } )$ . Thus, in scenario (1,2), $a$ sells to buyer 1 and $b$ to the other two. Aggregate utility is $V _ { 1 , 2 } =$ ${ l _ { a } } + { l _ { b } } - t | 1 - 0 . 5 | + l _ { b } ,$ or $V _ { 1 , 2 } = l _ { a } + 2 l _ { b } - 0 . 5 t$ The value network that delivers this is unique— $^ { \\cdot a }$ and buyer 1 form one network $\\begin{array} { r } { ( v ( X _ { a } ^ { * } ) = l _ { a } ) . } \\end{array}$ , $b$ and the other buyers form the other $( v ( X _ { b } ^ { * } ) = 2 l _ { b } - 0 . 5 t )$ . Once $a$ has two or more units of capacity (i.e., all of the other cases), it always sells to buyers 1 and 2, with $b$ picking up buyer 3. In these cases, $V _ { q _ { a } , q _ { b } } = l _ { a } + l _ { a } - t \\left| 0 - 0 . 5 \\right| + l _ { b } ,$ or $V _ { q _ { a } , q _ { b } } = 2 l _ { a } - t | 0 - 0 . 5 | + l _ { b } ^ { ' }$ $( { \\dot { q } } _ { a } \\neq 1 ; { q } _ { b } \\neq 2 )$ The network values are $v ( X _ { a } ^ { * } ) = 2 l _ { a } - 0 . 5 t$ and $v ( X _ { b } ^ { * } ) = l _ { b }$ . "
+    },
+    {
+      "block_id": "2016410573260067450",
+      "title": "5.3. Managerial Implications",
+      "sub_firstblock": "5.3.1. Competitive Advantage. Notice from Table 1 that the vertical superiority of firm a over $b$ does not consistently result in greater profitability. In all cases, a's competitive interval is nontrivial: there is always room for value capture above-and-beyond the minimum guaranteed by competition. This is true in spite of a's superior product and, in the five cases in which it has two or more units of capacity, a market share that is twice the size of firm b's. Indeed, in those cases, competition provides no guarantee of capture whatsoever. Whatever value $a$ does capture in those cases is entirely due to its persuasive resources—those capabilities that enhance its ability to persuade buyers 1 and 2 to part with value beyond that required by competition. "
+    },
+    {
+      "block_id": "2016410573260067464",
+      "title": "6. Conclusions",
+      "sub_firstblock": "We examine markets in which economic value is created by value networks, disjoint subsets of agents (e.g. independent supply or value chains). In this context, we define three notions of competitive intensity—all of which imply bounds on the amount of value agents may capture in a market setting. We demonstrate that, while these bounds are weaker than the ones provided by the core, they also require much less information. At the same time, they add substantial traction beyond added value (the present workhorse for empirical work in this line of research). We apply these ideas in a more concrete market setting to show how competitive intensity performs in more familiar circumstances. In this specific setting, even our weakest notion of competitive intensity may be sufficient to characterize the firm's competitive intervals. Throughout, competitive intensity provides strong intuition about how competition is actually operating in these cases. "
+    },
+    {
+      "block_id": "2016410573260067469",
+      "title": "Acknowledgments",
+      "sub_firstblock": "The authors are grateful for useful comments to seminar and conference audiences at Aachen, PUC Chile, the 2013 CRES Foundations of Business Strategy Conference at Washington University in St. Louis, the 2014 Atlanta Competitive Advantage Conference, the 2014 Academy of Management Conference, the 2014 Annual Conference of the Strategic Management Society, and the 2016 Eden Advanced Strategy Seminar at IESE. Discussions by Ramon Casadesus-Masanell and Bruno Cassiman are gratefully acknowledged, as are helpful comments by two anonymous reviewers, an associate editor, and the department editor of this journal. "
+    },
+    {
+      "block_id": "2016410573260067471",
+      "title": "Appendix A. Proof of Proposition 1",
+      "sub_firstblock": "We first show that $\\pi _ { i } ^ { \\mathrm { m i n } } \\geq w _ { i } ^ { * } = \\operatorname* { m a x } _ { X \\in { \\mathcal { P } } ^ { * } \\backslash X _ { i } ^ { * } } a v _ { i } ( X )$ If this were not the case, $i$ could always join any $Y \\in \\arg \\operatorname* { m a x } _ { X \\in { \\mathcal { P } } ^ { * } \\backslash X _ { i } ^ { * } } a v _ { i } ( X )$ (or refuse joining any value network if we do not have $w _ { i } ^ { * } >$ $v ( i ) )$ Since we know that $\\begin{array} { r } { v ( Y ) = \\sum _ { j \\in Y } \\pi _ { j } , } \\end{array}$ a new value network formed by $i$ and the members of $Y$ would make all of them better off because of the positive value added by $i ,$ which would contradict the hypothesis that $\\pi _ { i } ^ { \\mathrm { m i n } }$ is a possible core allocation. "
+    },
+    {
+      "block_id": "2016410573260067477",
+      "title": "Appendix B. Proof of Proposition 2",
+      "sub_firstblock": "Note from the definition of $\\boldsymbol { s } _ { i } ^ { * }$ that choosing $Y = \\varnothing$ would make $s _ { i } ^ { * } = w _ { i } ^ { * } ,$ so allowing $Y$ to differ from $\\emptyset$ implies that $s _ { i } ^ { * } \\geq$ $\\boldsymbol { w } _ { i } ^ { * }$ and $w _ { - i } ^ { \\ast } \\geq s _ { - i } ^ { \\ast } ,$ so we just need to show that $s _ { i } ^ { * } \\leq \\pi _ { i } ^ { \\mathrm { m i n } }$ and $\\pi _ { i } ^ { \\mathrm { m a x } } \\leq s _ { - i } ^ { * }$ To prove that $\\pi _ { i } ^ { \\mathrm { m i n } } \\geq s _ { i } ^ { * } ,$ suppose to the contrary that $s _ { i } ^ { * } - \\pi _ { i } ^ { \\mathrm { m i n } } > 0$ and assume that $s _ { i } ^ { * } > w _ { i } ^ { * }$ to avoid triviality. Letting $X ^ { \\ast } \\in \\mathcal { P } ^ { \\ast } \\backslash X _ { i } ^ { \\ast }$ and $Y ^ { * } \\subset X ^ { * }$ be some maximizers of "
+    },
+    {
+      "block_id": "2016410573260067484",
+      "title": "Appendix C. Proof of Proposition 3",
+      "sub_firstblock": "From the generalized competitive intensity, we have that for each $i \\in N$ , $S \\subseteq N \\backslash \\{ i \\}$ and $\\pi \\in C$ that "
+    },
+    {
+      "block_id": "2016410573260067498",
+      "title": "Appendix D. Proof of Proposition 4",
+      "sub_firstblock": "We have shown $\\bar { w } _ { i } \\geq \\pi _ { i } ^ { \\operatorname* { m a x } } \\geq \\pi _ { i } ^ { \\operatorname* { m i n } } \\geq \\underline { w } _ { i }$ for every $i \\in N$ It follows that if $\\pi ^ { \\phi } \\in C .$ , then those agents in its front and end receive, respectively, the upper and lower bounds of their competitive intervals. Moreover, since $C \\subseteq D C I _ { \\mathrm { { \\scriptscriptstyle M } } }$ , if the boundaries of the DCI lie in the $C ,$ it must be that $D C I = C$ . "
+    },
+    {
+      "block_id": "2016410573260067503",
+      "title": "Endnotes",
+      "sub_firstblock": "1Gans and Ryall (2016) provide a recent review of this line of work. "
+    },
+    {
+      "block_id": "2016410573260067506",
+      "title": "Appendix E. Proof of Proposition 5",
+      "sub_firstblock": "3 As we discuss in greater detail in Section 2, the analytical implications of added value are, themselves, implied by the logic of the core (indeed, Brandenburger and Stuart 1996 already suggest the usefulness of the core for strategy theory, p. 22). "
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "paper_title": "Hierarchical Maximum Likelihood Parameter Estimation for Cumulative Prospect Theory: Improving the Reliability of Individual Risk Parameter Estimates",
+  "block_set": [
+    {
+      "block_id": "2016410536899645579",
+      "title": "1. Introduction",
+      "sub_firstblock": "People must often make choices among a number of different options for which the outcomes are not certain. Such choices are referred to as risky when the options are well-defined sets of outcomes and each has its respective payoff(s) and probability of fruition (Knight 1921, Edwards 1954, Luce and Raiffa 1957) clearly described. Expected value (EV) maximization stands as a benchmark solution to risky choice problems, but people's behavior does not always conform to this optimization principle. Rather, decision makers (DMs) reveal different preferences for risk, sometimes, for example, forgoing an option with a higher expectation in lieu of an option with lower variance (thus indicating risk aversion; in some cases DMs reveal the opposite preference, too, indicating risk seeking). Behavioral theories of risky decision making (Kahneman and Tversky 1979, 2000; Tversky and Kahneman 1992; Camerer 1995) have been developed to identify and highlight the structure in these choice patterns and provide psychological insights into DMs' revealed preferences. Reliable measures of risk preferences allow researchers to investigate the associations between risky choice behavior and other variables of interest and allow the incorporation of risk preferences in other contexts (e.g., Camerer 2004, Huettel et al. 2006). This paper is about measuring those subjective risk preferences and in particular developing a statistical estimation procedure that can increase the reliability and robustness of those parameter estimates, thus better capturing risk preferences and doing so consistently at the individual level. "
+    },
+    {
+      "block_id": "2016410536899645582",
+      "title": "1.1. Three Necessary Components for Measuring Risk Preferences",
+      "sub_firstblock": "There are three elementary components in measuring risk preferences and these parts serve as the foundation for developing behavioral models of risky choice. These three components are lotteries, models, and statistical estimation/fitting procedures. We explain each of these components below in general terms and then provide detailed examples and a discussion of the elements in the subsequent sections of the paper. "
+    },
+    {
+      "block_id": "2016410536899645600",
+      "title": "1.2. Overfitting and Bounding Parameters",
+      "sub_firstblock": "Multiparameter models' estimation methods may be prone to overfitting and in doing so adjust to noise instead of real risk preferences (Roberts and Pashler 2000). This can sometimes be observed when parameter values emerge that are highly atypical and extreme. A common solution to this problem is to set boundaries and limit the range of parameter values that are potentially estimated. Boundaries prevent extreme parameter values and thus can reduce overfitting, but on the downside they negate the possibility of detecting extreme preferences altogether, even though these preferences may be real but unusual. Boundaries are also defined arbitrarily and may create serious estimation problems due to parameter interdependence. For example, setting a different boundary on one parameter may radically change the estimate of another parameter (e.g., restricting the range of probability distortion may unduly influence estimates of loss aversion) for one particular subject. The interdependence of parameter estimates has been noted (Nilsson et al. 2011, Zeisberger et al. 2012). To circumvent the pitfalls of arbitrary parameter boundaries, we use a hierarchical estimation method based on Farrell and Ludwig (2008) without such boundaries. At its core, this hierarchical method uses estimates of risk preferences of the whole sample to inform estimates of the risk preferences at the individual level. We therefore address to what degree an estimation method combining group-level information with individual-level information can more reliably represent individual risk preferences compared with using either individual or aggregate information exclusively. "
+    },
+    {
+      "block_id": "2016410536899645607",
+      "title": "1.3. Justification for Using Hierarchical Estimation Methods",
+      "sub_firstblock": "The ultimate goal of the hierarchical estimation procedure here is to obtain improvements in the reliability of estimates for individual risk preferences that can be used to make better predictions about risky choice behavior, contrasted to other estimation methods. This is not modeling as a means only to maximize in-sample fit but rather to maximize out-of-sample correspondence; moreover, these methods provide a way to gain insights into what people are actually motivated by as they cogitate about risky options and make choices when confronting irreducible but quantified uncertainty. Ideally, the parameters should not only be about merely summarizing choices but also reflect some psychological mechanisms that underlie risky decisionmaking behavior. "
+    },
+    {
+      "block_id": "2016410536899645609",
+      "title": "1.4. Other Applications of Hierarchical Estimation Methods",
+      "sub_firstblock": "Other researchers have applied hierarchical estimation methods to risky choice modeling at the individual level. Nilsson et al. (2011) have applied a Bayesian hierarchical parameter estimation model to simple risky choice data. The hierarchical procedure outperformed maximum likelihood estimation in a parameter recovery test. The authors, however, did not test out-of-sample predictions nor the test-retest reliability of their parameter estimates, a gap we address in this paper. Wetzels et al. (2010) applied Bayesian hierarchical parameter estimation in a learning model and found it was more robust with regard to extreme estimates and misunderstandings of the nature of the decision-making task. Scheibehenne and Pachur (2013) applied Bayesian hierarchical parameter estimation to risky choice data using a Transfer of Attention eXchange (TAX) model (Birnbaum and Chavez 1997, Birnbaum 1999) but reported no improvement in parameter stability. In another study, Scheibehenne and Pachur (2015) also find no improvement in parameter stability for prospect theory. The authors offer the explanation that hierarchical estimation at times overcorrects for extreme but correct parameter values and that the benefits of hierarchical estimation may be limited to cases where data are sparse. "
+    },
+    {
+      "block_id": "2016410536899645613",
+      "title": "1.6. Major Contributions",
+      "sub_firstblock": "In this paper we show concretely how the use of a hierarchical estimation method is able to circumvent many of the problems that occur with maximum likelihood procedures when estimating individual parameters in cumulative prospect theory. The hierarchical method outperforms maximum likelihood estimation with regard to out-of-sample fit and parameter reliability and does not resort to arbitrarily chosen parameter bounds or to the elimination of subjects to accomplish this efficiency gain. As a statistical method it is simpler, more transparent, and computationally less demanding than other approaches. We explore how this method is a more nuanced way of discerning parameters through the use of a hierarchical step, which produces a kind of plausibility filter for sets of individual-level parameters. This helps develop an explanation and intuition for how hierarchical methods achieve these superior results. We conclude that the hierarchical maximum likelihood (HML) method is readily applicable \"off the shelf,\" making it a powerful approach for both researchers and practitioners interested in measuring DMs' risk preferences. "
+    },
+    {
+      "block_id": "2016410536899645615",
+      "title": "1.7. Structure of the Rest of This Paper",
+      "sub_firstblock": "In this paper we focus on evaluating different statistical estimation procedures for fitting individual choice data to a risky choice model. To this end, we hold constant the set of lotteries DMs made choices with and the functional form of the risky choice model. We then fit the same set of choice data using two estimation methods and contrast the results to differentiate the quality of the different statistical methods. We also compute the test-retest reliability of individual-level parameters that resulted from different estimation procedures. This broad approach allows us to evaluate different estimation methods and make substantiated conclusions about the fit quality as well as diagnose overfitting. We conclude with recommendations for estimating risk preferences at the individual level. "
+    },
+    {
+      "block_id": "2016410536899645621",
+      "title": "2. Lotteries and Experimental Design",
+      "sub_firstblock": "One hundred eighty-five participants from the subject pool at the Max Planck Institute for Human Development in Berlin volunteered to participate in two research sessions (referred to hereafter as time 1 and time 2) that were administered approximately two weeks apart. After both sessions were conducted, complete data from both sessions were available for 142 participants; these subjects with complete data sets are retained for subsequent analysis.1 The experiment was incentive compatible and was conducted without deception. The data used here are the resulting choices from the Schulte-Mecklenbeck et al. (2016) experiment, and we are indebted to these authors for their generosity in sharing their raw data. "
+    },
+    {
+      "block_id": "2016410536899645623",
+      "title": "2.1. Participants",
+      "sub_firstblock": "In each session of the experiment, individuals made choices from a set of 91 simple binary lotteries. Each option has two possible outcomes between $- 1 0 0$ and 100 that occur with known probabilities that sum to one. There were four types of lotteries for which examples are shown in Table 1: gains only, losses only, mixed lotteries with both gains and losses, and mixed-zero lotteries with one gain and one loss and zero (status quo) as the alternative outcome. The first three types were included to cover the spectrum of risky decisions and the mixed-zero type allows for measuring loss aversion separately from risk aversion (Rabin 2000, Wakker 2005). The same 91 lotteries were used in both test-retest sessions of this research. The set of lotteries was compiled of existing items used by Rieskamp (2008), Gächter et al. (2007), and Holt and Laury (2002). In total, 35 lotteries are gain only, 25 are loss only, 25 are mixed, and 6 are mixed-zero. All of the lotteries are listed in Appendix E. "
+    },
+    {
+      "block_id": "2016410536899645625",
+      "title": "2.2. Lotteries",
+      "sub_firstblock": "Participants received extensive instructions regarding the experiment at the beginning of the first session. All participants received EUR 10 as a guaranteed payment for participation in the research and could earn more based on their choices. Participants worked through several examples of risky choices to familiarize themselves with the interface of the MouselabWeb software (Willemsen and Johnson 2011, 2014) that was used to administer the study. Although the same 91 lotteries were used for both experimental sessions, the item order was fully randomized. Additionally, the order of the outcomes (top-bottom) and option order (A or B) and the orientation (A above B, A left of B) were randomized and stored during the first session. The exact opposite spatial representation of all of this was used in the second session to mitigate potential order or presentation effects. "
+    },
+    {
+      "block_id": "2016410536899645629",
+      "title": "2.3. Procedure",
+      "sub_firstblock": "We use cumulative prospect theory (Tversky and Kahneman 1992) to model risk preferences. A two-outcome lottery $L$ is valued in utility $u ( \\cdot )$ as the sum of its components in which the monetary reward $x _ { i }$ is weighted by a value function $v ( \\cdot )$ and the associated probability $p _ { i } ,$ which is transformed by a probability weighting function $w ( \\cdot )$ . This is shown in the following equation:2 "
+    },
+    {
+      "block_id": "2016410536899645636",
+      "title": "3. Model Specification",
+      "sub_firstblock": "In general, power functions have been shown to fit behavioral choice data better than many other functional forms at the individual level (Stott 2006). Stevens (1957) also cites experimental evidence showing the merit of power functions in general for modeling psychological processes. Here we use a power value function as displayed in the following equation: "
+    },
+    {
+      "block_id": "2016410536899645641",
+      "title": "3.1. Value Function",
+      "sub_firstblock": "To capture subjective probability distortion, we use Prelec's functional specification (Prelec 1998; see Figure B.1 in Appendix B). Prelec's two-parameter probability weighting function can accommodate a wide range of curves and it has been shown to fit individual data well (Gonzalez and Wu 1999, Fehr-Duda and Epper 2012). Its specification4 can be found in the following equation: "
+    },
+    {
+      "block_id": "2016410536899645646",
+      "title": "3.2. Probability Weighting Function",
+      "sub_firstblock": "Individual risk preferences are captured by obtaining a set of parameters that best fit the observed choices implemented via a particular choice model. In this section we explain the workings of standard maximum likelihood estimation (MLE) and of hierarchical maximum likelihood estimation (HML). "
+    },
+    {
+      "block_id": "2016410536899645648",
+      "title": "4. Estimation Methods",
+      "sub_firstblock": "A narrow interpretation of cumulative prospect theory dictates that even a trivial difference in utility leads the DM to always choose the option with the highest utility. However, even in early experiments with repeated lotteries, Mosteller and Nogee (1951) found that this is not the case with real DMs. Choices were instead partially stochastic, with the probability of a DM choosing the generally more favored option increasing as the utility difference between the options increased. This idea of random utility maximization has been developed by Luce (1959) and others (e.g., Luce and Suppes 1965, McFadden 1980, Harless and Camerer 1994, Hey and "
+    },
+    {
+      "block_id": "2016410536899645669",
+      "title": "4.1. Maximum Likelihood Estimation",
+      "sub_firstblock": "A potential weakness of MLE is that only the likelihood drives the parameter estimations; thus, the method sometimes returns parameter estimates that are considered outliers. To circumvent this while avoiding the complete removal of subjects from the analysis, we applied an established practice of using (somewhat arbitrarily chosen) bounds to the MLE estimation method. These bounds are $0 . 2 \\leq \\alpha \\leq 2$ , $0 . 2 \\leq \\lambda \\leq 5 ,$ $0 . 2 \\leq \\delta \\leq 3 $ ,and $0 . 2 \\leq \\gamma \\leq 3 .$ They have been chosen such that extreme values are excluded while still allowing for a wide range of risk preferences. This is important because using too narrow of bounds can adversely affect the validity of the estimation procedure. "
+    },
+    {
+      "block_id": "2016410536899645671",
+      "title": "4.2. Bounded MLE",
+      "sub_firstblock": "The HML estimation procedure developed here is based on the work of Farrell and Ludwig (2008). It is a two-step procedure that is explained below. "
+    },
+    {
+      "block_id": "2016410536899645690",
+      "title": "4.3. Hierarchical Maximum Likelihood Estimation",
+      "sub_firstblock": "In parameter recovery procedures, simulated choices are generated using a model and known input parameters. These resulting choices are subsequently used to estimate parameters and the correspondence between the generating parameters and recovered parameters provides insight into the extent to which the estimation procedure's resulting output corresponds to the latent parameters in general. It is a useful way to ascertain whether an estimation method is able to identify parameters as intended. "
+    },
+    {
+      "block_id": "2016410536899645694",
+      "title": "5. Parameter Recovery Results",
+      "sub_firstblock": "The aggregate data can be analyzed to establish stylized facts and general behavioral tendencies. In this analysis, all 12,922 choices (142 participants $\\times$ 91 lotteries) are modeled together and one set of risk preference parameters is estimated. This preference set is estimated using estimation methods discussed before (MLE, HML). Five parameters (the fifth being the softmax sensitivity parameter $\\varphi$ ) are estimated for each method. Note that this analysis, one in which all choices are pooled together, is not suitable for identifying individual risk preferences but rather yields aggregate and stylized results of DMs in general. "
+    },
+    {
+      "block_id": "2016410536899645702",
+      "title": "6.1. Aggregate Results",
+      "sub_firstblock": "When benchmarking the explained fraction of choices and the fit of individual parameters compared to their estimated aggregate counterparts (complete pooling of choices, where each individual is assigned the aggregate parameters), we find that individual parameters provide clear benefits because both the explained fraction of choices and the fit are substantially improved by using individual-level parameters. After having established that individual parameters have clear value in terms of model fit, a more direct comparison between MLE and HML is warranted. Particularly for HML, it is important to determine to what degree its parameter estimates sacrifice in-sample performance, which is the performance of the individual parameters of the first session in terms of how well the parameters summarize the actual choice data. Individual risk preference parameters were estimated for each subject using both estimation methods. Fits are expressed in deviance11 (lower is better because this value is twice the negative log-likelihood) and are directly comparable because the hierarchical component is excluded from the deviance values for evaluation purposes. The mean and standard deviation of the subject's fits are displayed in Table 2. As to be expected, the loglikelihood is lowest for MLE because that method attempts to find the set of parameters with the best possible fit in-sample. However, HML is very close behind, and more importantly it has substantial advantages in terms of reliability, which we explore in the next section. "
+    },
+    {
+      "block_id": "2016410536899645715",
+      "title": "6.2. Individual Risk Preference Estimates",
+      "sub_firstblock": "A key issue in measuring preferences is the reliability of the parameter estimates. This viewpoint is consistent with considering risk preferences as a trait, a stable characteristic of an individual DM, and amenable to psychological interpretation. Reliability can be assessed by applying the different estimation procedures independently on the same data from the two experimental sessions. Large changes in parameter values between time 1 and 2 are a problem and indicate that we are mostly measuring/modeling noise instead of real individual risk preferences. At the individual level we can examine the test-retest correlations of the parameters from the estimation methods, displayed in Table 3. MLE provides rather unreliable estimates. The test-retest reliability for MLE can be improved by applying admittedly somewhat arbitrary bounds. "
+    },
+    {
+      "block_id": "2016410536899645721",
+      "title": "6.3. Parameter Reliability",
+      "sub_firstblock": "This paper illustrates the merits of a hierarchical maximum likelihood (HML) procedure in estimating individual risk parameters. The HML method does reduce the in-sample performance, albeit trivially, while at the same time significantly improving the out-of-sample fit compared to MLE. Of central importance, HML estimation yields parameter estimates with higher reliability than MLE. In terms of the bias-variance trade-off often discussed in statistical model evaluation, HML dominates MLE by having equivalent in-sample performance, better out-of-sample performance, and better parameter reliability, all while using the exact same data and choice model. If improvements had occurred in either out-of-sample fit or parameter reliability, but not both simultaneously, a trade-off between the importance of fit and parameter reliability would be necessary to evaluate the cost/benefit of HML. No such trade-off is required here. The use of populationlevel information in establishing individual parameter estimates mitigates the estimation difficulties that ensnare MLE and bounded MLE, and consequently HML yields a better measure of individual differences. "
+    },
+    {
+      "block_id": "2016410536899645738",
+      "title": "7. Discussion",
+      "sub_firstblock": "The authors thank Michael Schulte-Mecklenbeck, Thorsten Pachur, and Ralph Hertwig for the use of the experimental data analyzed in this paper. These data are a subset from a large decision-making study conducted at the Max Planck Institute for Human Development in Berlin. The authors also thank Helga Fehr-Duda, Thomas Epper, and Didier Sornette for helpful comments and suggestions on this project. This work was supported in part by the ETH Zürich Risk Center and is related to Future Resilient Systems (FRS) Module 3.1 from the Singapore ETH Centre. "
+    },
+    {
+      "block_id": "2016410536899645740",
+      "title": "Appendix A. Example of a Binary Risky Choice",
+      "sub_firstblock": "A one-shot binary lottery (also referred to as a gamble or a prospect) is a common tool for studying risky decision mak-It    h    ll he decision research (Lopes 1983). In these simple risky choices, "
+    },
+    {
+      "block_id": "2016410536899645747",
+      "title": "Appendix B. Prospect Theory Curves",
+      "sub_firstblock": ".l o oo "
+    },
+    {
+      "block_id": "2016410536899645753",
+      "title": "Appendix C. Interparameter Correlation",
+      "sub_firstblock": "Table C.1 reports the interparameter correlations. The correlation between $\\alpha$ (utility curvature) and $\\varphi$ (the noise parameter) is particularly low. This is not surprising because the value of $\\alpha$ primarily affects utility (and scales its magnitude), whereas $\\varphi$ operates directly on the resulting utility. "
+    },
+    {
+      "block_id": "2016410536899645756",
+      "title": "Appendix D. Aggregate Stochastic Predictions",
+      "sub_firstblock": "The workings of the stochastic choice function, shown in Equation (4), can be verified by comparing its predicted "
+    },
+    {
+      "block_id": "2016410536899645765",
+      "title": "Appendix E. Lotteries",
+      "sub_firstblock": "Endnotes"
+    },
+    {
+      "block_id": "2016410536899645774",
+      "title": "Endnotes",
+      "sub_firstblock": "1 Estimated parameter values for subjects who did not complete both sessions entirely did not differ significantly from subjects' parameters who did complete both sessions. "
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "paper_title": "Rising Through the Ranks: The Evolution of the Market for Corporate Executives, 1936-2003",
+  "block_set": [
+    {
+      "block_id": "2016411239315542054",
+      "title": "1. Introduction",
+      "sub_firstblock": "The rapid rise in executive pay in the United States since the 1970s, particularly relative to the wages earned by other workers, has stimulated an extensive literature on executive compensation (Hall and Liebman 1998, Murphy 1999, Hall and Murphy 2003, Bebchuk and Fried 2003). Over this period, CEOs have also become increasingly mobile across firms (Huson et al. 2001). Surprisingly, the mobility and remuneration of top managers are often studied independently and, even when they are related, the workings of the labor market for executives receive little attention.1 This paper contributes new facts on the mobility, compensation, and careers of top executives over most of the twentieth century, with the aim of integrating the labor market to our understanding of the changes in pay and turnover. This long-run perspective suggests that an evolving market for corporate executives may have played an important role in the development of the compensation and mobility of top managers. "
+    },
+    {
+      "block_id": "2016411239315542073",
+      "title": "2. Long-Run Trends in the Market for Managers",
+      "sub_firstblock": "One of the main objectives of the paper is to establish the long-run trends in the market for managers, and to relate them to the changes in executive compensation over the twentieth century. This section provides a description of the data collection, briefly summarizes the long-run trends in compensation established by Frydman and Saks (2010), and presents new evidence on managerial careers. "
+    },
+    {
+      "block_id": "2016411239315542075",
+      "title": "2.1. Sample Selection",
+      "sub_firstblock": "Constructing a consistent data set on the compensation and careers of executives over the twentieth century is challenging for several reasons. A first step requires identifying the names of top managers for a sizable number of firms. Commonly used data sets, such as Compustat's Executive Compensation database (ExecuComp), only provide this information for recent decades. I build on the work by Frydman and Saks (2010) who hand collect the names and remuneration of individual top executives for 101 large publicly traded U.S. corporations (corresponding to the 50 largest firms in 1940, 1960, and 1990) since the 1930s. Their sample is a good starting point for the purpose of this study because it allows me to track the compensation of individual executives over time. "
+    },
+    {
+      "block_id": "2016411239315542083",
+      "title": "2.2. New Data on Managerial Biographies",
+      "sub_firstblock": "A considerable literature in sociology and economics has studied the educational background, career paths, and social status of executives at different points in time. (See Friedman and Tedlow 2003 for a comprehensive review of this literature.) Because each study uses a different design and focuses on different aspects of managerial careers, they cannot provide a systematic understanding of the long-run evolution of the market for corporate officers. To construct a consistent, longrun panel data set following the careers of top executives within the same set of firms, I collect biographical information for the three highest-paid executives of the 50 largest firms in 1960. "
+    },
+    {
+      "block_id": "2016411239315542114",
+      "title": "2.4. The Evolution of Managerial Careers",
+      "sub_firstblock": "2.4.1. The Education of Top Managers. The education of top executives experienced two main changes over the twentieth century. First, the years of formal schooling increased over time. Figure 3 shows the highest level of education achieved in each year in the sample, by education level. Almost $6 0 \\%$ of the executives in the 1930s had obtained a college degree, whereas about $2 0 \\%$ of the sample had at most graduated from high "
+    },
+    {
+      "block_id": "2016411239315542168",
+      "title": "3. Theoretical Framework",
+      "sub_firstblock": "The long-run trends presented in the previous section suggest that pay and managerial mobility have not changed in isolation, but rather have been accompanied by a substantial transformation in the characteristics and the careers of top managers. A plausible explanation for these patterns needs to match the following facts: the level of pay followed a J-shaped pattern, declining during the 1940s and increasing since the late 1970s; inequality among all top executives and within firms experienced a minor decline until the 1950s, and has increased rapidly since the 1980s; managerial turnover experienced a J-shaped pattern, declining until the 1950s and increasing since the 1970s, but the mobility in the earlier decades occurred when executives were young, whereas now managers are likely to switch firms fairly late in their careers; top managers used to have mostly technical or general education, but the fraction of executives with a formal education background in business has steadily increased since the 1960s; and the diversity in occupational experience has increased throughout most of the century. "
+    },
+    {
+      "block_id": "2016411239315542177",
+      "title": "3.1. Setup",
+      "sub_firstblock": "The general setup of the theoretical framework is as follows. The model has two periods, $t = [ 1 , 2 ]$ . In the first period $t = 1$ , productivity and skills are realized, and firms make their decisions. Specifically, at the beginning of the first period firms draw a random firm productivity level and managers draw a skill level; the best manager at the firm assumes the job of the CEO. At the middle of the period, existing firms decide whether to continue operations or exit the market. After the exit decisions are made, continuing firms make hiring decisions; firms can fire their existing managers and search for a replacement. At the beginning of the second period $t = 2$ the managerial labor market clears. Exiting firms are potentially replaced by new firms. Output is realized and wages are paid. "
+    },
+    {
+      "block_id": "2016411239315542199",
+      "title": "3.2. Equilibrium",
+      "sub_firstblock": "I begin the analysis by first deriving the equilibrium wage for a manager of ability $\\alpha _ { i }$ . The manager always has the option to start a new firm at productivity level $\\theta _ { N }$ . Her expected payoff from doing so is equal to "
+    },
+    {
+      "block_id": "2016411239315542251",
+      "title": "4. Empirical Evidence: Skills, Pay, and Mobility",
+      "sub_firstblock": "According to the model, the long-run trends in pay, inequality, and turnover may reflect the growing importance of general managerial skills over time. But has such a change in skills actually occurred? Changes in the types of formal education are suggestive of such a transformation: MBA degrees probably confer general knowledge that is useful for different industries, whereas degrees in engineering and science may be more valuable in specific industries. The increased diversity in occupational experience also seems consistent with a shift toward general managerial human capital. Individuals with general skills are arguably more likely to work successfully in different sectors. "
+    },
+    {
+      "block_id": "2016411239315542256",
+      "title": "4.1. An Index of the Generality of Human Capital",
+      "sub_firstblock": "I define two indicator variables for whether a manager's latest educational degree achieved was \"technical\" or \"business.\" These variables are not mutually exclusive because a substantial fraction of the executives had neither technical nor business education. The omitted category contains \"other types of education,\" defined as general degrees (such as BA or MA degrees with no specified major), and degrees in other nontechnical and nonbusiness fields (such as law and medicine, among others). "
+    },
+    {
+      "block_id": "2016411239315542267",
+      "title": "4.2. The Interaction Between Skills, Compensation, and Mobility",
+      "sub_firstblock": "My model suggests that the level of executive pay should be higher when managerial skills are more important. Table 8 relates the log real level of total pay for each executive to the index of general human capital.18 "
+    },
+    {
+      "block_id": "2016411239315542295",
+      "title": "5. Interpretation of the Findings",
+      "sub_firstblock": "The analysis thus far takes a shift in the importance of general managerial skills as given, but investments in formal education, individuals' willingness to accumulate experience in various sectors, and firms' decisions to provide certain skills on the job are endogenous choices. Still, these choices may be an optimal response to an exogenous change in the weight of general skills in the firms' production function. A resulting question is the following: Which factors could have caused such a change in the type of skills over time? "
+    },
+    {
+      "block_id": "2016411239315542301",
+      "title": "5.1. Mechanisms Affecting the Relative Importance of General and Specific Skills",
+      "sub_firstblock": "An extensive literature debates the causes for the recent rise in executive pay, but most of the proposed explanations are silent on turnover and managerial careers. A challenge for any theory is to account for all of the long-run stylized facts established in this paper. The two most popular explanations view compensation as either the result of the competitive assignment of CEOs to firms, or the outcome of rent extraction by powerful CEOs (Jenter and Frydman 2010). Interestingly, these theories have implicitly opposite views on the workings of the labor market. Next, I consider each in more detail. "
+    },
+    {
+      "block_id": "2016411239315542312",
+      "title": "5.2. Alternative Explanations",
+      "sub_firstblock": "This paper establishes a series of stylized facts on managerial careers over most of the twentieth century. In combination with the long-run trends in executive pay documented by Frydman and Saks (2010), these facts provide a challenge for the most common explanations for the recent rise in compensation. I propose that the long-run trends in the level of managerial pay, inequality among managers, and the external mobility of corporate officers can be partly explained by a shift in the importance of general managerial skills. Following Murphy and Zábojnik (2004), Murphy and Zábojnik (2007), I present a simple framework to show that an increase in the importance of general skills can lead to higher levels of pay, higher levels of managerial turnover, and more inequality among top managers. "
+    },
+    {
+      "block_id": "2016411239315542320",
+      "title": "6. Conclusion",
+      "sub_firstblock": "The author would like to thank Philippe Aghion, Claudia Goldin, Eric Hilt, Caroline Hoxby, Lawrence Katz, Ilyana Kuziemko, Robert Margo, Dimitris Papanikolaou, Demian Reidel, Raven Saks, Antoinette Schoar, and Gustavo Suarez for their advice and encouragement throughout this project. The author would also like to thank the staff at the Historical Collections at Baker Library and Danielle Barney for making the data collection on executive pay possible. Yoon Chang, Ryan Delahoyde, and James Sigel provided outstanding research assistance. "
+    },
+    {
+      "block_id": "2016411239315542322",
+      "title": "Acknowledgments",
+      "sub_firstblock": "Year entered labor market. Defined as the year in which the executive started his first job. When the date for the first job was missing, it was replaced by the year in which the executive finished his formal education. The year of graduation from school was also used if the first job observed was started six years later than the observed end of formal education. For 39 observations, this information was still missing and so it was predicted from a regression of \"year entered labor market\" on cohort dummies. "
+    },
+    {
+      "block_id": "2016411239315542338",
+      "title": "Appendix A. Variable Definitions",
+      "sub_firstblock": "Notes. Standard errors are clustered by person and shown in parentheses. Observations are at the person-year level. Period dummy variables are indicators for 19501969, 19701989, and 19902003. All regressions control for log market value, dummy variables for president, chairman of the board, executive vice president and vice president, and highest level of education achieved by the executive (dummy variables for graduate, undergraduate, and some college education). Total compensation and the firms market value are measured in year 2,000 dollars. Total compensation is the sum of salaries, bonuses, long-term bonus payments, and the Black-Scholes value of stock option grants. Based on the three highest-paid officers in the 50 largest firms in 1960, matched to biographical sources, with information on year of birth and nonmissing index. "
+    },
+    {
+      "block_id": "2016411239315542361",
+      "title": "Appendix C. Analytical Appendix",
+      "sub_firstblock": "I characterize the solution to the model for general values of $\\theta _ { N } ,$ as discussed in Section 3.2 of the paper. The solution to Equations (9)(11) is given by "
+    },
+    {
+      "block_id": "2016411239315542369",
+      "title": "C.2. Distribution of Managerial Ability",
+      "sub_firstblock": "As discussed in Section 3.2, the importance of general managerial skills $\\xi$ affects the allocation of managerial talent across firms. The joint distribution of managerial ability $g ( \\alpha _ { 1 } , \\alpha _ { 2 } ) .$ , introduced in Equation (13) in the paper, is given by "
+    },
+    {
+      "block_id": "2016411239315542374",
+      "title": "Endnotes",
+      "sub_firstblock": "$^ 1 \\mathrm { A }$ notable exception is Eisfeldt and Rampini (2008), which finds that executive compensation and turnover are both procyclical when managers with private information on the productivity of the firms' assets make capital reallocation decisions. "
+    }
+  ]
+}

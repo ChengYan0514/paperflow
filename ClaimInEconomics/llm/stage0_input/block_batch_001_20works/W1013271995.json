@@ -1,0 +1,95 @@
+{
+  "paper_title": "Reversibility and Further Properties of FCFS Infinite Bipartite Matching",
+  "block_set": [
+    {
+      "block_id": "2016405925157540297",
+      "title": "1. Introduction",
+      "sub_firstblock": "et al. [9] and Adan and Weiss [4]. "
+    },
+    {
+      "block_id": "2016405925157540308",
+      "title": "1.1. Notations",
+      "sub_firstblock": "Throhout the pape we hal use the ollwig notatons, ters, and illustrations o accopany ur ahematical analysis. For convenience we shall refer to $s ^ { n }$ as servers, $c ^ { m }$ as customers (we could equally well call the rdingohenext r npatintscl nagets,maes nales, uy bi nd e, and $T$ as time (equivalently we could call it location, position, event). We use $c _ { i } ,$ $\\mathbf { \\Phi } _ { \\dot { \\mathbf { \\eta } } _ { i } } , \\mathbf { \\epsilon } _ { i } = 1 , \\dots , I$ to denote the different types of customers, and we use $c ^ { m }$ to denote the type of the mth customer. Similarly we use $s _ { j } , j = 1 , \\ldots , J$ to denote the types of servers, and $s ^ { n }$ denotes the type of the nth server. In the accompanying figures, we will simplify the notation by writing $c ^ { m } = i$ if $c ^ { m } = c _ { i } ,$ and $s ^ { n } = j$ if $s ^ { n } = s _ { j } ,$ and we will arrange the sequences in two lin, the top one containing the ordered customers, and the botto one containing the orderd servers. At a laterstage we wil sometimes swap iems between the top and the botto lines in a way o be explaine then. In     n $s ^ { n }$ and $c ^ { m }$   \ncharacterized by the pair of times $( m , n )$ . "
+    },
+    {
+      "block_id": "2016405925157540310",
+      "title": "1.2. Motivations and previous works",
+      "sub_firstblock": "In 1984, Ed Kaplan [1] asked the following question when studying public housing in Boston: Entitled families list those projets where they wish o ive, and when a home bee available   projec,  is assd by lhee itmht ste Theqetinhen was wha acm i l o preeren is ctually assed to eah of the proects i their s? Kapln cldthes ractis the matching rates. The same mechanism may also model child adoptions, blood banks, organ transplants, and the operation of web servers and cloud computing. "
+    },
+    {
+      "block_id": "2016405925157540322",
+      "title": "1.3. New contributions of the paper",
+      "sub_firstblock": "Consider the FCFS infinite bipartite matching model. The following questions were left unanswered by the different contributions mentioned above. First, can one construct FCFS matching of two sequences that are defined for all the integers, $\\mathbb { Z } = \\dots , - 2 , - 1 , 0 , 1 , \\dots \\colon$ Second, partial balance usually indicates reversibility, can we show that the FCFS infinite matching model is time reversible in some sense? Third, the Markov chain that was defined and analyzed in Adan and Weiss [4] is one of several Markov chains that can be associated with the FCFS infinite matching mode, can we obtain stationary distributions for all of them (. for the chain define in Caldentey t al. [9]? We answer a these questions n the cuent paper. Indeed, we ncover the fundamental structure of the model in the following three steps: "
+    },
+    {
+      "block_id": "2016405925157540325",
+      "title": "1.4. Organization",
+      "sub_firstblock": "We now briey describe the content o the sections o the paper. In Section , we state the deinition  FCFS matching and summarize some results from Adan and Weiss [4]. These include uniqueness of the FCFS matching of two sequences over $\\mathbb { N } ,$ and two specific mechanisms to construct the matching. We define two Markov c s wih the to mehan, wi we l thetal Mar has,  sa the ey and sufficient condition for their ergodicity, given by complete resource pooling. "
+    },
+    {
+      "block_id": "2016405925157540336",
+      "title": "2. FCFS Bipartite Matching Over $\\mathbb{N}$",
+      "sub_firstblock": "In this secton e provid  precdefinition  biparti matchi, quot he resul niquenes  e matching for $T = \\mathbb { N } ,$ describe two Markov chains to construct this unique matching, define complete resource p,an quot he reslt that the Marko chais re egoi ny  cle e pol holds. "
+    },
+    {
+      "block_id": "2016405925157540380",
+      "title": "3. Loynes' Construction of FCFS Bipartite Matching Over $\\mathbb { Z }$ ",
+      "sub_firstblock": "In thissecion e howha  cmple eour poolhols, the ortwoidependent nfiit eq of i.i.d. customers and servers, ${ \\left( s ^ { n } , c ^ { n } \\right) } _ { n \\in \\mathbb { Z } }$ there exists almost surely a unique FCFS matching. This matching coincides with the matchings obtained from the stationary versions of the various Markov chains described above. The matching is obtained using a Loynes' type scheme (se Loynes [14] for he original Loynes' construction). "
+    },
+    {
+      "block_id": "2016405925157540419",
+      "title": "4.Exchange Transformation and Dynamic Reversibility ",
+      "sub_firstblock": "The FCFS matching depends on the time direction in which it is constructed. The simple example in igure shows that FCFS is not preserved if the time direction is reversed. "
+    },
+    {
+      "block_id": "2016405925161734156",
+      "title": "3. Loynes' Construction of FCFS Bipartite Matching Over $\\mathbb{Z}$",
+      "sub_firstblock": "We have found that for any two independent i.i.d. sequences of customers $C = \\left( c ^ { m } \\right) _ { m \\in \\mathbb { Z } }$ and of servers $S =$ ${ \\big ( } s ^ { n } { \\big ) } _ { n \\in \\mathbb { Z } } ,$ under complete resource pooling, there is a unique FCFS matching almost surely. Furthermore, if we exchange every matched pair $( c ^ { m } , s ^ { n } )$ of customers and servers and retain the matching, we obtain two permuted n  n ${ \\tilde { C } } = \\left( { \\tilde { c } } ^ { n } \\right) _ { n \\in \\mathbb { Z } } ,$ $\\tilde { S } = ( \\tilde { s } ^ { m } ) _ { m \\in \\mathbb { Z } }$ . These new sequences are again independent and i.i.d., and the retained matching between them is FCFS in reversed time direction, and it is the unique FCFS matching of $\\tilde { C } , \\tilde { S }$ in reversed time. "
+    },
+    {
+      "block_id": "2016405925161734168",
+      "title": "4. Exchange Transformation and Dynamic Reversibility",
+      "sub_firstblock": "We consider four mechanisms for the Markovian evolution of the stationary FCFS matching, and define an associated Markov chain for each. "
+    },
+    {
+      "block_id": "2016405925161734199",
+      "title": "5. Stationary Distributions",
+      "sub_firstblock": "Examinng panel (of Figure6 we  that illustratesFCF matching and exchange  erver an custmr lines $C$ and $S$ all the way from $- \\infty$ up to position $N _ { . }$ , and at the same time it also illustrates matching and exchange of server and customer lines $\\tilde { C }$ and $\\tilde { S }$ FCFS in reversed time, all the way from $\\infty$ to $N + 1$ . Our main observation now is that if $Z _ { N } ^ { s } = \\smash { 3 = ( z ^ { 1 } , \\ldots , z ^ { L } ) } .$ , then $\\big ( z ^ { L } , \\dots , z ^ { 1 } \\big )$ is exactly the state of the customer-by-customer FCFS matching in reversed time of the sequences $\\tilde { C } , \\tilde { S } ,$ when all customers $\\tilde { c } ^ { n }$ , $n \\geq N + 1$ have been matched to some ${ \\tilde { s } } ^ { m }$ , and exchanged back to a customer $c ^ { m }$ and server $s ^ { n }$ .For $\\mathbf { \\Psi } _ { 3 } = ( z ^ { 1 } , \\dots , z ^ { L } )$ we denote $\\overleftarrow { \\mathfrak { z } } = ( z ^ { L } . \\dots . { z } ^ { 1 } )$ We $\\tilde { C } , \\tilde { S }$ in reversed time by $\\scriptstyle { \\dot { Z } } ,$ so that $\\hat { Z } _ { N } ^ { c } ,$ is the state where all ${ \\tilde { c } } ^ { n }$ , $n > N$ have been matched. We then formally state the following (see Figure 7): "
+    },
+    {
+      "block_id": "2016405925161734215",
+      "title": "5.1. Mechanisms for Evolution of FCFS Matching and Detailed Markov Chains",
+      "sub_firstblock": "We are now ready to derive the stationary distributions of the detailed Markov chains. "
+    },
+    {
+      "block_id": "2016405925161734261",
+      "title": "5.2. Time Reversal of the Detailed Markov Chains",
+      "sub_firstblock": "The extreme simplicity of the stationary probabilitis obtained in Theorem 5 is deceptive, since it ds not indicate which states are possible, according to the compatibiliy graph and the FCF matching poliy. In par-h      h   a c.s  reu, i iso  ius how calclatheoalizi san r hestut , ( To allow us to cassstates in a conveint way, and thus to ow us tocunt them and to  u the stationary probabilities, w define an augmented detailed Markovchain. It also describes the server-byserver FCFS matching mechanism, but its states are augmentations of the states of $Z ^ { s }$ , in that they are even more detailed. "
+    },
+    {
+      "block_id": "2016405925161734310",
+      "title": "5.3. Stationary Distributions of the Detailed Markov Chains",
+      "sub_firstblock": "We now consider the natural Markov chains $O$ of pair by pair and $Q ^ { s } , Q ^ { c }$ of server-by-server and customer-bycustomer FCFS matching. The state consists of the ordered list of unmatched customers and/or servers. "
+    },
+    {
+      "block_id": "2016405925161734334",
+      "title": "5.4. Augmented State, Marginals, and the Normalizing Constant",
+      "sub_firstblock": "5.5. Stationary Distribution of the Natural Markov Chains"
+    },
+    {
+      "block_id": "2016405925161734335",
+      "title": "5.5. Stationary Distribution of the Natural Markov Chains",
+      "sub_firstblock": "Assume ergodicity (complete resource pooling) holds. The matching rate $c _ { i }$ with server of type $s _ { j } ,$ $r _ { c _ { i } , s _ { j } }$ i the s. limit of thefraction $\\left( s ^ { n } , c ^ { m } \\right) _ { 0 \\leq m , n \\leq N } ,$ as $N \\to \\infty$ . An expression for $r _ { c _ { i } , s _ { j } }$ $L _ { s _ { j } } , L _ { c _ { i } , s _ { j } } ,$ "
+    },
+    {
+      "block_id": "2016405925161734345",
+      "title": "6. Calculation of Performance Measures",
+      "sub_firstblock": "Assue ergodicity equivalentl, complete resour pooling) holds, and consider a stationary FCFS mahing over $\\mathbb { Z }$ For each server $s ^ { n }$ ,if $s ^ { n }$ is matched to $c ^ { m }$ we let $\\bar { L ( s ^ { n } , c ^ { m } ) } = m - n$ denote the link length. We define the random variable $L _ { s _ { j } }$ to have the stationary distribution of link lengths of servers of type $s _ { j }$ We define the random variable $L _ { s _ { j } , c _ { i } }$ to ve arui  ema bee re $s _ { j }$ and customers of type $c _ { i }$ . In this section we derive the distributions of $L _ { s _ { j } }$ and of $L _ { s _ { j } , c _ { i } }$ . They are mixtures of convolutions of some positively signed and some negatively signed geometric random variables. "
+    },
+    {
+      "block_id": "2016405925161734389",
+      "title": "6.1. Matching Rates",
+      "sub_firstblock": "oroposed $\\pi _ { D } , \\pi _ { E } ,$ similar to (8), satisfy "
+    }
+  ]
+}

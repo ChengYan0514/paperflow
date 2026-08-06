@@ -1,0 +1,517 @@
+A. Bachem · U. Derigs M. Jünger · R. Schrader Editors 
+Operations Research '93 
+Achim Bachem · Ulrich Derigs Michael Jünger $\bullet$ Rainer Schrader (Eds.) 
+Operations Research '93 
+Extended Abstracts of the 18th Symposium   
+on Operations Research   
+held at the University of Cologne   
+September 1-3, 1993 
+With 61 Figures 
+Professor Dr. Achim Bachem Mathematisches Institut Universität zu Köln Weyertal 80 D-50931 Köln, FRG 
+Professor Dr. Dr. Ulrich Derigs   
+Lehrstuhl für Wirtschaftsinformatik   
+Universität zu Köln   
+PohligstraBe 1   
+D-50969 Köln, FRG 
+Professor Dr. Michael Jünger Institut für Informatik Universität zu Köln PohligstraBe 1 D-50969 Köln, FRG 
+Professor Dr. Rainer Schrader Institut für Informatik Universität zu Köln PohligstraBe 1 D-50969 Köln, FRG 
+T way bans.l h th  snGCr L JV German Copyright Law. 
+$\circledcirc$ Physica-Verlag Heidelberg 1994 
+Te atm,hat sc nameeexemp fom levan potecvweulatn nd the free for general use. 
+88/2202-543210-Printed on acid-free paper 
+Preface
+This proceedings volume contains extended abstracts of talks presented at the 18th Symposium on Operations Research held at the University of Cologne, September 1-3, 1993. 
+The Symposia on Operations Research are the annual meetings of the Gesellschaft für Mathematik, Ökonometrie und Operations Research (GMÖOR), a scientific society providing a link between research and applications in the areas of applied mathematics, economics and operations research. The broad range of interests and scientific activities covered by GMÖOR and its members was demonstrated by about 250 talks presented at the 18th Symposium. As in recent years, emphasis was placed on optimization and stochastics, this year with a special focus on combinatorial optimization and discrete mathematics. We appreciate that with sections on parallel and distributed computing and on scientific computing also new fields could be integrated into the scope of the GMÖOR. 
+This book contains extended abstracts of most of the papers presented at the conference. Long versions and full papers of the talks are expected to appear elsewhere in refereed periodicals. 
+The contributions were divided into sixteen sections: (1) Theory of Optimization, (2) Computational Methods of Optimization, (3) Combinatorial Optimization and Discrete Mathematics, (4) Scientific Computing, (5) Decision Theory, (6) Mathematical Economics and Game Theory, (7) Banking, Finance and Insurance, (8) Econometrics, (9) Macroeconomics and Economic Theory, (10) Stochastics, (11) Production and Logistics, (12) System and Control Theory, (13) Routing and Scheduling, (14) Knowledge Based Systems, (15) Information Systems and (16) Parallel and Distributed Computing. 
+The conference was opened by the Vice Rector of the University, Professor Speth. Further opening addresses were given by the Vice Mayor of Cologne, Mrs. Canisius, and the chairman of the GMÖOR, Professor Bachem. This year, also the GMÖOR Senior Scientist Prize was awarded during the opening ceremony. The awardee was Professor Krelle, one of the founders of the predecessor organizations of GMÖOR. 
+The scientific program consisted of semi-plenary lectures, invited and contributed talks. In the semi-plenary lectures, twelve leading experts gave a one-hour survey on recent developments and most interesting results in their fields. Egon Balas and Joel L. Horowitz started this series with talks on the prize collection TSP and bootstrap methods in applied econometrics. They were followed by Michael Ball who spoke about the design and analysis of reliable networks and by Denis Boyssou with a talk on preference modelling. Rainer Burkard and Bernard Cornet gave talks on the Monge property and exchange economies. Bezalel Gavish surveyed recent results in the area of telecommunication and Jonathan Borwein discussed trends in convex programming. Jan Karel Lenstra spoke about local search methods in job shop scheduling and Robert A. Becker dealt with Ramsey equilibria. The series of semi-plenary talks was closed by David Shmoys and Luk van Wassenhove with talks on the role of linear programming for solving scheduling problems and on recent results in logistics. 
+With over 370 participants, about 250 presentations, software demonstrations, press conferences and a lot of other designated actions we were able to show that our field remains active, vital and open for new topics. We would like to thank the authors for presenting their papers and the chairmen of the sections, who helped us in attracting so many distinguished speakers from all over the world. We also thank Dr. Müller of Physica-Verlag for his continuous support and cooperation in publishing this proceedings volume and Mrs. Krupp for her patience and perseverance in preparing its final version. 
+The conference was generously sponsored by the Ministerium für Wissenschaft und Forschung des Landes Nordrhein-Westfalen and the Deutsche Forschungsgemeinschaft (DFG), which allowed us to support people from abroad and which made it possible that so many authors from Eastern Europe could attend the Symposium. We are deeply indebted to both institutions. 
+Finally we would like to thank our university and the members of our organizational staff without whose enthusiastic and unselfish support this symposium would not have been possible. 
+Achim Bachem Ulrich Derigs Michael Jünger Rainer Schrader 
+Organizing Staff
+Jürgen Antes, Oliver Bastert, Petra Bauer, Jens Behrendt, Andre Blumberg, Irina Brüggemann, Norbert Büchen, Nicole Cochems, Jens Cords, Frank Damm, Thorsten Demmer, Martin Diehl, Stefan Ditzen, Kristof Doffing, Klaus Dresbach, Stefan EBer, Thomas Fabian, Martin Fabini, Sandor Fekete, Stefan Fischer, Gregor Grabenbauer, Conchita Graf, Marc Gürtler, Thomas Harth, Udo Heinrichs, Rainer Heesen, Winfried Hochstättler, Martin Kabath, Jutta Kaibel, Kerstin Kalisch, Antje Kerwer, Thomas Klöcker, Rainer Kowallik, Martina Kramer, Stefan Kromberg, Claudia Krupp, Thomas Lange, Sebastian Leipert, Susanne Lummerich, Martin Malich, Harald Mika, Christoph Moll, Thomas Müller, Sabine Muffert, Petra Mutzel, Stephan Noy, Martin Olschewski, Thomas Pfenning, Christian Platter, Ilona Ratensperger, Hans Rhenius, Marcus Rickert, Lothar Schickhoff, Peter Stangier, Andreas Steffens, Judith Steinmann, Peter Störmer, Stefan Thienel, Georg Wambach, Thomas Wieczorek, Imke Windmöller, Katja Wolf, Michael Wottawa. 
+List of Sections and Chairpersons
+Section 1: Theory of Optimization J. Jahn Section 2: Computational Methods of Optimization U. Suhl Section 3: Combinatorial Optimization and Discrete Mathematics H. Hamacher Section 4: Scientific Computing H.G. Bock Section 5: Decision Theory W. Gaul Section 6: Mathematical Economics and Game Theory E. Dierker Section 7: Banking, Finance and Insurance W. Bühler Section 8: Econometrics W. Härdle Section 9: Macroeconomics and Economic Theory A. Karmann/G. Uebe Section 10: Stochastics P. Kall Section 11: Production and Logistics B. Fleischmann Section 12: System and Control Theory R.F. Hartl Section 13: Routing and Scheduling R.H. Möhring Section 14: Knowledge Based Systems M. Richter/W. Mellis Section 15: Information Systems M. Jarke Section 16: Parallel and Distributed Computing B. Monien 
+Invited Semiplenary Talks
+The Prize Collecting TSP: Polyhedral Results and Applications Egon Balas 
+The Design and Analysis of Reliable Networks Michael Ball 
+Ramsey Equilibria Robert A. Becker 
+Convex Programming and Entropy Type Functionals Jonathan M. Borwein 
+Preference Modelling: A Survey of Recent Advances Denis Bouyssou 
+Monge Properties and their Role in Linear and Discrete Optimization Rainer E. Burkard 
+Linear Exchange Economies and Dynamics of Exchange Bernard Cornet 
+Telecommunications - Huge Capacity and Mobility, New Modelling Challenges Bezalel Gavish 
+The Bootstrap as a Tool of Applied Econometrics Joel L. Horowitz 
+Job Shop Scheduling and Local Search Jan Karel Lenstra 
+Performance Guarantees for Scheduling Algorithms via Linear Programming David Shmoys 
+Third Party Logistics and Reverse Logistics Luk van Wassenhove 
+Contents Alphabetically by Authors
+The Scheduling Problem in High-Level Synthesis: Extended 0/1 LP Model and Solution   
+Methods H. Achatz .   
+An Application of an Interior Point Method for Problems with Uncertainty A. Altmann.... ...5   
+Spline Approximation of the Mathematical Programming Task T.A. Arakelian, I.E. Danielian 8   
+Decision Making Concerning Product Line Design Based on Conjoint Analysis E. Aust, W. Gaul .... 12   
+The Simulated Trading Heuristic for Solving Vehicle Routing Problems A. Bachem, M. Malich... 16   
+Expert System for Handling Dangerous Goods D. Barbucha, W. Filipowicz, P. Jedrzejowicz 20   
+Linear 0-1 Inequalities and Extended Clauses P. Barth 24   
+A Model- and Method Base System for Discrete Optimization Problems P. Becker 28   
+A Simple Model of Political Affairs H. Behnke 32   
+Groundstates in Ising Spin Lattices by Optimal Matchings J. Bendisch, U. Derigs, A. Metz ... 36   
+Parallel Tabu Search for Irregular Cutting J. Blazewicz, J. Kaczmarek, R. Walkowiak . 40   
+Optimization of the Spare Parts Storage for the Power Units Equipments P.P. Bocanete, L. Neamtu . .43   
+Using Strong Cutting Planes in Constraint Logic Programming A. Bockmayr . 47   
+Efficient Workload-Balancing on Grids, Hypercubes and Trees M. Böhm, E. Speckenmeyer 50   
+Outline of a Theory of Risk Under Partial Probability Information H.W. Brachinger .... 52   
+Enhanced Reliability and the Demand Impact of Jointly Normally   
+Distributed Signals T. Braun .56   
+Optimal Control of Investment, Level of Employment and Stockkeeping M.H. Breitner, B. Koslik, O. von Stryk, H.J. Pesch .60 
+XII
+Computational Complexity in Infinite Combinatorial Structures V.E. Brimkov, R.P. Barneva ... ..64   
+On the 2D Knapsack Problem with Real Coefficients under the Blum-Shub-Smale   
+Computational Model V.E. Brimkov, S.S. Danchev .. 68   
+The Job-Shop Problem and Immediate Selection P. Brucker, B. Jurisch, A. Krämer.... .72   
+The Advantage of and System Support for Combined Bankassurance Products H.U. Buhl, K. Sandbiller, A. Will . .. 76   
+Utilization of Integer Programming for the Optimization of Class Timetables J.V. Caixeta Filho, J.C.V. de Oliveira ... ….. 80   
+A Sequential Generalized Quadratic Programming Algorithm Using Exact L1   
+Penalty Functions E. Casas, C. Pola .84   
+Eventman - A Business Event Tracking System D. Cepar, F. Mulec 88   
+Demographer - A New Version D. Cepar, E. Ursic, R. Zaloznik 92   
+The 1-Part m-Machine Cyclic Scheduling Problem in Robotic Cells Y. Crama, J. van de Klundert 97   
+Consistent Restricted Shapley Values J. Derks, H. Peters ..... 100   
+Model of Optimization of Wood Waste Processing in Slovenia S. Devjak, M. Tratnik, F. Merzelj .. 103   
+On Uniformization for Continuous-Time Markov Chains N.M. van Dijk . 108   
+Crew Scheduling for an Urban Transit Company K. Djellab, G. Fleury, M. Gourgand, A. Quilliot l15   
+Some Remarks on Dependence Among the Consistency Tests C. Domanski, D. Parys 119   
+Is there Room for Convergence in the E.C.? R.C. Douven, J.C. Engwerda 122   
+Reduced Game Properties of Egalitarian Division Rules for Cooperative Games T. Driessen, Y. Funaki .. .126   
+Decomposition Algorithms Based on Knowledge Based Models E. Dudek-Dyduch ... 130   
+On Some Expert Control T. Dyduch ... 134 XIII   
+Stochastic Solution of Closed Leontief Input-Output Models K. Egle, S. Fenyi .... 138   
+On Connectivity of Efficient Matroid Bases M. Ehrgott ..... .142   
+On Stochastic Vector Optimization Problems with General Stochastic Parameters in   
+the Constraints Using Chance-Constrained Approach A.-Z. H. El-Banna ..... . 145   
+Existence of an Optimal Sampling Frequency for LQ-Controlled Economic Systems J. Engwerda 149   
+Approximating the Core of Euclidean TSP Games U. Faigle, W. Kern, S. Fekete, W. Hochstättler 153   
+LP-Relaxations for the Edge-Weighted Subclique Problem U. Faigle, R. Garbe, K. Heerink, B. Spieker ..... .. 157   
+On the Equilibrium Dynamics of a Two-Sector Overlapping-Generations Model   
+with Heterogeneous Capital Goods K. Farmer .. .161   
+New Results on a Newton-Type Method for LCP A. Fischer .... .165   
+Routing in Meshes Using Linear Assignment Problem D. Fortin, A. Tusera ... 169   
+On Stochastic Dynamic Optimization in Discrete Time K. Frauendorfer 172   
+A Reexamination of Utility Functions Derived from Demand Functions S. Fuchs-Seliger . .176   
+Exact Matroid Parity and Polynomial Identities G. Galbiati, F. Malfioli .... ..180   
+Structural Exchange Rate Relationships in the Foreign Exchange Markets T. Gerhards ... 190   
+Spectral Moments of Graphs and Some Applications D. Gernert ...... .194   
+Polymatroids, Bipartite Graphs and the Cone of Boolean Submodular Functions E. Girlich, M. Höding ... ......198   
+Expected Waste for a Bin-Packing Algorithm Using Items that are   
+Exponentially Distributed W. Goessens ..... .200   
+Algorithms for the Capacitated-Chinese-Postman-Problem in Mixed Graphs P. Greistorfer .203   
+Human Capital and International Capital Flows T. Gries .. 207   
+Computer Simulation for Image Reconstruction from a very Limited   
+Number of Projections N. Gubareny 211   
+Capacitated Lot-Sizing with Linked Production Quantities of Adjacent Periods K. Haase, A. Drexl .. ...212   
+The Equal Gain Splitting Rule for Sequencing Situations and the   
+General Nucleolus H. Hamers, I. Curiel, J. Potters, S. Tijs . ..216   
+Consequentialism, Non-Archimedean Probabilities, and Lexicographic   
+Expected Utility P.J. Hammond .219   
+Boltzmann-Like and Force Models for Behavioral Changes D. Helbing .. 251   
+Value Preserving Intertemporal Portfolio Selection K. Hellwig, T. Wiesemann ... .255   
+Generating Convex Polyominoes at Random W. Hochstättler, C. Moll, M. Loebl .259   
+A New Linear Time Algorithm for Computing the Convex   
+Hull of a Simple Polygon W. Hochstättler, S. Kromberg, C. Moll ... .263   
+A Production-Transportation Problem with Stochastic Demand and   
+Concave Production Costs K. Holmberg, H. Tuy . 266   
+Biconvex Quadratic Maximization Subject to Linear Constraints S. Indihar ...... 270   
+K-Fold Complementarity Problem and the Order Complementarity Problem G. Isac ...... …..272   
+A Fault Diagnosis Information System Using Temporary   
+Relations Between Symptoms S. Jacobs ....... 276   
+On the Solution of Linear Vector Optimization Problems in the Image Space J. Jahn .280   
+Bifurcated Routing with Transition Costs A. De Jongh ....... .284   
+Batch Sequencing with Sequence Dependent Setup-Times and -Costs:   
+A Comparison of Logic and Mixed Integer Programming Approaches C. Jordan, A. Drexl ... .286   
+Collective Selforganized Computer Processes in Digital Network   
+Structures A. Katkov 287 XV   
+Linear Dependences of Random Variables and Simulation I. Kavkler, L. Arih . 288   
+Heterogeneity and Multivariate Logistic Distributions L. Knüppel ...... .292   
+Competitive Advantages through Flexible Design of Decentralized   
+Information Systems H.J. König ..... .296   
+Long Run Simulation of the German Social Security System G. Köpp, G. Uebe .... .300   
+Modelling Simulated Annealing with History Dependent Cooling Schedules M. Kolonko .... 304   
+Intelligent Multiple Criteria Decision Support E. Konarzewska Gubala 306   
+Program Allocation Prediction by Neural Networks A. Krysiak, F. Seredynski . 310   
+An Assessment of Flexibility Concepts and their Practical   
+Usefulness to Decision Modelling A. Ku... 313   
+Some Results Concerning the Complexity of Interval Edge-Colorings of Graphs M. Kubale 317   
+On the Variance of the Number of Pivot Steps Required by the Simplex Algorithm K.-H. Küfer ... .. 321   
+Inversion Problems in Pyramidal Classification R. Lasch .... .324   
+A Comparison of Heuristic Methods in Scheduling Flexible Assembly Systems G. List, A. Nubaumer .331   
+Sequential Estimation through Estimating Equations R. Magiera 335   
+Inflation and Credit Market Shocks: A Signal Extraction Problem K. Matthews, C. Ioannidis ..... .. 339   
+The General Business Optimization Model I. Mesko, T. Mesko .343   
+Time-Series Forecasting by Pattern Imitation - Outliers B. Motnikar, T. Pisanski .347   
+Periodic Networks and Railway Scheduling K. Nachtigall .... 351   
+A Note on Two Person Full-Information Best Choice Problems with   
+Imperfect Observation P. Neumann, Z. Porosinski, K. Szajowski 355   
+Complexity of Optimization on Vectorweighted Bipartite Graphs P. Neumayer ... 359   
+Shortest Path Problem in Parallel Processors V. Nica, C. Fabian, Z. Kormos .. .362   
+Bicriterial and Restrictive Planar 2-Median Problems S. Nickel . .366   
+Optimal Solutions to Approximate Integer Programming Problems O. Oguz ..... 370   
+Analysis of Panel Data by Means of the Gambler-Mover-Stayer Model M. Overbeck-Larisch ..... 373   
+Aggregation $\&$ Clustering of Preferences: Opinion vs. Action J. W. Owsinski ... 377   
+Inverse Function Theorems for Nonsmooth Mappings in Banach Spaces Z. Páles.... 385   
+Knowledge Acquisition Through Schedule Decomposition E. Pesch .. 389   
+Multilevel Control of Aquatic Ecosystems in Lake G. Petriczek, Z. Uhrynowski .393   
+Short Proofs of Some Theorems in Probability and Statistics Based on a   
+Weak Compactness Argument for Tests D. Plachky . 397   
+Approximation Algorithms for Multi-Index Transportation Problems   
+with Decomposable Costs M. Queyranne, F.C.R. Spieksma 401   
+Multicriterial Optimization in Production and Management M. Rabinovitch 405   
+Convexity-Concavity: Matrices and Matrix Games T. Radzik . 408   
+Generalizations of Erlang Formulae and Some of Their 2nd Order Properties M.F. Ramalhoto, A. Pacheco . .412   
+An Efficient Approach for Down-and-out-Calls in a Binomial Model M. Reimer, K. Sandmann .. .418   
+Horizontal Stretching in the Mapping of Algorithms onto a Data-driven Array B. Robic . .422   
+An Optimal Marketing Strategy for Heterogeneous Groups of Porkers J. Roemen .. .425   
+A Discrete Min-Max Algorithm for Inequality Contraints B. Rustem ... 428 
+XVII
+On Two and Three Person Exchange Games M. Sakaguchi 430 
+Binomial Term Structure Models and the Forward Probability Measure:   
+Algorithmic Model Specification and Simulation Results K. Sandmann, E. Schlögl .... ..434   
+Monte Carlo Simulations and the Pricing of Options in the Discontinuous Case K. Schäfer .... .. 438   
+Nine Kinds of Monotone and Generalized Monotone Maps S. Schaible ... 442   
+Equivalence of Cutting Stock Problems G. Scheithauer .... .445   
+Numerical Experiments to the Modified Integer Round-Up Property of the One  
+dimensional Cutting Stock Problem G. Scheithauer, J. Terno .. 449   
+Optimality for a Generalized Stackelberg Problem H. Schmidt . 452   
+Non-Simple Polymatroids and Corresponding Submodular Functions G. Schneidereit, A. Zaporoshetc . 455   
+Evaluation Techniques for Disjunctive Logic Programs D. Seipel, H. Argenton 458   
+An Algorithm for Finding the Global Minimum of Multiextremal   
+Lipschitz Functions Y.D. Sergeyev . 463   
+Comparison of Some Classifiers Based on Parametric or Nonparametric   
+Learning Algorithms F. Shaghaghi, H. Sadeghi 466   
+General Structures of Primal Scaling Interior Point Methods D. X. Shaw ... 470   
+Scheduling and Allocation in High-Level Synthesis J. Silc .... 474   
+A Modelling of Energy-Economy Interaction under Uncertainty N.V. Simakov ... 478   
+Value Convergence in Generalized Markov Decision Chains K. Sladky ... 480   
+Managerial Attitudes Toward the Valuation of Information Technology C.A. Snyder, M.D. Miller . 483   
+Convergences for Sequences of Sets and Linear Mappings Y. Sonntag, C. Zalinescu 487 
+XVII
+Solving the "Business System Planning"-Problem Using Specialized   
+Branch & Bound Algorithms D.M. Spahni 491   
+A Knowledge-Based Environment for Decision Support Z. Strezova 495   
+Optimal On-Line Detection of Multiple Parameter Changes K. Szajowski .. 498   
+Using Uncertain Information from a Telecommunication Network E. Szmidt . .502   
+Characterizations of Qualitative Data U. Tüshaus .. 506   
+High Order Iterative Methods for Nonlinear Egvations O. Vaarmann .... 510   
+Computer Simulation of Observation Systems under Attainment of   
+Supersolvability by Mathematical Reduction Method A. Verlan ... .512   
+Risk Based Equity Cost Calculation in Banking M. Wahrenburg, R. De Mello ... .513   
+An Alternative Approach to Robust Design Problems J. Wallacher .... .515   
+Workflow Model Verification of Cooperating Agents in Cardiological   
+Intensive Care Units G. von der Weiden, P. Szczurko, B. Thull .518   
+Dually-Weighted Cross Decomposition for the Capacitated   
+Facility Location Problem P. Wentges ... 522   
+Preassignments in Chromatic Scheduling D. de Werra ... .526   
+Reconstruction of Public Finance in a Stochastic Differential Game Framework D.W.K. Yeung ... .529   
+Stochastic Forest Management Based on an Interactive Technique L. Zadnik Stirn .. .533   
+Solving Dial-A-Ride Problems in Practice D. Zepf. 537   
+Robust Mappings and Optimization D. Zhuang .... 539   
+The Profitability of Insurance H.-J. Zwiesler .... 542 
+Author Index ... 546 
+Contents by Sections
+Section 1: Theory of Optimization
+Computational Complexity in Infinite Combinatorial Structures 
+V.E. Brimkov, R.P. Barneva . .64 
+Optimization of the Spare Parts Storage for the Power Units Equipments P.P. Bocanete, L. Neamtu . .43   
+On the 2D Knapsack Problem with Real Coefficients under the Blum-Shub-  
+Smale Computational Model V.E. Brimkov, S. Danchev 68   
+New Results on a Newton-Type Method for LCP A. Fischer .... .165   
+K-Fold Complementarity Problem and the Order Complementarity Problem G. Isac ... .. 272   
+On the Solution of Linear Vector Optimization Problems in the Image Space J. Jahn .. .280   
+On the Variance of the Number of Pivot Steps Required by the Simplex Algorithm K.-H. Küfer .... .. 321   
+Optimal Solutions to Approximate Integer Programming Problems O. Oguz .... .370   
+Inverse Function Theorems for Nonsmooth Mappings in Banach Spaces Z. Páles ... 385   
+Nine Kinds of Monotone and Generalized Monotone Maps S. Schaible ... 442   
+Optimality for a Generalized Stackelberg Problem H. Schmidt .. 452   
+High Order Iterative Methods for Nonlinear Egvations O. Vaarmann 510   
+Convergences for Sequences of Sets and Linear Mappings Y. Sonntag, C. Zalinescu ... .487   
+Robust Mappings and Optimization D. Zhuang .... 539 
+Section 2: Computational Methods of Optimization
+An Application of an Interior Point Method for Problems with Uncertainty A. Altman ..   
+Spline Approximation of the Mathematical Programming Task T.A. Arakelian, I. E. Danielian.   
+Linear 0-1 Inequalities and Extended Clauses P. Barth .. 24   
+Biconvex Quadratic Maximization Subject to Linear Constraints S. Indihar .. . 270   
+A Sequential Generalized Quadratic Programming Algorithm Using Exact L1   
+Penalty Functions E. Casas, C. Pola .84   
+An Algorithm for Finding the Global Minimum of Multiextremal Lipschitz   
+Functions Y.D. Sergeyev .. .463   
+General Structures of Primal Scaling Interior Point Methods D.X. Shaw ... .470   
+A Production-Transportation Problem with Stochastic Demand and Concave   
+Production Costs K. Holmberg, H. Tuy .266 
+Section 3: Combinatorial Optimization and Discrete Mathematics
+Utilization of Integer Programming for the Optimization of Class Timetables J.V. Caixeta Filho, J.C.V. de Oliveira ..80   
+On Connectivity of Efficient Matroid Bases M. Ehrgott ... 142   
+Spectral Moments of Graphs and Some Applications D. Gernert . 194   
+Expected Waste for a Bin-Packing Algorithm Using Items that are Exponentially   
+Dist ributed W. Goessens 200   
+LP-Relaxations for the Edge-Weighted Subclique Problem U. Faigle, R. Garbe, K. Heerink, B. Spieker .. 157   
+Polymatroids, Bipartite Graphs and the Cone of Boolean Submodular Functions E. Girlich, M. Höding .. 198   
+A New Linear Time Algorithm for Computing the Convex Hull of a Simple   
+Polygon W. Hochstättler, S. Kromberg, C. Moll . .263   
+Some Results Concerning the Complexity of Interval Edge-Colorings of Graphs M. Kubale ... 317   
+Generating Convex Polyominoes at Random W. Hochstäter, C. Moll, M. Loebl . 259   
+Exact Matroid Parity and Polynomial Identities G. Galbiati, F. Malffioli ... 180   
+Complexity of Optimization on Vectorweighted Bipartite Graphs P. Neumayer .. 359   
+Bicriterial and Restrictive Planar 2-Median Problems S. Nickel 366   
+Equivalence of Cutting Stock Problems G. Scheithauer . 445   
+Non-Simple Polymatroids and Corresponding Submodular Functions G. Schneidereit, A. Zaporoshetc 455   
+Approximation Algorithms for Multi-Index Transportation Problems with   
+Decomposable Costs M. Queyranne, F.C.R. Spieksma 401 
+Numerical Experiments to the Modified Integer Round-Up Property of the One-dimensional Cutting Stock Problem G. Scheithauer, J. Terno ... 449 
+Dually-Weighted Cross Decomposition for the Capacitated Facility Location   
+Problem P. Wentges .. 522   
+Preassignments in Chromatic Scheduling D. de Werra ... 526 
+Section 4: Scientific Computing
+Groundstates in Ising Spin Lattices by Optimal Matchings J. Bendisch, U. Derigs, A. Metz . 36   
+Demographer - A New Version D. Cepar, E. Ursic, R. Zaloznik 92   
+Computer Simulation for Image Reconstruction from a very Limited Number of   
+Projections N. Gubareny ... ..211   
+Computer Simulation of Observation Systems under Attainment of Supersolvability   
+by Mathematical Reduction Method A. Verlan ...... .512 
+Section 5: Decision Theory
+Decision Making Concerning Product Line Design Based on Conjoint Analysis E. Aust, W. Gaul . 12   
+Outline of a Theory of Risk Under Partial Probability Information H.W. Brachinger . 52   
+Intelligent Multiple Criteria Decision Support E. Konarzewska Gubala . 306   
+An Assessment of Flexibility Concepts and their Practical Usefulness to Decision   
+Modelling A. Ku 313   
+Inversion Problems in Pyramidal Classification R. Lasch . 324   
+Aggregation & Clustering of Preferences: Opinion vs. Action J.W. Owsinski .. 377   
+An Optimal Marketing Strategy for Heterogeneous Groups of Porkers J. Roemen . 425   
+Value Convergence in Generalized Markov Decision Chains K. Sladky ... 480   
+Characterizations of Qualitative Data U. Tüshaus 506 
+Section 6: Mathematical Economics and Game Theory
+A Simple Model of Political Affairs H. Behnke 32   
+Is there Room for Convergence in the E.C. ? R. Douven, J. Engwerda .. 122   
+Reduced Game Properties of Egalitarian Division Rules for Cooperative Games T. Driessen, Y. Funaki .. ..126   
+Consequentialism, Non-Archimedean Probabilities, and Lexicographic Expected   
+Utility P.J. Hammond . .219   
+Boltzmann-Like and Force Models for Behavioral Changes D. Helbing .... 251   
+Approximating the Core of Euclidean TSP Games U. Faigle, W. Kern, S. Fekete, W. Hochstättler 153   
+Consistent Restricted Shapley Values J. Derks, H. Peters .. 100   
+Convexity-Concavity: Matrices and Matrix Games T. Radzik ... 408   
+On Two and Three Person Exchange Games M. Sakaguchi . 430   
+An Efficient Approach for Down-and-out-Calls in a Binomial Model M. Reimer, K. Sandmann . .418   
+The Equal Gain Splitting Rule for Sequencing Situations and the General   
+Nucleolus H. Hamers, I. Curiel, J. Potters, S. Tijs .216   
+Reconstruction of Public Finance in a Stochastic Differential Game Framework D.W.K. Yeung ... .529 
+Section 7: Banking, Finance and Insurance
+Enhanced Reliability and the Demand Impact of Jointly Normally Distributed   
+Signals T. Braun 56   
+The Advantage of and System Support for Combined Bankassurance Products H.U. Buhl, K. Sandbiller, A. Will. 76   
+Structural Exchange Rate Relationships in the Foreign Exchange Markets T. Gerhards .... 190   
+Inflation and Credit Market Shocks: A Signal Extraction Problem K. Matthews, C. Ioannidis 339   
+Monte Carlo Simulations and the Pricing of Options in the Discontinuous Case K. Schäfer ..... ... 438   
+Binomial Term Structure Models and the Forward Probability Measure:   
+Algorithmic Model Specification and Simulation Results K. Sandmann, E. Schlögl ..... .434   
+Risk Based Equity Cost Calculation in Banking M. Wahrenburg, R. De Mello . 513   
+Value Preserving Intertemporal Portfolio Selection K. Hellwig, T. Wiesemann 255   
+The Profitability of Insurance H.-J. Zwiesler . 542 
+XXIII
+Section 8: Econometrics
+A Modelling of Energy-Economy Interaction under Uncertainty N.V. Simakov ... .478 
+Section 9: Macroeconomics and Economic Theory 
+On the Equilibrium Dynamics of a Two-Sector Overlapping-Generations Model   
+with Heterogeneous Capital Goods K. Farmer .. 161   
+Human Capital and International Capital Flows T. Gries ... 207   
+Long Run Simulation of the German Social Security System G. Köpp, G. Uebe ... 300   
+Section 10: Stochastics   
+Stochastic Solution of Closed Leontief Input-Output Models K. Egle, S. Fenyi ... . 138   
+On Stochastic Vector Optimization Problems with General Stochastic Parameters   
+in the Constraints Using Chance-Constrained Approach A.-Z. H. El-Banna .. 145   
+On Stochastic Dynamic Optimization in Discrete Time K. Frauendorfer .. 172   
+Linear Dependences of Random Variables and Simulation I. Kavkler, L. Arih .. 288   
+Heterogeneity and Multivariate Logistic Distributions L. Knüppel .... 292   
+Modelling Simulated Annealing with History Dependent Cooling Schedules M. Kolonko ... 304   
+Sequential Estimation through Estimating Equations R. Magiera .. 335   
+Time-Series Forecasting by Pattern Imitation - Outliers B. Motnikar, T. Pisanski 347   
+Analysis of Panel Data by Means of the Gambler-Mover-Stayer Model M. Overbeck-Larisch .. 373   
+Some Remarks on Dependence Among the Consistency Tests C. Domanski, D. Parys ... 119   
+Short Proofs of Some Theorems in Probability and Statistics Based on a Weak   
+Compactness Argument for Tests D. Plachky .... 397   
+A Note on Two Person Full-Information Best Choice Problems with Imperfect   
+Observation P. Neumann, Z. Porosinski, K. Szajowski .. .355   
+Generalizations f Erlang Formulae and Some of Their nd Order Properties M.F. Ramalhoto, A. Pacheco 412   
+Optimal On-Line Detection of Multiple Parameter Changes K. Szajowski .. 498   
+An Alternative Approach to Robust Design Problems J. Wallacher ... 515 
+XXIV
+Stochastic Forest Management Based on an Interactive Technique L. Zadnik Stirn .. 533 On Uniformization for Continuous-Time Markov Chains N.M. van Dijk .... 108 
+Section 11: Production and Logistics   
+Model of Optimization of Wood Waste Processing in Slovenia S. Devjak, M. Tratnik, F. Merzelj ... .. 103   
+Capacitated Lot-Sizing with Linked Production Quantities of Adjacent Periods K. Haase, A. Drexl .. ..212   
+Batch Sequencing with Sequence Dependent Setup-Times and -Costs:   
+A Comparison of Logic and Mixed Integer Programming Approaches C. Jordan, A. Drexl .. 286   
+The General Business Optimization Model I. Mesko, T. Mesko 343   
+Multicriterial Optimization in Production and Management M. Rabinovitch ... 405 
+Section 12: System and Control Theory
+Optimal Control of Investment, Level of Employment and Stockkeeping M.H. Breitner, B. Koslik, O. von Stryk, H.J. Pesch . 60   
+On Some Expert Control T. Dyduch .. .134   
+Existence of an Optimal Sampling Frequency for LQ-Controlled Economic Systems J. Engwerda .. 149   
+Knowledge Acquisition Through Schedule Decomposition E. Pesch .... 389   
+A Discrete Min-Max Algorithm for Inequality Contraints B. Rustem .. 428   
+Multilevel Control of Aquatic Ecosystems in Lake G. Petriczek, Z. Uhrynowski .. .393 
+Section 13: Routing and Scheduling
+The Scheduling Problem in High-Level Synthesis: Extended $\mathbf { 0 } / 1$ LP Model and   
+Solution Methods H. Achatz .   
+Expert System for Handling Dangerous Goods D. Barbucha, W. Filipowicz, P. Jedrzejowicz 20   
+Bifurcated Routing with Transition Costs A. De Jongh .... 284   
+Crew Scheduling for an Urban Transit Company K. Djellab, G. Fleury, M. Gourgand, A. Quilliot 115   
+Routing in Meshes Using Linear Assignment Problem D. Fortin, A. Tusera ... .169   
+Algorithms for the Capacitated-Chinese-Postman-Problem in Mixed Graphs P. Greistorfer .. .203   
+The Job-Shop Problem and Immediate Selection P. Brucker, B. Jurisch, A. Krämer 72   
+A Comparison of Heuristic Methods in Scheduling Flexible Assembly Systems G. List, A. Nubaumer .. .331   
+The Simulated Trading Heuristic for Solving Vehicle Routing Problems A. Bachem, M. Malich ... 16   
+Periodic Networks and Railway Scheduling K. Nachtigall ... 351   
+Scheduling and Allocation in High-Level Synthesis J. Silc ... 474   
+Solving Dial-A-Ride Problems in Practice D. Zepf ..... 537   
+The 1-Part m-Machine Cyclic Scheduling Problem in Robotic Cells Y. Crama, J. van de Klundert 97 
+Section 14: Knowledge Based Systems
+Using Strong Cutting Planes in Constraint Logic Programming A. Bockmayr ... 47   
+Decomposition Algorithms Based on Knowledge Based Models E. Dudek-Dyduch .. 130   
+Comparison of Some Classifiers Based on Parametric or Nonparametric Learning   
+Algorithms F. Shaghaghi, H. Sadeghi .466   
+Evaluation Techniques for Disjunctive Logic Programs D. Seipel, H. Argenton .. 458   
+A Knowledge-Based Environment for Decision Support Z. Strezova . 495   
+Using Uncertain Information from a Telecommunication Network E. Szmidt ... .502 
+Section 15: Information Systems
+A Model- and Method Base System for Discrete Optimization Problems P. Becker .. 28   
+A Fault Diagnosis Information System Using Temporary Relations Between   
+Symptoms S. Jacobs .276   
+Competitive Advantages through Flexible Design of Decentralized Information   
+Systems H.J. König .296   
+Eventman - A Business Event Tracking System D. Cepar, F. Mulec ... 88   
+Managerial Attitudes Toward the Valuation of Information Technology C.A. Snyder, M.D. Miller . .483 
+XXVI
+Solving the "Business System Planning"-Problem Using Specialized Branch &   
+Bound Algorithms D.M. Spahni .. .491   
+Workflow Model Verification of Cooperating Agents in Cardiological Intensive   
+Care Units G. von der Weiden, P. Szczurko, B. Thull 518 
+Section 16: Parallel and Distributed Computing
+Parallel Tabu Search for Irregular Cutting J. Blacewicz, J. Kaczmarek, R. Walkowiak 40   
+Efficient Workload-Balancing on Grids, Hypercubes and Trees M. Böhm, E. Speckenmeyer 50   
+A Reexamination of Utility Functions Derived from Demand Functions S. Fuchs-Seliger ... 176   
+Collective Selforganized Computer Processes in Digital Network Structures A. Katkov 287   
+Shortest Path Problem in Parallel Processors V. Nica, C. Fabian, Z. Kormos . .362   
+Horizontal Stretching in the Mapping of Algorithms onto a Data-driven Array B. Robic .. 422   
+Program Allocation Prediction by Neural Networks A. Krysiak, F. Seredynski 310 
+The Scheduling Problem in High-Level Synthesis: Extended 0/1 LP Model and Solution Methods
+Hans Achatz Universität Passau Lehrstuhl Rechnerstrukturen (Prof. W. Grass) D-94030 Passau, Germany 
+As demonstrated by the activity in this area high-level synthesis - often referred to as behavioral synthesis - is becoming an increasingly popular research topic. A main part of high-level synthesis is scheduling where each operation from a data flow graph is assigned to a control step besides several constraints. We have formulated the scheduling problem as a 0/1 LP. For the first time we have extended the model to different execution times and multifunctional function units. To decrease the computation time we have developed a method for constructing new lower bounds with the help of LP (!). The results show that computation time is superior to comparable approaches though our model is able to describe a larger set of problems. 
+1. INTRODUCTION
+High-level synthesis tools transform a behavioral description in terms of algorithm into a RT-level structural description observing several constraints. In order to produce the data path part of a digital processor the following subtasks have to be solved: scheduling, resource allocation and resource binding. This paper is concerned with the scheduling problem as a first step in the sequence of subtasks. Scheduling is the task of assigning operations to control steps optimizing a certain objective function. Several different methods for scheduling have been published. Most of them are heuristics. 
+We have extended the $_ { 0 / 1 }$ formulation of Hwang (1991) and Lee (1989) combined with ideas from Gebotys (1991) to enlarge the set of scheduling problems that can be described in our model. These $0 / 1 \ \mathrm { { L P } }$ approaches are very promising with respect to the set of allowable constraints like chaining, multicycle operations, functional pipelining, mutually exclusive operations and loop folding. They also reported very short computing times to get optimal solutions for benchmark examples. However there are at least two drawbacks of these approaches, which are very important for practical applications. They cannot correctly handle multifunctional function units with different operator combinations and they require assigning operation time to operation instances in the behavior description. In practice operation time is a feature of the function unit (FU) or even better of an operation performed by a module. In the second case, different operations of a module for example "add" and "and" may be done in different execution times. The algorithm to be described has been implemented as a part of a high-level synthesis system SUSAN (System for Universal Scheduling and Allocation) (see Achatz (1993b)) transforming VHDL behavioral description into composition of formally verified RT-level modules. 
+2. 0/1 LP MODEL AND EXTENSIONS
+We start with the notation of the 0/1 LP formulations introduced by Lee (1989). A short summary of the abbreviations should make this paper more readable. As soon as possible (ASAP) and as last as possible (ALAP) times are computed for every operation. For simplicity the 0/1 LP model in this introduction is restricted to operations with one cycle propagation delay and function units with only one operation type executable. 
+Notation:
+n number of operations in the data flow graph S number of control steps   
+Oi operation i where $1 \leq \bar { \mathfrak { i } } \leq \mathfrak { n }$   
+oi → 0j precedence relation between oi and oj   
+Si start time (ASAP) of operation o   
+Li start time (ALAP) of operation oj   
+m number of different function types   
+tk function unit type number k where 1≤k≤m FUtk function unit of type $\mathfrak { t } _ { \mathbf { k } }$   
+ctk cost of a function unit of type tk   
+$\mathsf { o i } \in \mathsf { F U } _ { \mathsf { I k } }$ $\mathrm { F U } _ { \mathfrak { k } }$ is able to execute operation o   
+${ \bf { d } } ( { \bf { t } } _ { \bf { k } } \left( { \bf { \sigma } } _ { \mathrm { { i } } } \right) )$ propagation delay of oi on FU-type tk Variables used in the formulation:   
+$\mathbf { M } _ { \mathbb { k } }$ number of function units of type tk needed xij variable associated with operation oj   
+$\bf x _ { i j } = 1$ if oj is scheduled in control step j; $\bf { x } _ { i j } = 0$ otherwise. 
+Thu  la 
+$$
+\sum \limits _ { \mathbf { k } = 1 } ^ { \mathbf { m } } \mathsf { c } _ { \mathbf { t } \mathbf { k } } \cdot \mathbf { M } _ { \mathbf { t } _ { \mathbf { k } } }
+$$
+subject to 
+resource constraints (2) 
+execution constraints 
+$$
+\begin{array} { r l r } {  { \sum _ { \mathfrak { i } \in \mathrm { ~ F U } _ { \mathfrak { t } _ { \mathbf { k } } } } \mathfrak { x } _ { \mathbf { i j } } - \mathbf { M } _ { \mathfrak { t } _ { \mathbf { k } } } \le 0 } } \quad  & { \forall \ 1 \le \mathbf { j } \le \mathbf { s } , \ 1 \le \mathbf { k } \le \mathbf { m } }  \\ & { } & \\ & { \overset { \mathrm { L . ~ } } { \sum _ { \mathbf { j } = \mathbf { S } _ { \mathbf { i } } } } \quad } & { \forall \ 1 \le \mathbf { i } \le \mathbf { n } } \\ & { } & \\ & { } & { \overset { \mathrm { L . ~ } } { \underset { \mathbf { j } = \mathbf { S } _ { \mathbf { i } } } { \sum _ { \mathbf { i } } } } \quad \overset { \mathrm { L . ~ } } { \sum _ { \mathbf { j } = \mathbf { S } _ { \mathbf { k } } } } \quad } \\ & { } & \end{array}
+$$
+precednce constrain 
+The 0/1 LP formulation for resource-constrained scheduling can be modeled in a similar way.   
+For more details see Achatz (1993a). 
+In the original model every function unit can only'compute one type of operation. If there are multifunctional function units with empty intersection of operation types, then the model is also able to describe the problem. These type of function units are only a problem, if the intersection of the sets of executable operations of two function units is not empty and operation sets of the units are not equal. 
+$$
+\mathrm { F U _ { t 1 } } = \{ \ + , - , * \ \} \mathrm { , \mathrm { ~ F U _ { t 2 } } = \{ \ + \} \mathrm { , \mathrm { ~ F U _ { t 3 } = \{ \ + , - \} \mathrm { , \bf ~ M _ { t 1 } = M _ { t 2 } = M _ { t 3 } = 1 \ } \mathrm { . } } } }
+$$
+It is easy to see that all the constraints are too strong. Instead, we have to construct the powerset Π of the not disjunctive operation types ( of course the empty set can be omitted) and to introduce new constraints . Let $\Pi _ { \mathbf { k } }$ denote the $\mathbf { k }$ -th set out of $\boldsymbol { \Pi }$ and $\mathbf { M } ( \Pi _ { \mathbf { k } } )$ denote the number of function units which are able to execute at least one operation out of $\Pi _ { \mathbf { k } }$ Building the powerset of the not disjunctive operation types seems to be exhaustive, but in real applications the number of these operation types is usally small. Most of the new constraints are redundant and can be omitted. 
+$$
+\sum _ { \bf 0 _ { i } \in \Pi } \bf x _ { i j } \cdot \bf M ( \Pi _ { k } ) \leq 0
+$$
+$$
+\forall \ 1 \leq \mathbf { j } \leq \mathbf { s } , \forall \ \Pi _ { \mathbf { k } }
+$$
+$\bf { M } ( \{ + , - \} )$ equals 3, because all three function units $\mathbf { F U _ { t _ { 1 } } }$ , $\mathrm { F U } _ { \mathfrak { t } _ { 2 } }$ and $\mathrm { F U } _ { \mathrm { t } _ { 3 } }$ are able to execute the operation $^ +$ . If a function unit has no operation types in common with other function units, then the original constraint can be taken. A proof that constraint (2) is necessary and sufficient can be found in Achatz (1993a). 
+If there are function units with different execution times for one operation type, many problems appear. Most of the scheduling algorithms (even the heuristically ones) have the restriction that every operation type has one unique execution time. Suppose $\mathfrak { t } _ { 1 } , \mathfrak { t } _ { 2 } , . . . , \mathfrak { t } _ { \mathfrak { p } }$ are functional units with different execution times for the operation oi. We introduce new 0/1 variables si1j,si2jipj instead of xij. If $\mathfrak { s } _ { \mathrm { i } _ { \boldsymbol { \mathbf { k } } } \mathrm { j } }$ equals 1, then operation oi is executed on unit ${ \bf t _ { k } }$ in control step j. 
+$$
+\sum _ { \mathbf { 0 _ { i } } \in \mathrm { ~ \mathbb { F } U _ { t _ { k } } ~ } } \mathbf { x _ { i j } } \mathrm { ~ - ~ } \mathbf { M _ { t _ { k } } } \leq \mathrm { ~ 0 ~ } \forall \mathrm { ~ 1 \leq j \leq s , ~ } 1 \leq \mathbf { k } \leq \mathbf { m _ { \mathrm { ~ } } }
+$$
+execution constrai 
+$$
+\begin{array} { r l r } {  { \mathrm {  ~ \gamma ~ } _ { \mathrm { { i t s } } } \sum _ { \mathrm { { i } } } \mathrm {  ~ { \hat { v } } _ { \mathrm { { i } } q } ~ } ^ { \mathrm { { \tiny ~ S } ~ } _ { \mathrm { { i } } q } \mathrm {  ~ { \hat { \Sigma } } } } \cdot \mathrm {  ~ { \cal { M } } } _ { { \mathrm { t } } { \bf { i } } _ { \mathrm { q } } } \le 0 } } & { ~ \forall ~ 1 \le \mathrm { j } \le \mathrm { s } , ~ 1 \le \mathrm { k } \le \mathrm { m } , ~ 1 \le \mathrm { q } \le \mathrm { p } } \\ & { } & \\ { \mathrm {  ~ \gamma ~ } _ { \mathrm { { n t s } } } \sum _ { \mathrm { { i } } } \mathrm {  ~ { \hat { \Sigma } } _ { \mathrm { { i } } q } ^ { \mathrm { { \tiny ~ D } } } ~ } } \\ & { } & { \mathrm {  ~ \gamma ~ } _ { \mathrm { { j } } = \mathrm { S } _ { \mathrm { { i } } } } \sum _ { \mathrm { { q } } = 1 } ^ { \mathrm { { \tiny ~ S } ~ } _ { \mathrm { { i } } } } \mathrm { q } \mathrm { j } ~ = ~ 1 } \qquad \forall ~ 1 \le \mathrm { i } \le \mathrm { n }  \end{array}
+$$
+precedence constraints 
+$$
+\begin{array} { c c } { \displaystyle \sum _ { \mathbf { j } = \mathbf { S } _ { \mathbf { i } } } ^ { \mathrm { L } _ { \mathbf { i } } } \left( \mathbf { j } + \mathbf { D } \right) \mathbf { \boldsymbol { \cdot } } \mathbf { s } _ { \mathbf { i } \mathbf { l } } \mathbf { j } } & { \displaystyle \cdot \sum _ { \mathbf { j } = \mathbf { S } _ { \mathbf { k } } } ^ { \mathrm { L } _ { \mathbf { k } } } \left( \mathbf { j } + \mathbf { D } \right) \mathbf { \boldsymbol { \cdot } } \mathbf { x } _ { \mathbf { k } } \mathbf { j } \leq \mathbf { - } \mathbf { d } ( \mathbf { t } _ { \mathbf { i } } \mathbf { _ { l } } ( \mathbf { o _ { i } } ) ) } \\ { \displaystyle \quad \vdots } & { \vdots } \\ { \displaystyle \sum _ { \mathbf { j } = \mathbf { S } _ { \mathbf { i } } } ^ { \mathrm { L } _ { \mathbf { i } } } \left( \mathbf { j } + \mathbf { D } \right) \mathbf { \boldsymbol { \cdot } } \mathbf { s } _ { \mathbf { i } } \mathbf { _ { p } } \mathbf { j } } & { \displaystyle \cdot \sum _ { \mathbf { j } = \mathbf { S } _ { \mathbf { k } } } ^ { \mathrm { L } _ { \mathbf { k } } } \left( \mathbf { j } + \mathbf { D } \right) \mathbf { \boldsymbol { \cdot } } \mathbf { x } _ { \mathbf { k } } \mathbf { j } \leq \mathbf { - } \mathbf { d } ( \mathbf { t } _ { \mathbf { i } } \mathbf { _ { p } } ( \mathbf { o _ { i } } ) ) } \end{array} \qquad \mathrm { ~ \forall ~ o _ { i } \to o _ k ~ }
+$$
+$\mathrm { D } = \mathrm { m a x } \{ \mathrm { d } ( \mathrm { t i } _ { \mathbf { q } } ( \mathrm { o i } ) ) : 1 { \le } \mathrm { q } { \le } \mathrm { p } \}$ , the maximal execution time for operation oj. A proof can also be found in Achatz (1993a). 
+3. GENERATING LOWER BOUNDS VIA LP 
+The efficiency of solving the $0 / 1 \bf { L P }$ is extremely dependent on good bounds. In our approach we generate lower bounds via LP. In all applications so far we did not have problems with computing times. For determination of these lower bounds we have to distinguish between time-constrained and resource-constrained scheduling. In the time-constrained model we assume that the number of csteps is given and that we want to minimize the hardware costs. If we know how many units of one type are needed at least the solution space would be reduced. In order to achieve a lower bound for the number of FU-types needed we construct a new objective function 
+minimize 
+$$
+{ \mathfrak { c } } _ { \mathfrak { k } } \cdot \mathbf { M } _ { \mathfrak { k } }
+$$
+Notice that the objective function only depends on one type of function unit. The problem is solved as LP (!). Therefore computing times are no problem. The solution expresses how many FUs of Type tk are needed at least if all other FU-types do not have any costs. The optimal value of the cost function can be rounded up because the LP solution is always a lower bound for the $0 / 1 \ \mathrm { \bf L P }$ solution. This estimation can be made for every FU-type. So we have generated lower bounds for every FU-type and therefore reduced the solution space drastically. For our experiments most of the lower bounds were also the optimal values. If there are multi-functional FUs with non disjunctive operation type sets the bounds are of course weaker, because one FUtype can replace the other. In a similar way we can compute new bounds for resource-constrained scheduling. 
+4. References 
+Achatz H. (1993a) Extended 0/1 LP Model for the Scheduling Problem in High-Level Synthesis, EURODAC, Hamburg, to appear. 
+Achatz H. (1993b) SUSAN: System for Universal Scheduling and Allocation, SASIMI Synthesis And SImulation Meeting and International Interchange, NARA, Japan, to appear. 
+Gebotys C. H., Elmasry M. I. (1991) Simultaneous Scheduling and Allocation for Cost Constrained Optimal Architectural Synthesis, 28th ACM/IEEE DAC, San Francisco, pp. 2 - 7. 
+Hwang C.-T., Lee J.-H., Hsu Y.-C. (1991) A Formal Approach to the Scheduling Problem in High Level Synthesis, IEEE Transactions on Computer-Aided Design 10 (4), pp. 464 - 475. 
+Lee J.-H., Hsu Y.-C., Lin Y.-L. (1989) A New Integer Linear Programming Formulation for the Scheduling Problem in Data Path Synthesis, ICCAD, pp. 20 - 23. 
+AN APPLICATION OF AN INTERIOR POINT METHOD FOR PROBLEMS WITH UNCERTAINTY 
+Anna Altman \*   
+Systems Research Institute,   
+Polish Academy of Sciences   
+ul. Newelska 6, 01-447 Warszawa,   
+Poland 
+Interior point methods (IPM) were first proposed for linear programming (LP) problems. Since 1984, when Karmarkar published his famous paper (Karmarkar (1984)), IPM were rapidly developed and improved. It is now widely accepted that the primal-dual logarithmic barrier method is the most efficient IPM. The idea of IPM was not restricted to linear programming alone. These methods quickly spread to quadratic, nonlinear and integer programming. The developments in quadratic programming (QP) are closely parallel to those in LP. While theoretical worst-case behaviour for LP and QP are the same, QP problems are harder to solve in practice. The derivation of the higher order primal-dual method for QP is analogous to the derivation for the linear case presented in Mehrotra (1991) and implemented by Altman and Gondzio (1992). 
+Let us consider the QP problem 
+$$
+{ \begin{array} { r } { \operatorname { m i n i m i z e } c ^ { T } x + { \frac { 1 } { 2 } } x ^ { T } Q x , } \\ { { \mathrm { s u b j e c t ~ t o } } ~ A x = b , } \\ { x + s = u , } \\ { x , s \geq 0 , } \end{array} }
+$$
+where $\mathbf { \Delta } _ { c } , \mathbf { \Delta } _ { x } , s , u \in \mathcal { R } ^ { n }$ , $b \in \mathcal { R } ^ { m }$ and $A \in \mathcal { R } ^ { m \neq n }$ is assumed to have a full row rank. The dual of (1) is given by 
+$$
+\begin{array} { r } { \operatorname* { m a x i m i z e } b ^ { T } y - u ^ { T } w - \cfrac { 1 } { 2 } x ^ { T } Q x , } \\ { \mathrm { s u b j e c t ~ t o } ~ A ^ { T } y + z - w - Q x = c , } \\ { x , z , w \geq 0 , } \end{array}
+$$
+where $\pmb { y } \in \mathcal { R } ^ { m }$ and $\pmb { x } , \pmb { z } , \pmb { w } \in \mathcal { R } ^ { n }$ 
+Having incorporated inequality-type constraints in a logarithmic term added to the objective function, we obtain the first order necessary conditions for the optimal solution of (1) and (2): 
+$$
+\pmb { A x } = \pmb { b } ,
+$$
+$$
+\begin{array} { r } { x + s = u , } \\ { A ^ { T } y + z - w - Q x = c , } \\ { X Z e = \mu e , } \\ { S W e = \mu e , } \\ { x , s , z , w > 0 , } \end{array}
+$$
+where $x , s , z$ and $W$ are diagonal matrices with the elements $\boldsymbol { x } _ { j } , \boldsymbol { s } _ { j } , \boldsymbol { z } _ { j }$ and ${ \pmb w } _ { j }$ , respectively and $e \in \mathcal { R } ^ { n }$ is a vector of ones. There is only one difference between necessary conditions for LP and QP, namely the term $\boldsymbol { Q x }$ in (5). 
+The basic primal-dual algorithm applies one iteration of Newton's method to find an approximate solution to (3-7) for a current (fixed) parameter $\pmb { \mu }$ and terminates when the duality gap is reduced to a predetermined tolerance. It may be viewed as an optimal trajectory from a given starting point to the optimum of (1) and (2). In the Mehrotra method a higher order Taylor approximation of the optimal trajectory is computed. Knowing Taylor terms we can compute the search directions in the primal and dual spaces. 
+Undoubtedly, the main computational effort in any IPM implementation is expanded in solving for the direction. To obtain the direction we solve the normal equation with matrix $A ^ { T } \Theta A$ . The difference between linear case and quadratic one is in the matrix $\Theta$ , for the quadratic case 
+$$
+\Theta = ( Q + X ^ { - 1 } Z + S ^ { - 1 } W ) ^ { - 1 } .
+$$
+For a linear case $Q = 0$ and other matrices in (8) are diagonal, and computing $\Theta$ is very simple. In many practical problems the matrix $Q$ is either diagonal or we can reformulate the problem (1) to obtain a diagonal quadratic matrix, cf. Vanderbei and Carpenter (1993). Therefore computing $\Theta$ for separable QP is as easy as for a LP. 
+The method described above was used for finding cost-effective environmental policy under uncertainty. We considered the problem of reduction of $S O _ { 2 }$ emissions in Europe, cf. Amann et al. (1993). We minimize European-wide emission control costs subject to the condition that grid-specific $s O _ { 2 }$ deposition targets are attained. The costs of emission control are uncertain. There are many possible scenarios of energy production, consumption, fuel characteristics and installed emission control measures. Having scenarios and their probabilities we construct mean-variance model. In such a method we minimize a weighted sum of expected value of total costs and their variance. 
+Finally we construct the stochastic optimization problem: 
+$$
+\begin{array} { r } { \operatorname* { m i n } E \{ c ( x ) \} + \alpha V \{ c ( x ) \} } \\ { \mathrm { ~ s . ~ t . ~ } T x \leq b , } \\ { l \leq x \leq u , } \end{array}
+$$
+where $\pmb { c } ( \pmb { x } )$ is a random function and costs are values of this function, $\pmb { x }$ denotes emissions to be reduced, $\pmb { b }$ is a vector of maximal grid depositions, and depositions $\pmb { y }$ are linear function of emissions $\left( { \pmb y } = { \pmb T } { \pmb x } \right)$ . 
+The costs for each country are piecewise linear convex functions. Since variance is a quadratic function, the objective function is quadratic too. The problem is reformulated in such a way that the quadratic part of the objective is separable. All constraints are linear. 
+To make the model more useful for decision makers we solve the model with different weighting factors for the variance. It enables us to control the value of variance at the solution found; in other words, uncertainty or risk. The method was successfully used at 
+IIASA in Transboundary Air Pollution Project. We hope that these ideas can be exploited for a wider class of other stochastic optimization problems. 

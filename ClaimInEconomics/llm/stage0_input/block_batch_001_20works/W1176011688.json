@@ -1,0 +1,100 @@
+{
+  "paper_title": "Mandatory universal drug plan, access to health care and health: Evidence from Canada",
+  "block_set": [
+    {
+      "block_id": "2016408853368934992",
+      "title": "Abstract",
+      "sub_firstblock": "Article history:   \nReceived 12 May 2014   \nReceived in revised form 12 May 2015   \nAccepted 11 August 2015   \nAvailable online 19 August 2015 "
+    },
+    {
+      "block_id": "2016408853368934998",
+      "title": "1. Introduction",
+      "sub_firstblock": "Pharmaceutical drug expenditure accounts for a significant proportion of overall health spending in many OECD countries. On average, more than a sixth of total health expenditure was dedicated to pharmaceuticals across OECD countries in 2011. On a per capita basis, the United States spend the most, almost USD 1000, followed by Canada (OECD, 2013). The rising financial burden associated with prescription drugs has raised policy concerns about the optimal design of health insurance, and drug insurance in particular, to ensure access to affordable prescription drugs. For example, the Part D drug benefit was added to Medicare in the United States (The Medicare Prescription Drug, Improvement, and Modernization Act of 2003). Several OECD countries, such as New Zealand, United Kingdom, the Netherlands and Germany, provide universal coverage for prescription drugs, which is integrated into the broader system of public health insurance or statutory social health insurance policies (Morgan et al., 2013). "
+    },
+    {
+      "block_id": "2016408853368935019",
+      "title": "2. Literature review",
+      "sub_firstblock": "There is a rich literature examining the effects of drug insurance/health insurance on utilization. It is well documented that individuals without insurance have lower levels of utilization than those with insurance; further, among individuals with insurance, those who face cost-sharing have lower utilization than those with full insurance. Zweifel and Manning (2000) and McWilliams (2009) review the evidence with respect to health insurance in general; Lexchin and Grootendorst (2004) and Goldman et al. (2007) review the evidence with respect to drug insurance. The RAND Health Insurance Experiment (HIE) estimated the price elasticity of demand for health care to be in the order of $- 0 . 2$ (Newhouse, "
+    },
+    {
+      "block_id": "2016408853368935029",
+      "title": "3. The institutional setting",
+      "sub_firstblock": "Canada has a predominantly publicly financed health care system with 13 provincial and territorial health insurance plans operating under a national legislative framework. The Canada Health Act (1984) established five principles that the provincial health insurance plans must respect: public administration, universality, portability, comprehensiveness and accessibility. All provinces and territories provide universal coverage for medically necessary hospital and physician services that are free at the point of use. The majority of public funding comes from general tax revenues of federal and provincial governments. Most hospitals are private, notfor-profit organizations funded through global budget. Physicians receive payments from provincial governments. The majority of physicians are remunerated by fee for service although new alternative payment models have been introduced in the past decade. "
+    },
+    {
+      "block_id": "2016408853368935041",
+      "title": "4. Data and descriptive statistics",
+      "sub_firstblock": "4.1. Data"
+    },
+    {
+      "block_id": "2016408853368935042",
+      "title": "4.1. Data",
+      "sub_firstblock": "The main data set for this analysis is the master files of the longitudinal household component of the National Population Health Survey (NPHS), a biennial nationally representative survey conducted by Statistics Canada. The target population of the NPHS includes community-based household residents in the 10 provinces, excluding populations on Indian Reserves, Canadian Forces Bases and some remote areas in Quebec and Ontario. The sample was created by first selecting households and then within each household, choosing one member 12 years of age or older to be the longitudinal respondent. It also includes 2,022 persons who were under the age of 12 in the first cycle and previously interviewed as part of the 1994/1995 National Longitudinal Survey of Children and Youth (NLSCY).8 Therefore, the NPHS longitudinal sample includes 17,276 persons from all ages in 1994/1995. The NPHS asks a series of questions related to health status, use of health services, chronic conditions and activity restrictions, and demographic and socio-economic status. "
+    },
+    {
+      "block_id": "2016408853368935052",
+      "title": "4.2. Outcome variables",
+      "sub_firstblock": "Drug insurance status is an indicator variable coded as one if a person reported having drug insurance and zero otherwise. Measures of health care utilization include drug utilization, physician visits and hospitalization. Drug utilization measures the number of distinct medications taken in the previous month.11 Note that this measure refers to both prescription and non-prescription drugs. Ideally we would separate these two, but separate measures are not available in the pre-policy cycles of the data. If the policy induces individuals to substitute prescription drugs for non-prescription drugs, our estimates would measure the net effects on total medication use and underestimate the impact of the policy on prescription drug use. Self-reported measures of medication use may introduce bias and measurement error.12 Therefore, we further look at aggregate drug expenditure from the Canadian Institute for Health Information (CIHI) to complement our analysis. We measure general practitioner (GP) visits and specialist visits separately as the number of visits with each type of physician in the previous 12 months. Finally, all of the medication and physician utilization variables were truncated at their 99.5 percentile to eliminate outliers.13 For all utilization measures, we further look at the extensive margin of utilization: whether a respondent had at least one medication or physician visit. Hospitalization measures whether a respondent had an overnight inpatient hospital stay in the previous 12 months. "
+    },
+    {
+      "block_id": "2016408853373128706",
+      "title": "4.3. Descriptive statistics",
+      "sub_firstblock": "Figs. 1–3 depict trends in prescription drug coverage and medication utilization among the general population aged 12 to 64 in Quebec compared to the rest of Canada. The corresponding 95 percent confidence intervals are presented for all series whenever applicable. Fig. 1 shows that there was an increase in self-reported prescription drug insurance coverage in all provinces from 1996 to 2003. It is apparent, however, that Quebec started with a lower baseline level of coverage than the other provinces, and that right after the 1997 reform it experienced a dramatic increase in coverage from 62 percent to 85 percent. Interestingly, the magnitude of the increase in overage is very similar to that from the Medicare Part D studies. For example, Afendulis et al. (2011) find that Part D drug coverage increased from 61 percent in 2005 to 88 percent in "
+    },
+    {
+      "block_id": "2016408853373128729",
+      "title": "5. Empirical strategy",
+      "sub_firstblock": "We use a difference-in-differences (DD) approach to compare outcomes in Quebec versus other Canadian provinces. The pre-policy period includes the 1994/1995 and 1996/1997 cycles of the NPHS data and the post-policy period includes the three cycles from 1998/1999 to 2002/2003. The treatment group is the general population in Quebec before and after the policy change and the comparison group is the general population in the other provinces of Canada. We employ the following equation to estimate the impact of the reform on insurance coverage, health care utilization and health outcomes: "
+    },
+    {
+      "block_id": "2016408853373128742",
+      "title": "6. Results",
+      "sub_firstblock": "6.1. Difference-in-differences estimation results"
+    },
+    {
+      "block_id": "2016408853373128743",
+      "title": "6.1. Difference-in-differences estimation results",
+      "sub_firstblock": "The first issue we address is whether the reform increases drug insurance coverage. Table III reports DD regression results with self-reported status of drug insurance as the dependent variable. Estimates of the policy effects from OLS regressions with two specifications are shown in columns 1 and 2, and those from fixed effects linear models are in columns 3 and 4.20 Standard errors clustered at the individual level are presented in parentheses. Comparing the four columns, the point estimates of the policy effects do not change notably when control variables are added to the specifications, or when we use a fixed effects rather than an OLS specification. The first row shows that the universal drug program has been successful in expanding drug coverage among the general population. The estimated increase in drug insurance coverage of 21 percentage points represents a 33 percent increase relative to the pre-policy coverage in Quebec. "
+    },
+    {
+      "block_id": "2016408853373128765",
+      "title": "6.2. Heterogeneous effects at different points of the HUI distribution",
+      "sub_firstblock": "DD conditional quantile regression estimates by deciles of HUI are plotted in Fig. 9. We find that the impact on health is monotonically decreasing and is virtually zero from the median to the ninth decile. This finding should not be surprising given that more than 50 percent of the population in the sample have HUI greater than 0.97. It should be noted that the positive impact on HUI is 0.038 at the first decile, representing a clinically important improvement in health status. At the 20th and 30th percentiles, the policy effects are around 0.015 and 0.014 and still statistically significant. These results suggest that it is mainly less healthy individuals that experienced an improvement in health status, indicating that high value pharmaceutical drugs may be under-used among them. Therefore, offering affordable pharmaceutical drugs to these high risk people can improve their health substantially. For policy purposes, this finding is crucial since a mandatory drug program can generate substantial health gains for those with worse health outcomes, who are usually the target of public drug programs. It provides useful information for policymakers who are considering a national pharmacare program in the Canadian context and for optimal drug insurance design in general. "
+    },
+    {
+      "block_id": "2016408853373128767",
+      "title": "6.3. Subgroup analysis by drug insurance status and chronic condition",
+      "sub_firstblock": "One important consideration in understanding the potential effects of the universal drug policy is how it may differentially affect sub-populations. If patients in different subgroups tend to use different combinations of inputs, such as medications, physician and hospital services, to produce health and if health care is more effective for some patients than others, then the benefits of health insurance should vary accordingly. Thanks to the panel nature of the data, individuals who were previously uninsured can be identified and subgroup analysis by previous insurance status is conducted to further identify the heterogeneous impacts of the policy. Similarly, policy effects by chronic condition are estimated. We examine the heterogeneous effects by looking at the interactions between these subgroups and the main treatment variable. "
+    },
+    {
+      "block_id": "2016408853373128778",
+      "title": "6.4. Sensitivity and robustness analysis",
+      "sub_firstblock": "We can test the identifying assumption of our DD estimation by falsification (placebo) tests for the years before the policy change. We define 1994/1995 as the pre-policy years and 1996/1997 as the post-policy year in the falsification tests. The test results (shown in Table VII) suggest that none of the coefficients is statistically significant except the coefficient in one of the specialist utilization models, which is significantly negative. Of course, out of 18 coefficient estimates (even if the variables were random numbers) it would be unusual not to have at least one that is statistically significant at the five or ten percent levels. Overall, the falsification tests do not reject the common trend hypothesis in our models. We further estimated full dynamic models by adding all interactions of Quebec and time dummies.25 The results are shown in Appendix B. We find that all coefficients on the interaction of Quebec and year 1994 (two periods before the policy change) are close to zero. Again this indicates that other provinces exhibited a parallel trend to Quebec in all of the outcomes. (Please refer to Appendix B for details). "
+    },
+    {
+      "block_id": "2016408853373128789",
+      "title": "7. Conclusion and discussion",
+      "sub_firstblock": "Canada continues to debate the merits of introducing a national pharmacare program. The debate needs to be informed by evidence regarding the effectiveness of expanded drug insurance coverage. This study examines the impact of Quebec’s mandatory universal drug program on insurance coverage, health care utilization and health outcomes. We find that the introduction of the mandatory drug program substantially increased drug coverage among the general population. The program also increased medication use and GP visits. No statistically significant effects were found for specialist visits and hospitalization. Our subgroup analysis by pre-reform drug insurance status suggests that the reform had no differential impacts on total drug and GP utilization among the previously insured and uninsured. Furthermore, effects on drug and GP utilization for the previously uninsured are concentrated at the extensive margin, indicating that the reform improved access to these services for them. Subgroup analysis by presence of chronic condition reveals that the reform had a much large effect on the probability of GP visit for those with chronic conditions. Most importantly, results of quantile regressions show that the reform had differential health impacts. People with worse health outcomes experienced a large improvement in their health status. "
+    },
+    {
+      "block_id": "2016408853373128798",
+      "title": "Funding sources",
+      "sub_firstblock": "There is no financial support for this research work. "
+    },
+    {
+      "block_id": "2016408853373128800",
+      "title": "Conflict of interest statement",
+      "sub_firstblock": "The authors confirm that there is no known conflict of interest associated with this manuscript and publication. "
+    },
+    {
+      "block_id": "2016408853373128802",
+      "title": "Acknowledgements",
+      "sub_firstblock": "The authors would like to thank Lonnie Magee, Robyn Tamblyn and Wei Lin for helpful comments and suggestions. The authors would also like to thank Natalie Malak (Argiropoulos) for her research assistance. The authors also received useful comments from participants at the Canadian Economics Association meetings. The research analysis was conducted at the Statistics Canada Research Data Centre at McMaster University and we thank the staff for their generous assistance. Opinions expressed in this paper do not necessarily reflect those of Statistics Canada. The authors alone are responsible for the views expressed here. "
+    },
+    {
+      "block_id": "2016408853373128804",
+      "title": "Appendix A. Variable description",
+      "sub_firstblock": ""
+    }
+  ]
+}

@@ -108,28 +108,41 @@ Format:
         return value,"Other"
     return value,None
 
-def normalize_field(df,field,cfg,client,model):
-    allowed=ENUM_RULES[field]
-    abnormal=df[field].dropna().astype(str)
-    abnormal=abnormal[~abnormal.isin(allowed)].unique().tolist()
-    if not abnormal:return df
-    mapping={}
+def normalize_field(df, field, cfg, client, model):
+    allowed = ENUM_RULES[field]
+    # 找出不在枚举范围内的值
+    abnormal = df[field].dropna().astype(str)
+    abnormal = abnormal[~abnormal.isin(allowed)].unique().tolist() 
+    if not abnormal:
+        return df 
+    # 调用 LLM 做归一化
+    mapping = {}
     with ThreadPoolExecutor(max_workers=cfg["max_workers"]) as pool:
-        futures=[pool.submit(call_llm,x,field,cfg,client,model) for x in abnormal]
-        for f in tqdm(as_completed(futures),total=len(futures),desc=field):
+        futures = [pool.submit(call_llm, x, field, cfg, client, model) for x in abnormal]
+        for f in tqdm(as_completed(futures), total=len(futures), desc=field):
             try:
-                k,v=f.result()
-                mapping[k]=v
+                k, v = f.result()
+                mapping[k] = v
             except Exception as e:
-                print("LLM error:",e)
-    if field=="causal_inference_method":
-        original=df[field].copy()
-    df[field]=df[field].apply(lambda x:mapping.get(str(x),x) if pd.notna(x) else None)
-    df[field]=df[field].apply(lambda x:x if x in allowed else ("Other" if field=="causal_inference_method" else None))
-    if field=="causal_inference_method":
-        df.loc[df[field]=="Other","evidence_method_other_description"]=original[df[field]=="Other"]
+                print("LLM error:", e)
+    # 只在处理 causal_inference_method 时保存原始值
+    if field == "causal_inference_method":
+        original = df[field].copy()
+    # 应用映射
+    df[field] = df[field].apply(
+        lambda x: mapping.get(str(x), x) if pd.notna(x) else None
+    )
+    # 把仍然不在允许列表中的值强制处理
+    df[field] = df[field].apply(
+        lambda x: x if (pd.isna(x) or x in allowed) 
+                  else ("Other" if field == "causal_inference_method" else None)
+    )
+    
+    # 关键修复点：只对「原本就不在允许列表」的行写入 description
+    if field == "causal_inference_method":
+        mask = (~original.isin(allowed)) & original.notna()
+        df.loc[mask, "evidence_method_other_description"] = original[mask] 
     return df
-
 def clean_boolean(x):
     x=str(x).lower().strip()
     if x=="true":return True

@@ -50,6 +50,12 @@ springdoc:
 logging:
   file:
     name: ${LOG_FILE:logs/paperflow-admin.log}
+  logback:
+    rollingpolicy:
+      max-file-size: ${LOG_MAX_FILE_SIZE:20MB}
+      max-history: ${LOG_MAX_HISTORY:30}
+      total-size-cap: ${LOG_TOTAL_SIZE_CAP:1GB}
+      clean-history-on-start: true
   level:
     root: INFO
     com.paperflow.admin: INFO

@@ -293,8 +293,9 @@ paperflow:
     data-root: ${DATA_ROOT:data}
 ```
 
-`LOG_FILE` 设置后端日志文件。数据库账号读取 Paperflow 业务表，并读写
-`admin_user` 和 `admin_audit_log`。
+`LOG_FILE` 设置后端日志文件。默认单个日志文件最大 20 MB，保留 30 天，历史日志总量
+上限 1 GB；可通过 `LOG_MAX_FILE_SIZE`、`LOG_MAX_HISTORY` 和 `LOG_TOTAL_SIZE_CAP`
+覆盖。数据库账号读取 Paperflow 业务表，并读写 `admin_user` 和 `admin_audit_log`。
 
 Blocks 接口单独使用默认 `size=100`、最大 `size=500`。
 资产接口只解析并读取 `paperflow.api.data-root` 下的相对路径。

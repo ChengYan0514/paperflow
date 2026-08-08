@@ -261,6 +261,22 @@ password: admin
   修改密码等审计事件；`ADMIN` 和 `USER` 不可访问。
 - Swagger 菜单打开 `/swagger-ui/index.html`。
 
+## 本地运行日志排查
+
+后端运行日志默认写入 `java-admin/logs/paperflow-admin.log`，同时保留在启动窗口。
+应用异常响应中的 `requestId` 可用于定位对应的完整堆栈：
+
+```bash
+tail -f java-admin/logs/paperflow-admin.log
+rg "ERROR" java-admin/logs/
+rg "<requestId>" java-admin/logs/
+zgrep "<requestId>" java-admin/logs/*.gz
+```
+
+日志按文件大小和日期轮转：单文件默认 20 MB，历史文件保留 30 天，总量上限 1 GB。
+可通过 `LOG_FILE`、`LOG_MAX_FILE_SIZE`、`LOG_MAX_HISTORY` 和 `LOG_TOTAL_SIZE_CAP`
+调整。日志不记录请求体、密码、Cookie、Authorization 或上传文件内容。
+
 ## 停止服务
 
 前端和后端都是前台进程运行时，按 `Ctrl+C` 停止对应终端里的进程。

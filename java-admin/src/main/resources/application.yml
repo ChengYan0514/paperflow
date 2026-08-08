@@ -9,6 +9,22 @@ spring:
     password: ${PAPERFLOW_DB_PASSWORD:password}
     hikari:
       maximum-pool-size: 10
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    baseline-on-migrate: true
+    baseline-version: 0
+  servlet:
+    multipart:
+      max-file-size: ${PAPER_UPLOAD_MAX_SIZE:100MB}
+      max-request-size: ${PAPER_UPLOAD_MAX_SIZE:100MB}
+openalex:
+  datasource:
+    url: "jdbc:postgresql://${OPENALEX_DB_HOST:${PAPERFLOW_DB_HOST:localhost}}:${OPENALEX_DB_PORT:${PAPERFLOW_DB_PORT:5432}}/${OPENALEX_DB_NAME:${PAPERFLOW_DB_NAME:openalex}}?currentSchema=${OPENALEX_DB_SCHEMA:dataset_20241125}"
+    username: ${OPENALEX_DB_USER:${PAPERFLOW_DB_USER:paperflow}}
+    password: ${OPENALEX_DB_PASSWORD:${PAPERFLOW_DB_PASSWORD:password}}
+    hikari:
+      maximum-pool-size: 5
+      read-only: true
 causal:
   datasource:
     url: "jdbc:postgresql://${CAUSAL_DB_HOST:${PAPERFLOW_DB_HOST:localhost}}:${CAUSAL_DB_PORT:${PAPERFLOW_DB_PORT:5432}}/${CAUSAL_DB_NAME:${PAPERFLOW_DB_NAME:paperflow}}?currentSchema=${CAUSAL_DB_SCHEMA:${PAPERFLOW_DB_SCHEMA:paperflow}}"
@@ -48,3 +64,4 @@ paperflow:
     default-block-page-size: 100
     max-block-page-size: 500
     data-root: ${DATA_ROOT:data}
+    upload-max-bytes: ${PAPER_UPLOAD_MAX_BYTES:104857600}

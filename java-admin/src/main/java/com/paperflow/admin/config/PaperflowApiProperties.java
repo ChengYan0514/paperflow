@@ -11,5 +11,5 @@ public record PaperflowApiProperties(
         @Min(1) int maxPageSize,
         @Min(1) int defaultBlockPageSize,
         @Min(1) int maxBlockPageSize,
-        String dataRoot) {
-}
+        String dataRoot,
+        @Min(1) long uploadMaxBytes) {}

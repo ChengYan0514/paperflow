@@ -74,6 +74,33 @@ public class DataSourceConfig {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 
+    @Bean
+    @ConfigurationProperties("openalex.datasource")
+    public DataSourceProperties openAlexDataSourceProperties() {
+        return new DataSourceProperties();
+    }
+
+    @Bean
+    @ConfigurationProperties("openalex.datasource.hikari")
+    public HikariDataSource openAlexDataSource(
+            @Qualifier("openAlexDataSourceProperties") DataSourceProperties properties) {
+        HikariDataSource dataSource = properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
+        dataSource.setReadOnly(true);
+        return dataSource;
+    }
+
+    @Bean
+    public SqlSessionFactory openAlexSqlSessionFactory(
+            @Qualifier("openAlexDataSource") DataSource dataSource) throws Exception {
+        return createSqlSessionFactory(dataSource);
+    }
+
+    @Bean
+    public SqlSessionTemplate openAlexSqlSessionTemplate(
+            @Qualifier("openAlexSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+        return new SqlSessionTemplate(sqlSessionFactory);
+    }
+
     private SqlSessionFactory createSqlSessionFactory(DataSource dataSource) throws Exception {
         SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
         factoryBean.setDataSource(dataSource);

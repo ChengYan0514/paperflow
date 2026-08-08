@@ -33,6 +33,7 @@
                 COUNT(*) FILTER (WHERE j.flag_text = -2) AS unsupported_file_count
             FROM original_file f
             JOIN original_file_job j ON j.file_id = f.file_id
+            WHERE f.deleted_at IS NULL
             GROUP BY f.source_id
         ) fs ON fs.source_id = s.source_id
     </sql>
@@ -102,21 +103,21 @@
         SELECT
             (SELECT COUNT(*) FROM source) AS source_count,
             (SELECT COUNT(*) FROM work) AS work_count,
-            (SELECT COUNT(DISTINCT file_id) FROM original_file) AS original_file_count,
+            (SELECT COUNT(DISTINCT file_id) FROM original_file WHERE deleted_at IS NULL) AS original_file_count,
             (
-                SELECT COUNT(DISTINCT matched_work_id)
-                FROM original_file_job
-                WHERE flag_match = 1 AND matched_work_id IS NOT NULL
+                SELECT COUNT(DISTINCT j.matched_work_id)
+                FROM original_file_job j JOIN original_file f ON f.file_id=j.file_id
+                WHERE j.flag_match = 1 AND j.matched_work_id IS NOT NULL AND f.deleted_at IS NULL
             ) AS matched_work_count,
             (
-                SELECT COUNT(DISTINCT file_id)
-                FROM original_file_job
-                WHERE flag_text = 2
+                SELECT COUNT(DISTINCT j.file_id)
+                FROM original_file_job j JOIN original_file f ON f.file_id=j.file_id
+                WHERE j.flag_text = 2 AND f.deleted_at IS NULL
             ) AS parsed_file_count,
             (
-                SELECT COUNT(DISTINCT file_id)
-                FROM original_file_job
-                WHERE flag_block = 1
+                SELECT COUNT(DISTINCT j.file_id)
+                FROM original_file_job j JOIN original_file f ON f.file_id=j.file_id
+                WHERE j.flag_block = 1 AND f.deleted_at IS NULL
             ) AS block_imported_file_count
     </select>
 
@@ -144,13 +145,15 @@
                 COUNT(DISTINCT f.file_id) FILTER (WHERE j.flag_block = 1) AS block_imported_file_count
             FROM original_file f
             LEFT JOIN original_file_job j ON j.file_id = f.file_id
+            WHERE f.deleted_at IS NULL
             GROUP BY f.source_id
         ) fs ON fs.source_id = s.source_id
         LEFT JOIN (
             SELECT ws.source_id, COUNT(DISTINCT ws.work_id) AS matched_work_count
             FROM work_source ws
             JOIN original_file_job j ON j.matched_work_id = ws.work_id
-            WHERE j.flag_match = 1
+            JOIN original_file f ON f.file_id=j.file_id
+            WHERE j.flag_match = 1 AND f.deleted_at IS NULL
             GROUP BY ws.source_id
         ) ms ON ms.source_id = s.source_id
         ORDER BY s.source_id ASC
@@ -385,7 +388,7 @@
             j.flag_block
         FROM original_file_job j
         JOIN original_file f ON f.file_id = j.file_id
-        WHERE j.matched_work_id = #{workId}
+        WHERE j.matched_work_id = #{workId} AND f.deleted_at IS NULL
     </select>
 
     <select id="findTextFiles" resultType="com.paperflow.admin.model.TextFileRow">
@@ -417,6 +420,12 @@
         f.original_file_path,
         f.original_file_type,
         f.file_size,
+        f.record_version,
+        f.current_version,
+        f.created_at,
+        f.created_by,
+        f.updated_at,
+        f.updated_by,
         j.flag_match,
         j.matched_work_id,
         j.flag_text,
@@ -425,8 +434,9 @@
 
     <sql id="OriginalFileFilters">
         <where>
+            f.deleted_at IS NULL
             <if test="sourceId != null">
-                f.source_id = #{sourceId}
+                AND f.source_id = #{sourceId}
             </if>
             <if test="q != null">
                 AND (
@@ -514,7 +524,7 @@
         FROM original_file f
         JOIN original_file_job j ON j.file_id = f.file_id
         LEFT JOIN source s ON s.source_id = f.source_id
-        WHERE f.file_id = #{fileId}
+        WHERE f.file_id = #{fileId} AND f.deleted_at IS NULL
     </select>
 
     <select id="countWorkBlocks" resultType="long">

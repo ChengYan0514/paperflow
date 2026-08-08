@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
     "CREATE TABLE work (work_id varchar(255) PRIMARY KEY, doi varchar(1000), title varchar(1000), publication_year int, publication_date varchar(255), type varchar(255), language varchar(255))",
     "CREATE TABLE work_source (work_id varchar(255), source_id varchar(255))",
     "CREATE TABLE work_author (work_id varchar(255), author_id varchar(255), author_name varchar(255), author_position varchar(32))",
-    "CREATE TABLE original_file (file_id varchar(255) PRIMARY KEY, source_id varchar(255), year int, paper_title varchar(2000), authors varchar(2000), doi varchar(500), url varchar(2000), provider varchar(255), original_file_name varchar(255), original_file_path varchar(1000), original_file_type varchar(10), file_size bigint)",
+    "CREATE TABLE original_file (file_id varchar(255) PRIMARY KEY, source_id varchar(255), year int, paper_title varchar(2000), authors varchar(2000), doi varchar(500), url varchar(2000), provider varchar(255), original_file_name varchar(255), original_file_path varchar(1000), original_file_type varchar(10), file_size bigint, record_version bigint default 0, current_version int default 1, created_at timestamp with time zone, created_by bigint, updated_at timestamp with time zone, updated_by bigint, deleted_at timestamp with time zone)",
     "CREATE TABLE original_file_job (file_id varchar(255) PRIMARY KEY, flag_match int, matched_work_id varchar(255), flag_text int, flag_block int)",
     "CREATE TABLE text_file (file_id varchar(255), file_type varchar(10), file_name varchar(255), file_path varchar(1000), file_size bigint)",
     "CREATE TABLE claim_table (claim_id bigint PRIMARY KEY, cause_standard varchar(255), effect_standard varchar(255))",

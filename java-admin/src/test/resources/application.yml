@@ -1,10 +1,18 @@
 spring:
+  flyway:
+    enabled: false
   datasource:
     url: jdbc:h2:mem:paperflow_admin_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=YEAR
     driver-class-name: org.h2.Driver
     username: sa
     password:
 causal:
+  datasource:
+    url: jdbc:h2:mem:paperflow_admin_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=YEAR
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+openalex:
   datasource:
     url: jdbc:h2:mem:paperflow_admin_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=YEAR
     driver-class-name: org.h2.Driver
@@ -28,3 +36,4 @@ paperflow:
     default-block-page-size: 100
     max-block-page-size: 500
     data-root: data
+    upload-max-bytes: 104857600

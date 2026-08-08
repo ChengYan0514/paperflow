@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
     "CREATE TABLE source (source_id varchar(255) PRIMARY KEY, source_name varchar(1000), provider varchar(1000))",
     "CREATE TABLE work (work_id varchar(255) PRIMARY KEY)",
     "CREATE TABLE work_source (work_id varchar(255), source_id varchar(255))",
-    "CREATE TABLE original_file (file_id varchar(255) PRIMARY KEY, source_id varchar(255))",
+    "CREATE TABLE original_file (file_id varchar(255) PRIMARY KEY, source_id varchar(255), deleted_at timestamp with time zone)",
     "CREATE TABLE original_file_job (file_id varchar(255) PRIMARY KEY, flag_match int, matched_work_id varchar(255), flag_text int, flag_block int)",
     "INSERT INTO source (source_id, source_name, provider) VALUES ('S1', 'Source One', 'Publisher A')",
     "INSERT INTO source (source_id, source_name, provider) VALUES ('S2', 'Source Two', 'Publisher B')",

@@ -9,14 +9,33 @@ Nginx + systemd 的生产部署方式。
 - Node.js 22+ 和 npm 可用。
 - 仓库根目录 `.env` 或 `java-admin/.env` 已配置 `PAPERFLOW_DB_*`，Java 后端会读取
   这些配置连接 Paperflow PostgreSQL 数据库。
+- 论文写入功能还需要配置只读 `OPENALEX_DB_*`。当前生产拓扑中两套连接指向同一
+  `openalex` 数据库，业务 schema 为 `widi_chengyan`，OpenAlex schema 为
+  `dataset_20241125`。
 - 如果 causal knowledge graph 在单独数据库，再额外配置 `CAUSAL_DB_*`；知识图谱
   相关接口会优先使用这组连接信息。
 - causal 数据库首次部署知识图谱查询前，由 schema owner 创建声明关联索引并更新
   统计信息；详见下方“因果知识图谱索引”。
-- 数据库账号需要读取 Paperflow 业务表，并读写 `admin_user` 和
-  `admin_audit_log`。
+- 数据库账号需要读写 Paperflow 业务 schema 中的 `original_file`、
+  `original_file_job`、`original_file_version`、Source 搜索快照、文件补偿表和管理表；
+  对 OpenAlex schema 只需要 SELECT。
 - 如果要预览 PDF/HTML 或 parsed 图片，`.env` 还需要配置 `DATA_ROOT` 指向
   Paperflow 数据根目录；未配置时默认使用仓库相对路径 `data`。
+- Java 进程必须能写 `DATA_ROOT/openalex/original`、`.upload-tmp`、
+  `paperflow/archive`、`paperflow/trash` 和 `paperflow/pending-delete`。
+
+### Source 模糊搜索索引
+
+应用账号当前没有数据库级 `CREATE` 权限，因此 Flyway 不尝试安装 PostgreSQL
+`pg_trgm` 扩展。生产环境建议由数据库管理员执行一次：
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+```
+
+扩展存在时迁移会创建名称和出版社的 trigram 索引；扩展不存在时 Source 搜索仍可
+使用，但模糊查询会退化为 `LIKE` 扫描。首次部署后由 SUPER_ADMIN 在“OpenAlex
+来源检索”页面执行一次全量同步。
 
 ## 启动后端
 

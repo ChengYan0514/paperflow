@@ -664,7 +664,13 @@ public class AdminService {
                 row.getOriginalFilePath(),
                 assetService.assetUrl(row.getOriginalFilePath()),
                 row.getOriginalFileType(),
-                row.getFileSize());
+                row.getFileSize(),
+                row.getRecordVersion(),
+                row.getCurrentVersion(),
+                row.getCreatedAt(),
+                row.getCreatedBy(),
+                row.getUpdatedAt(),
+                row.getUpdatedBy());
     }
 
     private TextFileDto toTextFile(TextFileRow row) {

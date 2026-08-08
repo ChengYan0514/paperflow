@@ -1,17 +1,22 @@
 # Paperflow Admin Platform
 
-Paperflow Admin Platform is the standalone read-only management platform for a
-Paperflow database. It contains:
+Paperflow Admin Platform is the standalone management platform for a Paperflow
+database. Most domain resources remain read-only, while Paper CRUD and single-file
+upload are implemented as the controlled write boundary.
+It contains:
 
 - `java-admin/`: Spring Boot REST API and Swagger UI.
 - `web-admin-pro/`: Ant Design Pro / Umi Max management frontend.
 - `docs/`: backend contract, runbook, and Paperflow database reference docs.
 - `CONTEXT.md`: shared Paperflow domain terms.
 
-The platform reads Paperflow PostgreSQL tables and files under `DATA_ROOT`. It
-does not import data, trigger the Python pipeline, run MinerU, or write
-Paperflow business tables. It only writes local Admin tables such as
-`admin_user` and `admin_audit_log`.
+The current platform reads Paperflow PostgreSQL tables and files under
+`DATA_ROOT` and writes local Admin tables such as `admin_user` and
+`admin_audit_log`. Paper CRUD adds controlled writes to Paper records and Original
+File versions without triggering the Python
+pipeline or running MinerU. See
+[`docs/adr/0003-paper-crud-and-source-search.md`](docs/adr/0003-paper-crud-and-source-search.md)
+and [`docs/paper-crud-implementation-plan.md`](docs/paper-crud-implementation-plan.md).
 
 Current management features include:
 

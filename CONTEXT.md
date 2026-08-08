@@ -37,12 +37,17 @@ same File Hash may upgrade the file type, choosing PDF before XML before HTML.
 _Avoid_: Processing job, Work job.
 
 **Paper Management Record (Paper)**:
-The read-only admin-facing resource identified by `file_id`. It is backed by
+The admin-facing resource identified by immutable `file_id`. It is backed by
 one **Original File Record** and its **Original File Job**. A matched **Work**
 supplements it with OpenAlex metadata but does not replace its identity or
 original-file metadata.
 _Avoid_: Work when referring to the Paper Management Record; Paper when
 referring to an OpenAlex Work.
+
+New records created by the admin platform derive `file_id` once from a
+canonicalized Source ID, year, title, and ordered author list. Historical
+records keep their existing File Hash identity. Editing metadata or replacing
+the Original File never changes `file_id`.
 
 **File Hash**:
 The extensionless value of `original_file_name`, used as the import identity for an **Original File Record**. Despite the name, it is not a file-content hash in the current domain.
@@ -99,6 +104,23 @@ A fixed authorization category assigned to an **Admin User**. Each **Admin
 User** has one **Admin Role**; the current roles are Admin and Viewer.
 _Avoid_: Permission matrix, dynamic role when referring to the current admin
 platform roles.
+
+**OpenAlex Source Search Snapshot**:
+A searchable local projection of the read-only OpenAlex `sources` dataset.
+It supports interactive Source selection but is not the authoritative source
+for creation-time validation and is not user-managed Source data.
+_Avoid_: Source CRUD, OpenAlex source table copy when referring to search.
+
+**Soft-deleted Paper**:
+A Paper hidden from normal management views whose database identity and file
+versions are retained in the recovery area. It may be restored by an Admin or
+Super Admin. Only a Super Admin may permanently delete it.
+_Avoid_: Deleted Paper when physical removal has not completed.
+
+**Original File Version**:
+One immutable stored revision of an Original File. Replacing or restoring a
+file creates a new version while the Paper `file_id` remains unchanged.
+_Avoid_: Paper version when referring only to the uploaded file bytes.
 
 ## Example Dialogue
 

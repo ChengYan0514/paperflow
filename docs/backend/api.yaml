@@ -494,6 +494,34 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
   /api/papers:
+    post:
+      tags: [Papers]
+      operationId: createPaper
+      summary: Create one Paper and upload one Original File.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [metadata, file]
+              properties:
+                metadata:
+                  $ref: "#/components/schemas/PaperMetadataInput"
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Paper created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaperMutation"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          description: Paper already exists or is in trash.
     get:
       tags: [Papers]
       operationId: listPapers
@@ -579,6 +607,48 @@ paths:
         "400":
           $ref: "#/components/responses/ValidationError"
   /api/papers/{fileId}:
+    put:
+      tags: [Papers]
+      operationId: updatePaper
+      summary: Update editable Paper metadata using optimistic locking.
+      parameters:
+        - $ref: "#/components/parameters/FileId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaperUpdateRequest"
+      responses:
+        "200":
+          description: Paper updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaperMutation"
+        "409":
+          description: Version conflict or matched metadata is locked.
+    delete:
+      tags: [Papers]
+      operationId: softDeletePaper
+      summary: Move a Paper to trash. ADMIN or SUPER_ADMIN only.
+      parameters:
+        - $ref: "#/components/parameters/FileId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaperDeleteRequest"
+      responses:
+        "200":
+          description: Paper moved to trash.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaperMutation"
+        "403":
+          $ref: "#/components/responses/Forbidden"
     get:
       tags: [Papers]
       operationId: getPaper
@@ -594,6 +664,185 @@ paths:
                 $ref: "#/components/schemas/PaperDetail"
         "404":
           $ref: "#/components/responses/PaperNotFound"
+  /api/papers/trash:
+    get:
+      tags: [Papers]
+      operationId: listTrashedPapers
+      summary: List soft-deleted Papers. ADMIN or SUPER_ADMIN only.
+      responses:
+        "200":
+          description: Trashed Paper identities and record versions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrashedPaper"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/papers/{fileId}/restore:
+    post:
+      tags: [Papers]
+      operationId: restorePaper
+      parameters:
+        - $ref: "#/components/parameters/FileId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaperVersionActionRequest"
+      responses:
+        "200":
+          description: Paper restored.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaperMutation"
+  /api/papers/{fileId}/purge:
+    post:
+      tags: [Papers]
+      operationId: purgePaper
+      summary: Permanently delete a trashed Paper. SUPER_ADMIN only.
+      parameters:
+        - $ref: "#/components/parameters/FileId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaperPurgeRequest"
+      responses:
+        "204":
+          description: Paper permanently deleted.
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/papers/{fileId}/versions:
+    get:
+      tags: [Papers]
+      operationId: listPaperVersions
+      parameters:
+        - $ref: "#/components/parameters/FileId"
+      responses:
+        "200":
+          description: Original File versions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaperFileVersion"
+    post:
+      tags: [Papers]
+      operationId: replacePaperFile
+      parameters:
+        - $ref: "#/components/parameters/FileId"
+        - name: recordVersion
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: New file version created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaperMutation"
+  /api/papers/{fileId}/versions/{versionNo}/restore:
+    post:
+      tags: [Papers]
+      operationId: restorePaperVersion
+      parameters:
+        - $ref: "#/components/parameters/FileId"
+        - name: versionNo
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaperVersionActionRequest"
+      responses:
+        "200":
+          description: Historical file restored as a new version.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaperMutation"
+  /api/openalex/source-search:
+    get:
+      tags: [OpenAlex Sources]
+      operationId: searchOpenAlexSources
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 200
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+      responses:
+        "200":
+          description: Source recommendations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenAlexSource"
+  /api/openalex/source-search/{sourceId}:
+    get:
+      tags: [OpenAlex Sources]
+      operationId: getOpenAlexSource
+      parameters:
+        - $ref: "#/components/parameters/SourceId"
+      responses:
+        "200":
+          description: Authoritative OpenAlex Source.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenAlexSource"
+  /api/openalex/source-search/sync:
+    post:
+      tags: [OpenAlex Sources]
+      operationId: syncOpenAlexSources
+      summary: Refresh the local Source search snapshot. SUPER_ADMIN only.
+      responses:
+        "200":
+          description: Sync count.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [syncedCount]
+                properties:
+                  syncedCount:
+                    type: integer
+                    format: int64
   /api/papers/{fileId}/blocks:
     get:
       tags: [Papers]
@@ -1162,6 +1411,14 @@ components:
             - WORK_NOT_FOUND
             - ORIGINAL_FILE_NOT_FOUND
             - PAPER_NOT_FOUND
+            - PAPER_ALREADY_EXISTS
+            - PAPER_IN_TRASH
+            - PAPER_VERSION_CONFLICT
+            - PAPER_MATCHED_FIELDS_LOCKED
+            - PAPER_STORAGE_CONFLICT
+            - INVALID_PAPER_FILE
+            - PAPER_FILE_TOO_LARGE
+            - PURGE_CONFIRMATION_REQUIRED
             - INTERNAL_ERROR
         message:
           type: string
@@ -1749,6 +2006,27 @@ components:
         fileSize:
           type: integer
           format: int64
+        recordVersion:
+          type: integer
+          format: int64
+        currentVersion:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdBy:
+          type: integer
+          format: int64
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedBy:
+          type: integer
+          format: int64
+          nullable: true
         flagMatch:
           type: integer
         matchedWorkId:
@@ -1811,6 +2089,167 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/CausalPaperSummary"
+    PaperMetadataInput:
+      type: object
+      required: [sourceId, year, paperTitle, authors]
+      properties:
+        sourceId:
+          type: string
+        year:
+          type: integer
+          minimum: 1000
+        paperTitle:
+          type: string
+          maxLength: 2000
+        authors:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            maxLength: 500
+        doi:
+          type: string
+          nullable: true
+        url:
+          type: string
+          nullable: true
+    PaperUpdateRequest:
+      allOf:
+        - $ref: "#/components/schemas/PaperMetadataInput"
+        - type: object
+          required: [recordVersion]
+          properties:
+            recordVersion:
+              type: integer
+              format: int64
+              minimum: 0
+    PaperMutation:
+      type: object
+      required: [fileId, recordVersion]
+      properties:
+        fileId:
+          type: string
+        recordVersion:
+          type: integer
+          format: int64
+    TrashedPaper:
+      allOf:
+        - $ref: "#/components/schemas/PaperMutation"
+        - type: object
+          required: [sourceId, recordVersion, deletedAt]
+          properties:
+            sourceId:
+              type: string
+            sourceName:
+              type: string
+              nullable: true
+            year:
+              type: integer
+              nullable: true
+            paperTitle:
+              type: string
+              nullable: true
+            authors:
+              type: string
+              nullable: true
+            deletedAt:
+              type: string
+              format: date-time
+            deletedBy:
+              type: integer
+              format: int64
+              nullable: true
+            deleteReason:
+              type: string
+              nullable: true
+    PaperDeleteRequest:
+      type: object
+      required: [recordVersion]
+      properties:
+        recordVersion:
+          type: integer
+          format: int64
+        reason:
+          type: string
+          maxLength: 500
+          nullable: true
+    PaperVersionActionRequest:
+      type: object
+      required: [recordVersion]
+      properties:
+        recordVersion:
+          type: integer
+          format: int64
+    PaperPurgeRequest:
+      type: object
+      required: [confirmation, recordVersion]
+      properties:
+        confirmation:
+          type: string
+          enum: [删除]
+        recordVersion:
+          type: integer
+          format: int64
+    PaperFileVersion:
+      type: object
+      required: [fileId, versionNo, fileName, fileUrl, fileType, fileSize, uploadedAt, current]
+      properties:
+        fileId:
+          type: string
+        versionNo:
+          type: integer
+        fileName:
+          type: string
+        fileUrl:
+          type: string
+        fileType:
+          type: string
+          enum: [PDF, XML, HTML]
+        fileSize:
+          type: integer
+          format: int64
+        uploadedBy:
+          type: integer
+          format: int64
+          nullable: true
+        uploadedAt:
+          type: string
+          format: date-time
+        current:
+          type: boolean
+    OpenAlexSource:
+      type: object
+      required: [sourceId, displayName, issn]
+      properties:
+        sourceId:
+          type: string
+        displayName:
+          type: string
+        publisher:
+          type: string
+          nullable: true
+        issnL:
+          type: string
+          nullable: true
+        issn:
+          type: array
+          items:
+            type: string
+        worksCount:
+          type: integer
+          nullable: true
+        citedByCount:
+          type: integer
+          nullable: true
+        isOa:
+          type: boolean
+          nullable: true
+        isInDoaj:
+          type: boolean
+          nullable: true
+        homepageUrl:
+          type: string
+          nullable: true
     TextFile:
       type: object
       required: [fileId, fileType, fileName, filePath, fileUrl, fileSize]

@@ -19,7 +19,12 @@ let setSearchParams = vi.fn();
 let params = { sourceId: 'S1', workId: 'W1', fileId: 'F1' };
 
 vi.mock('@umijs/max', () => ({
+  history: { push: vi.fn() },
   Link: ({ children, to }: any) => <a href={to}>{children}</a>,
+  useAccess: () => ({
+    canDeletePapers: true,
+    canRestorePaperVersions: true,
+  }),
   useSearchParams: () => [searchParams, setSearchParams],
   useParams: () => params,
 }));
@@ -154,6 +159,7 @@ vi.mock('@/services/business', () => ({
     textFiles: file.textFiles,
     causalSummary: null,
   })),
+  listPaperVersions: vi.fn(async () => []),
   getServiceStatus: vi.fn(async () => ({
     status: 'UP',
     version: '0.1.0',
@@ -286,7 +292,7 @@ describe('business pages', () => {
 
     expect(getPaper).toHaveBeenCalledWith('F1');
     expect(await screen.findByText('Paper title')).toBeInTheDocument();
-    expect(screen.getByText('查看解析后全文')).toHaveAttribute('href', '/papers/F1/blocks');
+    expect(screen.getByText('查看解析后全文').closest('a')).toHaveAttribute('href', '/papers/F1/blocks');
   });
 
   it('shows the causal summary before linking to causal claims', async () => {
@@ -313,7 +319,7 @@ describe('business pages', () => {
     expect(screen.getByText('标准变量对')).toBeInTheDocument();
     expect(screen.getByText('变量数')).toBeInTheDocument();
     expect(screen.getByText('8')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: '查看因果声明' })).toHaveAttribute(
+    expect(screen.getByText('查看因果声明').closest('a')).toHaveAttribute(
       'href',
       '/knowledge/causal-graph/causal-claims/W1',
     );
@@ -324,10 +330,10 @@ describe('business pages', () => {
 
     expect(getPaper).toHaveBeenCalledWith('F1');
     expect(
-      await screen.findByRole('link', { name: '查看论文全文文件：paper.pdf' }),
+      (await screen.findByText('查看论文全文文件：paper.pdf')).closest('a'),
     ).toHaveAttribute('href', '/api/assets/openalex/original/S1/F1.pdf');
     expect(screen.getByText('paper.md')).toBeInTheDocument();
-    expect(screen.getByText('查看解析后全文')).toHaveAttribute('href', '/papers/F1/blocks');
+    expect(screen.getByText('查看解析后全文').closest('a')).toHaveAttribute('href', '/papers/F1/blocks');
   });
 
   it('shows real service status', async () => {

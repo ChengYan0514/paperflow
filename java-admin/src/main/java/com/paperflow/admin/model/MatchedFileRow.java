@@ -18,6 +18,12 @@ public class MatchedFileRow {
     private String matchedWorkId;
     private Integer flagText;
     private Integer flagBlock;
+    private Long recordVersion;
+    private Integer currentVersion;
+    private java.time.OffsetDateTime createdAt;
+    private Long createdBy;
+    private java.time.OffsetDateTime updatedAt;
+    private Long updatedBy;
 
     public String getFileId() {
         return fileId;
@@ -154,4 +160,17 @@ public class MatchedFileRow {
     public void setFlagBlock(Integer flagBlock) {
         this.flagBlock = flagBlock;
     }
+
+    public Long getRecordVersion() { return recordVersion; }
+    public void setRecordVersion(Long recordVersion) { this.recordVersion = recordVersion; }
+    public Integer getCurrentVersion() { return currentVersion; }
+    public void setCurrentVersion(Integer currentVersion) { this.currentVersion = currentVersion; }
+    public java.time.OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(java.time.OffsetDateTime createdAt) { this.createdAt = createdAt; }
+    public Long getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
+    public java.time.OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(java.time.OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public Long getUpdatedBy() { return updatedBy; }
+    public void setUpdatedBy(Long updatedBy) { this.updatedBy = updatedBy; }
 }

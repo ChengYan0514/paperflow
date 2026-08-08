@@ -1,24 +1,40 @@
 import {
   ArrowLeftOutlined,
+  DeleteOutlined,
+  EditOutlined,
   FileSearchOutlined,
   FolderOpenOutlined,
   LinkOutlined,
   ReadOutlined,
+  RollbackOutlined,
+  UploadOutlined,
 } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
-import { Link, useParams } from '@umijs/max';
+import { history, Link, useAccess, useParams } from '@umijs/max';
 import {
   Button,
   Descriptions,
   Divider,
+  Input,
+  Modal,
+  Space,
   Statistic,
   Table,
   Tag,
   Typography,
+  Upload,
+  message,
 } from 'antd';
 import { useEffect, useState } from 'react';
-import type { PaperDetail, TextFile } from '@/services/business';
-import { assetUrl, getPaper } from '@/services/business';
+import type { PaperDetail, PaperFileVersion, TextFile } from '@/services/business';
+import {
+  assetUrl,
+  getPaper,
+  listPaperVersions,
+  replacePaperFile,
+  restorePaperVersion,
+  softDeletePaper,
+} from '@/services/business';
 import {
   AssetLink,
   bytes,
@@ -99,10 +115,12 @@ function SectionHeading({
 }
 
 export default function PaperDetailPage() {
+  const access = useAccess();
   const { fileId = '' } = useParams();
   const [file, setFile] = useState<PaperDetail>();
   const [error, setError] = useState<unknown>();
   const [loading, setLoading] = useState(true);
+  const [versions, setVersions] = useState<PaperFileVersion[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -110,6 +128,10 @@ export default function PaperDetailPage() {
       .then(setFile)
       .catch(setError)
       .finally(() => setLoading(false));
+  }, [fileId]);
+
+  useEffect(() => {
+    listPaperVersions(fileId).then(setVersions).catch(() => setVersions([]));
   }, [fileId]);
 
   return (
@@ -148,6 +170,52 @@ export default function PaperDetailPage() {
                   ) : null}
                 </div>
                 <div className="paper-hero-actions">
+                  <Button href={`/papers/${fileId}/edit`} icon={<EditOutlined />}>
+                    编辑元数据
+                  </Button>
+                  <Upload
+                    accept=".pdf,.xml,.html"
+                    showUploadList={false}
+                    beforeUpload={async (upload) => {
+                      await replacePaperFile(
+                        fileId,
+                        originalFile.recordVersion || 0,
+                        upload,
+                      );
+                      message.success('全文文件已替换');
+                      setFile(await getPaper(fileId));
+                      setVersions(await listPaperVersions(fileId));
+                      return Upload.LIST_IGNORE;
+                    }}
+                  >
+                    <Button icon={<UploadOutlined />}>替换全文</Button>
+                  </Upload>
+                  {access.canDeletePapers ? (
+                    <Button
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => {
+                        let reason = '';
+                        Modal.confirm({
+                          title: '将论文移入回收站',
+                          content: (
+                            <Input.TextArea
+                              placeholder="删除原因（可选）"
+                              maxLength={500}
+                              onChange={(event) => { reason = event.target.value; }}
+                            />
+                          ),
+                          onOk: async () => {
+                            await softDeletePaper(fileId, originalFile.recordVersion || 0, reason);
+                            message.success('论文已移入回收站');
+                            history.push('/papers');
+                          },
+                        });
+                      }}
+                    >
+                      删除
+                    </Button>
+                  ) : null}
                   <Button
                     href={`/papers/${fileId}/blocks`}
                     icon={<ReadOutlined />}
@@ -306,6 +374,45 @@ export default function PaperDetailPage() {
                       dataIndex: 'fileSize',
                       width: 120,
                       render: (_, item) => bytes(item.fileSize),
+                    },
+                  ]}
+                />
+              </section>
+
+              <section className="paper-surface paper-text-files">
+                <SectionHeading
+                  eyebrow="File history"
+                  title="全文文件版本"
+                  extra={<span className="paper-section-note">{versions.length} 个版本</span>}
+                />
+                <Table<PaperFileVersion>
+                  dataSource={versions}
+                  pagination={false}
+                  rowKey="versionNo"
+                  columns={[
+                    { title: '版本', dataIndex: 'versionNo', width: 80 },
+                    { title: '格式', dataIndex: 'fileType', width: 90 },
+                    { title: '大小', dataIndex: 'fileSize', width: 120, render: (_, item) => bytes(item.fileSize) },
+                    { title: '上传时间', dataIndex: 'uploadedAt' },
+                    { title: '状态', width: 100, render: (_, item) => item.current ? <Tag color="green">当前</Tag> : <Tag>历史</Tag> },
+                    {
+                      title: '操作', width: 180,
+                      render: (_, item) => (
+                        <Space>
+                          <Button href={assetUrl(item.fileUrl) || undefined} target="_blank">下载</Button>
+                          {!item.current && access.canRestorePaperVersions ? (
+                            <Button
+                              icon={<RollbackOutlined />}
+                              onClick={async () => {
+                                await restorePaperVersion(fileId, item.versionNo, originalFile.recordVersion || 0);
+                                message.success('历史版本已恢复为新版本');
+                                setFile(await getPaper(fileId));
+                                setVersions(await listPaperVersions(fileId));
+                              }}
+                            >恢复</Button>
+                          ) : null}
+                        </Space>
+                      ),
                     },
                   ]}
                 />

@@ -46,6 +46,7 @@ class AssetServiceTest {
     }
 
     private AssetService service() {
-        return new AssetService(new PaperflowApiProperties(20, 100, 100, 500, dataRoot.toString()));
+        return new AssetService(
+                new PaperflowApiProperties(20, 100, 100, 500, dataRoot.toString(), 104_857_600L));
     }
 }

@@ -1,7 +1,9 @@
 # Paperflow Java Admin Overview
 
-本文定义 Paperflow Java 后端管理服务的当前边界。该服务对 Paperflow 业务
-表保持只读，只为登录、用户管理和审计写入本地管理表，不替代 Python pipeline。
+本文定义 Paperflow Java 后端管理服务当前已经实现的边界。当前服务对 Paperflow
+业务表保持只读，只为登录、用户管理和审计写入本地管理表，不替代 Python
+pipeline。已经接受但尚未实施的 Paper CRUD 新边界见 ADR 0003 和
+`docs/paper-crud-implementation-plan.md`；实现该计划时必须同步修订本文。
 
 ## 目标
 

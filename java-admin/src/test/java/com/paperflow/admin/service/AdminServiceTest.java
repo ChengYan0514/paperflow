@@ -11,7 +11,8 @@ import com.paperflow.admin.model.MatchedFileRow;
 import org.junit.jupiter.api.Test;
 
 class AdminServiceTest {
-    private static final PaperflowApiProperties PROPERTIES = new PaperflowApiProperties(20, 100, 100, 500, "data");
+    private static final PaperflowApiProperties PROPERTIES =
+            new PaperflowApiProperties(20, 100, 100, 500, "data", 104_857_600L);
 
     private final AdminService service =
             new AdminService(

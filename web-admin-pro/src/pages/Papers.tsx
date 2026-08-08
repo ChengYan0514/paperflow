@@ -1,6 +1,6 @@
-import { DownloadOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
-import { Link, useSearchParams } from '@umijs/max';
+import { Link, useAccess, useSearchParams } from '@umijs/max';
 import { Button, Space, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import type { OriginalFile, Page, SourceSummary } from '@/services/business';
@@ -43,6 +43,7 @@ const sortOptions = ['yearDesc', 'providerAsc', 'textStatusIssueFirst'].map(
 );
 
 export default function PapersPage() {
+  const access = useAccess();
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<Page<OriginalFile>>();
   const [source, setSource] = useState<SourceSummary>();
@@ -116,6 +117,14 @@ export default function PapersPage() {
             rowKey="fileId"
             search={false}
             toolBarRender={() => [
+              <Button href="/papers/new" icon={<PlusOutlined />} key="create" type="primary">
+                导入论文
+              </Button>,
+              ...(access.canDeletePapers ? [
+                <Button href="/papers/trash" icon={<DeleteOutlined />} key="trash">
+                  回收站
+                </Button>,
+              ] : []),
               <Button
                 href={papersExportUrl(searchParams)}
                 icon={<DownloadOutlined />}

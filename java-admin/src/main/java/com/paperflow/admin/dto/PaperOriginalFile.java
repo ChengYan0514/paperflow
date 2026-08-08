@@ -14,4 +14,10 @@ public record PaperOriginalFile(
         String originalFilePath,
         String originalFileUrl,
         String originalFileType,
-        Long fileSize) {}
+        Long fileSize,
+        Long recordVersion,
+        Integer currentVersion,
+        java.time.OffsetDateTime createdAt,
+        Long createdBy,
+        java.time.OffsetDateTime updatedAt,
+        Long updatedBy) {}

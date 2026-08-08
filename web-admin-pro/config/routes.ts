@@ -25,6 +25,11 @@ export default [
         component: './Sources',
       },
       {
+        path: '/source-search',
+        name: 'OpenAlex 来源检索',
+        component: './SourceSearch',
+      },
+      {
         path: '/sources/:sourceId',
         name: '来源详情',
         hideInMenu: true,
@@ -34,6 +39,25 @@ export default [
         path: '/papers',
         name: '论文管理',
         component: './Papers',
+      },
+      {
+        path: '/papers/new',
+        name: '导入论文',
+        hideInMenu: true,
+        component: './PaperForm',
+      },
+      {
+        path: '/papers/trash',
+        name: '论文回收站',
+        hideInMenu: true,
+        access: 'canDeletePapers',
+        component: './PaperTrash',
+      },
+      {
+        path: '/papers/:fileId/edit',
+        name: '编辑论文',
+        hideInMenu: true,
+        component: './PaperForm',
       },
       {
         path: '/papers/:fileId',

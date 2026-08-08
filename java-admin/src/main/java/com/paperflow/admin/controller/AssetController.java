@@ -1,6 +1,10 @@
 package com.paperflow.admin.controller;
 
 import com.paperflow.admin.service.AssetService;
+import com.paperflow.admin.service.AdminUserPrincipal;
+import com.paperflow.admin.service.ApiException;
+import com.paperflow.admin.dto.AdminRole;
+import com.paperflow.admin.dto.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.file.Path;
 import org.springframework.core.io.FileSystemResource;
@@ -9,7 +13,9 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
@@ -23,9 +29,18 @@ public class AssetController {
     }
 
     @GetMapping("/api/assets/**")
-    public ResponseEntity<Resource> getAsset(HttpServletRequest request) {
+    public ResponseEntity<Resource> getAsset(
+            HttpServletRequest request, @AuthenticationPrincipal AdminUserPrincipal principal) {
         String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
         String relativePath = path.substring("/api/assets/".length());
+        if (relativePath.startsWith("paperflow/trash/")
+                && (principal == null || principal.role() == AdminRole.USER)) {
+            throw new ApiException(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Forbidden");
+        }
+        if (relativePath.startsWith("paperflow/pending-delete/")
+                && (principal == null || principal.role() != AdminRole.SUPER_ADMIN)) {
+            throw new ApiException(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Forbidden");
+        }
         Path asset = assetService.resolveAsset(relativePath);
         if (!asset.toFile().isFile()) {
             return ResponseEntity.notFound().build();

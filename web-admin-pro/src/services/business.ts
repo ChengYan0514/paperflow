@@ -1,5 +1,5 @@
 import { request } from '@umijs/max';
-import { apiBaseUrl } from './auth';
+import { apiBaseUrl, csrfToken } from './auth';
 
 export type Page<T> = {
   items: T[];
@@ -127,6 +127,58 @@ export type OriginalFile = {
   flagText: number;
   flagBlock: number;
   textFiles: TextFile[];
+  recordVersion?: number;
+  currentVersion?: number;
+  createdAt?: string | null;
+  createdBy?: number | null;
+  updatedAt?: string | null;
+  updatedBy?: number | null;
+};
+
+export type OpenAlexSource = {
+  sourceId: string;
+  displayName: string;
+  publisher?: string | null;
+  issnL?: string | null;
+  issn: string[];
+  worksCount?: number | null;
+  citedByCount?: number | null;
+  isOa?: boolean | null;
+  isInDoaj?: boolean | null;
+  homepageUrl?: string | null;
+};
+
+export type PaperMutation = { fileId: string; recordVersion: number };
+export type TrashedPaper = PaperMutation & {
+  sourceId: string;
+  sourceName?: string | null;
+  year?: number | null;
+  paperTitle?: string | null;
+  authors?: string | null;
+  deletedAt: string;
+  deletedBy?: number | null;
+  deleteReason?: string | null;
+};
+
+export type PaperFileVersion = {
+  fileId: string;
+  versionNo: number;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  uploadedBy?: number | null;
+  uploadedAt: string;
+  current: boolean;
+};
+
+export type PaperMetadataInput = {
+  sourceId: string;
+  year: number;
+  paperTitle: string;
+  authors: string[];
+  doi?: string;
+  url?: string;
 };
 
 export type PaperTaskStatus = {
@@ -251,4 +303,84 @@ export function listPaperBlocks(fileId: string, params?: URLSearchParams) {
     `/api/papers/${fileId}/blocks`,
     withDefaults(params),
   );
+}
+
+async function writeJson<T>(path: string, method: string, data?: unknown) {
+  const token = await csrfToken();
+  return request<T>(path, {
+    method,
+    headers: { 'X-XSRF-TOKEN': token },
+    data,
+  });
+}
+
+async function writeForm<T>(path: string, formData: FormData) {
+  const token = await csrfToken();
+  return request<T>(path, {
+    method: 'POST',
+    headers: { 'X-XSRF-TOKEN': token },
+    data: formData,
+  });
+}
+
+export function searchOpenAlexSources(query: string) {
+  const params = new URLSearchParams({ q: query });
+  return getJson<OpenAlexSource[]>('/api/openalex/source-search', params);
+}
+
+export function getOpenAlexSource(sourceId: string) {
+  return getJson<OpenAlexSource>(`/api/openalex/source-search/${sourceId}`);
+}
+
+export function syncOpenAlexSources() {
+  return writeJson<{ syncedCount: number }>('/api/openalex/source-search/sync', 'POST');
+}
+
+export function createPaper(metadata: PaperMetadataInput, file: File) {
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', file);
+  return writeForm<PaperMutation>('/api/papers', form);
+}
+
+export function updatePaper(fileId: string, metadata: PaperMetadataInput, recordVersion: number) {
+  return writeJson<PaperMutation>(`/api/papers/${fileId}`, 'PUT', { ...metadata, recordVersion });
+}
+
+export function replacePaperFile(fileId: string, recordVersion: number, file: File) {
+  const form = new FormData();
+  form.append('file', file);
+  return writeForm<PaperMutation>(
+    `/api/papers/${fileId}/versions?recordVersion=${recordVersion}`,
+    form,
+  );
+}
+
+export function listPaperVersions(fileId: string) {
+  return getJson<PaperFileVersion[]>(`/api/papers/${fileId}/versions`);
+}
+
+export function restorePaperVersion(fileId: string, versionNo: number, recordVersion: number) {
+  return writeJson<PaperMutation>(
+    `/api/papers/${fileId}/versions/${versionNo}/restore`,
+    'POST',
+    { recordVersion },
+  );
+}
+
+export function softDeletePaper(fileId: string, recordVersion: number, reason?: string) {
+  return writeJson<PaperMutation>(`/api/papers/${fileId}`, 'DELETE', { recordVersion, reason });
+}
+
+export function listTrashedPapers(query?: string) {
+  const params = query ? new URLSearchParams({ q: query }) : undefined;
+  return getJson<TrashedPaper[]>('/api/papers/trash', params);
+}
+
+export function restorePaper(fileId: string, recordVersion: number) {
+  return writeJson<PaperMutation>(`/api/papers/${fileId}/restore`, 'POST', { recordVersion });
+}
+
+export function purgePaper(fileId: string, recordVersion: number, confirmation: string) {
+  return writeJson<void>(`/api/papers/${fileId}/purge`, 'POST', { recordVersion, confirmation });
 }

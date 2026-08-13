@@ -60,6 +60,9 @@ file_id = lowercase_hex(SHA-256(UTF-8(fingerprint_input)))
 `file_id` 仅在创建时计算一次，创建后永久不变。修改元数据、Source、替换或恢复
 文件版本均不重新计算。物理文件名为 `{file_id}.{normalized_extension}`。
 
+批量 CSV 导入也必须提供 `year`，并校验 `file_name` 去除扩展名后等于按同一规则计算的
+`file_id`；不一致的行在预检阶段失败。
+
 如果 `file_id` 已存在：
 
 - 正常记录返回 `409 PAPER_ALREADY_EXISTS`。

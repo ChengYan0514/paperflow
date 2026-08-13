@@ -17,5 +17,9 @@ class PaperMetadataTest {
         assertEquals("Alice Smith;BOB", metadata.authorsText());
         assertEquals("10.1000/abc", metadata.doi());
         assertEquals("s123\n2024\neconomic growth\nalice smith;bob", metadata.fingerprintInput());
+        assertEquals("0b25942be034bdccafd3bd2a7d70487650c584a9eb76a94f0f410daed7723141",
+                PaperMetadata.fileId("S123", 2024, "Example Title", "Author One;Author Two"));
+        assertEquals(PaperMetadata.fileId("S123", 2024, "Economic Growth", "Alice Smith;BOB"),
+                PaperMetadata.fileId(" s123 ", 2024, "  Economic   Growth ", " Alice  Smith ; BOB "));
     }
 }

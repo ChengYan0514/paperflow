@@ -1,6 +1,10 @@
 package com.paperflow.admin.service;
 
 import java.text.Normalizer;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 
@@ -25,8 +29,22 @@ record PaperMetadata(String sourceId, int year, String title, List<String> autho
     }
 
     String fingerprintInput() {
+        return fingerprintInput(sourceId, year, title, authorsText());
+    }
+
+    static String fingerprintInput(String sourceId, int year, String title, String authorsText) {
         return canonical(sourceId) + "\n" + year + "\n" + canonical(title) + "\n"
-                + authors.stream().map(PaperMetadata::canonical).reduce((a, b) -> a + ";" + b).orElse("");
+                + java.util.Arrays.stream(authorsText == null ? new String[0] : authorsText.split(";", -1))
+                        .map(PaperMetadata::canonical).reduce((a, b) -> a + ";" + b).orElse("");
+    }
+
+    static String fileId(String sourceId, int year, String title, String authorsText) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                    .digest(fingerprintInput(sourceId, year, title, authorsText).getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException exc) {
+            throw new IllegalStateException(exc);
+        }
     }
 
     private static String display(String value) {

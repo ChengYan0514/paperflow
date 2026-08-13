@@ -44,7 +44,7 @@ import java.util.concurrent.Executor;
 
 @Service
 public class OriginalFileImportService {
-    private static final Set<String> REQUIRED_COLUMNS = Set.of("source_id", "file_name", "file_path", "paper_title", "authors");
+    private static final Set<String> REQUIRED_COLUMNS = Set.of("source_id", "year", "file_name", "file_path", "paper_title", "authors");
     private static final Set<String> ALLOWED_COLUMNS = Set.of("source_id", "year", "paper_title", "authors", "doi", "url", "provider", "file_name", "file_path", "file_type", "file_size");
     private static final List<String> TYPES = List.of("HTML", "XML", "PDF");
 
@@ -343,7 +343,11 @@ public class OriginalFileImportService {
         if (parts.length < 4 || !parts[2].equals(row.sourceId())) return "SOURCE_PATH_MISMATCH";
         if (!entries.contains(row.filePath())) return "FILE_NOT_FOUND";
         if (!sourceExists(row.sourceId())) return "SOURCE_NOT_FOUND";
+        Integer year = nullableInt(row.year());
+        if (year == null) return "YEAR_INVALID";
         row.fileId = fileId(row.fileName());
+        String expectedFileId = PaperMetadata.fileId(row.sourceId(), year, row.title(), row.authors());
+        if (!expectedFileId.equals(fileId(row.fileName()))) return "FILE_ID_MISMATCH";
         Path actual = extracted.resolve(row.filePath());
         row.detectedType = detectType(actual);
         row.actualSize = actualSize(actual);
@@ -352,12 +356,7 @@ public class OriginalFileImportService {
         if (!blank(row.suppliedType()) && !row.detectedType.equals(row.suppliedType().toUpperCase(Locale.ROOT))) warnings.add("FILE_TYPE_MISMATCH");
         if (row.suppliedSize() != null && row.suppliedSize() != row.actualSize) warnings.add("FILE_SIZE_MISMATCH");
         row.warning = warnings.isEmpty() ? null : String.join(",", warnings);
-        try {
-            if (!row.year().isBlank()) {
-                int year = Integer.parseInt(row.year());
-                if (year < 1000 || year > java.time.Year.now().getValue() + 1) return "YEAR_INVALID";
-            }
-        } catch (NumberFormatException exc) { return "YEAR_INVALID"; }
+        if (year < 1000 || year > java.time.Year.now().getValue() + 1) return "YEAR_INVALID";
         referenced.add(row.filePath());
         return null;
     }

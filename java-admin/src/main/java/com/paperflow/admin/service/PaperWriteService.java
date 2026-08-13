@@ -9,13 +9,9 @@ import com.paperflow.admin.dto.PaperMutationResponse;
 import com.paperflow.admin.dto.PaperUpdateRequest;
 import com.paperflow.admin.dto.TrashedPaperDto;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
-import java.util.HexFormat;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -52,7 +48,8 @@ public class PaperWriteService {
                 request.sourceId(), request.year(), request.paperTitle(), request.authors(), request.doi(), request.url());
         validateYear(metadata.year());
         OpenAlexSourceDto source = sources.requireAuthoritative(metadata.sourceId());
-        String fileId = fingerprint(metadata.fingerprintInput());
+        String fileId = PaperMetadata.fileId(
+                metadata.sourceId(), metadata.year(), metadata.title(), metadata.authorsText());
         ExistingState state = existingState(fileId);
         if (state != null) {
             ErrorCode code = state.deletedAt() == null ? ErrorCode.PAPER_ALREADY_EXISTS : ErrorCode.PAPER_IN_TRASH;
@@ -425,14 +422,6 @@ public class PaperWriteService {
     private void validateYear(int year) {
         int max = java.time.Year.now().getValue() + 1;
         if (year < 1000 || year > max) throw new IllegalArgumentException("Invalid publication year");
-    }
-
-    private String fingerprint(String value) {
-        try {
-            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException exc) {
-            throw new IllegalStateException(exc);
-        }
     }
 
     private String extension(String path) {

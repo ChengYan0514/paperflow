@@ -129,11 +129,11 @@ data
 
 ### 2.5 `original_file`
 
-表格描述：原始文件登记表。导入阶段只校验和登记，不做匹配。`file_id` 是全库唯一且不可变的原始文件身份，当前定义为 `original_file_name` 去除后缀后的值，不是文件内容 hash。
+表格描述：原始文件登记表。导入阶段只校验和登记，不做匹配。`file_id` 是全库唯一且不可变的原始文件身份，定义为规范化 `source_id`、`year`、`paper_title` 与 `authors` 的 SHA-256 十六进制哈希，不是文件内容 hash。
 
 | 名称 | 代码 | 主键 | 数据类型 | 约束/说明 |
 | --- | --- | --- | --- | --- |
-| 文件 ID | `file_id` | TRUE | `varchar(255)` | 主键；`original_file_name` 去除后缀后的值；全库唯一且不可变 |
+| 文件 ID | `file_id` | TRUE | `varchar(255)` | 主键；元数据稳定 SHA-256 哈希；全库唯一且不可变 |
 | 来源 ID | `source_id` | FALSE | `varchar(255)` | 外键 `source.source_id`，`ON DELETE RESTRICT` |
 | 论文年份 | `year` | FALSE | `int4` | CSV 输入 |
 | 论文标题 | `paper_title` | FALSE | `varchar(2000)` | CSV 输入 |
@@ -406,9 +406,9 @@ CSV 字段映射：
 | `file_path` | `original_file.original_file_path` |
 | `file_type` | `original_file.original_file_type` |
 | `file_size` | `original_file.file_size` |
-| `file_name` 去后缀 | `original_file.file_id` |
+| `source_id`、`year`、`paper_title`、`authors` | 规范化后计算 `original_file.file_id` |
 
-CSV 不提供 `file_id` 字段，由导入器从 `file_name` 去后缀生成。
+CSV 不提供 `file_id` 字段，由导入器根据元数据计算；`file_name` 去扩展名必须与计算结果相同。
 
 每行 CSV 必须满足：
 

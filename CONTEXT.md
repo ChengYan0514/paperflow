@@ -50,8 +50,10 @@ records keep their existing File Hash identity. Editing metadata or replacing
 the Original File never changes `file_id`.
 
 **File Hash**:
-The extensionless value of `original_file_name`, used as the import identity for an **Original File Record**. Despite the name, it is not a file-content hash in the current domain.
-_Avoid_: Content hash, checksum.
+The lowercase hexadecimal SHA-256 of canonical `source_id`, `year`, `paper_title`, and
+semicolon-separated `authors`, used as the import identity for an **Original File Record**.
+It is metadata-derived rather than a file-content hash.
+_Avoid_: Content hash, checksum, filename stem.
 
 **Original File Job**:
 A file-level processing status record keyed by `file_id`. It tracks Matching,

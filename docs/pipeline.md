@@ -5,7 +5,7 @@
 
 ## 总览
 
-Paperflow 是离线批处理管线。它不负责采集论文文件，只处理已经放到标准路径下的
+Paperflow 是离线批处理管线。它是项目外的一个python项目，路径是/data/bak/code/paperflow。它不负责采集论文文件，只处理已经放到标准路径下的
 OpenAlex 元数据、外部交付 CSV、Original File 和 MinerU parsed 输出。
 
 ```mermaid
@@ -177,7 +177,7 @@ uv run paperflow import-original-files --csv openalex/csv/batch.csv --data-root 
 - `--csv` 是相对 `DATA_ROOT` 的路径。
 - CSV 文件必须位于 `openalex/csv/` 约定目录下。
 - Original File 必须已经存在；Paperflow 不移动、不复制外部文件。
-- `file_id` 由 `file_name` 去掉后缀得到。
+- `file_id` 为规范化 `source_id`、`year`、`paper_title` 与 `authors` 的 SHA-256 十六进制哈希；`file_name` 去扩展名必须等于该值。
 - 同一 File Hash 重复导入时保留一条 Original File Record。
 - 文件类型优先级为 `PDF > XML > HTML`；更高优先级会替换文件名、路径、类型和大小。
 

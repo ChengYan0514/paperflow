@@ -9,11 +9,26 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import java.util.concurrent.Executor;
 
 @Configuration
 @EnableCaching
+@EnableScheduling
 @EnableConfigurationProperties(PaperflowApiProperties.class)
 public class AppConfig {
+
+    @Bean("originalFileImportExecutor")
+    public Executor originalFileImportExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(1);
+        executor.setQueueCapacity(2);
+        executor.setThreadNamePrefix("original-file-import-");
+        executor.initialize();
+        return executor;
+    }
 
     /**
      * Causal-graph aggregates are derived from an offline, batch-produced dataset with no

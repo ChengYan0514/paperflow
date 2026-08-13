@@ -71,3 +71,8 @@ paperflow:
     max-block-page-size: 500
     data-root: ${DATA_ROOT:data}
     upload-max-bytes: ${PAPER_UPLOAD_MAX_BYTES:104857600}
+    import-max-zip-bytes: ${PAPER_IMPORT_MAX_ZIP_BYTES:5368709120}
+    import-max-extracted-bytes: ${PAPER_IMPORT_MAX_EXTRACTED_BYTES:10737418240}
+    import-max-files: ${PAPER_IMPORT_MAX_FILES:10000}
+    import-part-bytes: ${PAPER_IMPORT_PART_BYTES:33554432}
+    import-staging-retention: ${PAPER_IMPORT_STAGING_RETENTION:PT168H}

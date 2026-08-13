@@ -1,0 +1,39 @@
+AN APPLICATION OF AN INTERIOR POINT METHOD FOR PROBLEMS WITH UNCERTAINTY
+Anna Altman \*   
+Systems Research Institute,   
+Polish Academy of Sciences   
+ul. Newelska 6, 01-447 Warszawa,   
+Poland 
+Interior point methods (IPM) were first proposed for linear programming (LP) problems. Since 1984, when Karmarkar published his famous paper (Karmarkar (1984)), IPM were rapidly developed and improved. It is now widely accepted that the primal-dual logarithmic barrier method is the most efficient IPM. The idea of IPM was not restricted to linear programming alone. These methods quickly spread to quadratic, nonlinear and integer programming. The developments in quadratic programming (QP) are closely parallel to those in LP. While theoretical worst-case behaviour for LP and QP are the same, QP problems are harder to solve in practice. The derivation of the higher order primal-dual method for QP is analogous to the derivation for the linear case presented in Mehrotra (1991) and implemented by Altman and Gondzio (1992). 
+Let us consider the QP problem 
+$$
+{ \begin{array} { r } { \operatorname { m i n i m i z e } c ^ { T } x + { \frac { 1 } { 2 } } x ^ { T } Q x , } \\ { { \mathrm { s u b j e c t ~ t o } } ~ A x = b , } \\ { x + s = u , } \\ { x , s \geq 0 , } \end{array} }
+$$
+where $\mathbf { \Delta } _ { c } , \mathbf { \Delta } _ { x } , s , u \in \mathcal { R } ^ { n }$ , $b \in \mathcal { R } ^ { m }$ and $A \in \mathcal { R } ^ { m \neq n }$ is assumed to have a full row rank. The dual of (1) is given by 
+$$
+\begin{array} { r } { \operatorname* { m a x i m i z e } b ^ { T } y - u ^ { T } w - \cfrac { 1 } { 2 } x ^ { T } Q x , } \\ { \mathrm { s u b j e c t ~ t o } ~ A ^ { T } y + z - w - Q x = c , } \\ { x , z , w \geq 0 , } \end{array}
+$$
+where $\pmb { y } \in \mathcal { R } ^ { m }$ and $\pmb { x } , \pmb { z } , \pmb { w } \in \mathcal { R } ^ { n }$ 
+Having incorporated inequality-type constraints in a logarithmic term added to the objective function, we obtain the first order necessary conditions for the optimal solution of (1) and (2): 
+$$
+\pmb { A x } = \pmb { b } ,
+$$
+$$
+\begin{array} { r } { x + s = u , } \\ { A ^ { T } y + z - w - Q x = c , } \\ { X Z e = \mu e , } \\ { S W e = \mu e , } \\ { x , s , z , w > 0 , } \end{array}
+$$
+where $x , s , z$ and $W$ are diagonal matrices with the elements $\boldsymbol { x } _ { j } , \boldsymbol { s } _ { j } , \boldsymbol { z } _ { j }$ and ${ \pmb w } _ { j }$ , respectively and $e \in \mathcal { R } ^ { n }$ is a vector of ones. There is only one difference between necessary conditions for LP and QP, namely the term $\boldsymbol { Q x }$ in (5). 
+The basic primal-dual algorithm applies one iteration of Newton's method to find an approximate solution to (3-7) for a current (fixed) parameter $\pmb { \mu }$ and terminates when the duality gap is reduced to a predetermined tolerance. It may be viewed as an optimal trajectory from a given starting point to the optimum of (1) and (2). In the Mehrotra method a higher order Taylor approximation of the optimal trajectory is computed. Knowing Taylor terms we can compute the search directions in the primal and dual spaces. 
+Undoubtedly, the main computational effort in any IPM implementation is expanded in solving for the direction. To obtain the direction we solve the normal equation with matrix $A ^ { T } \Theta A$ . The difference between linear case and quadratic one is in the matrix $\Theta$ , for the quadratic case 
+$$
+\Theta = ( Q + X ^ { - 1 } Z + S ^ { - 1 } W ) ^ { - 1 } .
+$$
+For a linear case $Q = 0$ and other matrices in (8) are diagonal, and computing $\Theta$ is very simple. In many practical problems the matrix $Q$ is either diagonal or we can reformulate the problem (1) to obtain a diagonal quadratic matrix, cf. Vanderbei and Carpenter (1993). Therefore computing $\Theta$ for separable QP is as easy as for a LP. 
+The method described above was used for finding cost-effective environmental policy under uncertainty. We considered the problem of reduction of $S O _ { 2 }$ emissions in Europe, cf. Amann et al. (1993). We minimize European-wide emission control costs subject to the condition that grid-specific $s O _ { 2 }$ deposition targets are attained. The costs of emission control are uncertain. There are many possible scenarios of energy production, consumption, fuel characteristics and installed emission control measures. Having scenarios and their probabilities we construct mean-variance model. In such a method we minimize a weighted sum of expected value of total costs and their variance. 
+Finally we construct the stochastic optimization problem: 
+$$
+\begin{array} { r } { \operatorname* { m i n } E \{ c ( x ) \} + \alpha V \{ c ( x ) \} } \\ { \mathrm { ~ s . ~ t . ~ } T x \leq b , } \\ { l \leq x \leq u , } \end{array}
+$$
+where $\pmb { c } ( \pmb { x } )$ is a random function and costs are values of this function, $\pmb { x }$ denotes emissions to be reduced, $\pmb { b }$ is a vector of maximal grid depositions, and depositions $\pmb { y }$ are linear function of emissions $\left( { \pmb y } = { \pmb T } { \pmb x } \right)$ . 
+The costs for each country are piecewise linear convex functions. Since variance is a quadratic function, the objective function is quadratic too. The problem is reformulated in such a way that the quadratic part of the objective is separable. All constraints are linear. 
+To make the model more useful for decision makers we solve the model with different weighting factors for the variance. It enables us to control the value of variance at the solution found; in other words, uncertainty or risk. The method was successfully used at 
+IIASA in Transboundary Air Pollution Project. We hope that these ideas can be exploited for a wider class of other stochastic optimization problems. 

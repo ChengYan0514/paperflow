@@ -1,0 +1,25 @@
+{
+  "paper_title": "Dually-Weighted Cross Decomposition for the Capacitated Facility Location Problem",
+  "block_set": [
+    {
+      "block_id": "2016415655498223631",
+      "title": "Abstract",
+      "sub_firstblock": "The cross decomposition algorithm of [van Roy 1986] is generally considered to be one of the most efficient procedures for solving the capacitated facility location problem. A modified version of this algorithm, called dually-weighted cross decomposition, is presented. In contrast to the cross decomposition algorithm, this approach does not use the optimal dual solutions of the primal subproblems or the optimal solutions of the dual master problem as Lagrangean multipliers for the dual subproblems. A specially weighted average of the previously constructed multipliers is used instead. Finite convergence of this approach is proven and first promising results are discussed. "
+    },
+    {
+      "block_id": "2016415655498223633",
+      "title": "1 Introduction",
+      "sub_firstblock": "The capacitated facility location problem (CFLP) can be formulated as the following mixedinteger programming problem (see e.g. [Cornuejols et al. 1991] for a more detailed description of the problem) : "
+    },
+    {
+      "block_id": "2016415655498223645",
+      "title": "2 Dually-weighted Cross Decomposition",
+      "sub_firstblock": "[Holmberg 1992] proposed a modification of the cross decomposition algorithm (mean value cross decomposition) to solve linear programming problems, where, in contrast to the cross decomposition algorithm, not the last optimal solution of one subproblem is used as input to the other and vice versa, but the arithmetic mean of all previously obtained optimal solutions of the respective subproblem. No master problems are used anymore and asymptotic convergence towards the optimum can be proven. "
+    },
+    {
+      "block_id": "2016415655498223670",
+      "title": "3 Results",
+      "sub_firstblock": "The cross decomposition and the dually-weighted cross decomposition algorithms were tested on 27 examples with 19-108 potential facilities and 65-174 customers on the road network of Switzerland. In these examples, a tolerance level $\\tau$ of $0 . 5 \\%$ for the duality gap $v ( M D _ { k } ) \\mathrm { ~ - ~ }$ $v ( S D _ { \\mu ^ { \\mathrm { b e s t } , k } } )$ was used, in step 3 the dual solution $( \\lambda ^ { k + 1 } , \\nu ^ { k + 1 } , \\mu ^ { k + 1 } )$ was altered as described in [Wentges 1993], and at most thirty iterations were carried out. "
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "paper_title": "Financial incentives for kidney donation: A comparative case study using synthetic controls",
+  "block_set": [
+    {
+      "block_id": "2016408810175991965",
+      "title": "Abstract",
+      "sub_firstblock": "Article history:   \nReceived 19 September 2014   \nReceived in revised form 19 June 2015   \nAccepted 28 June 2015   \nAvailable online 6 July 2015 "
+    },
+    {
+      "block_id": "2016408810175991971",
+      "title": "1. Introduction",
+      "sub_firstblock": "Can altruism be bought? Prior literature, dating back to Olson (1971), emphasizes the importance of “selective incentives” or private goods in encouraging individual contributions to group goals. On the other hand, Titmuss (1970) famously argued that paying for blood donations would undermine social norms of generosity and reduce giving. Existing evidence is mixed. Some studies, many in the laboratory, suggest that explicit monetary incentives may have minimal or even perverse effects.1 But a series of results from field experiments document strong positive effects of incentives (Goette and Stutzer, 2008; Lacetera et al., 2014a). "
+    },
+    {
+      "block_id": "2016408810175991992",
+      "title": "2. Background and prior literature",
+      "sub_firstblock": "2.1. Statutory background"
+    },
+    {
+      "block_id": "2016408810175991993",
+      "title": "2.1. Statutory background",
+      "sub_firstblock": "In 1984, the U.S. Congress enacted the National Organ Transplantation Act (NOTA).3 NOTA established a network of sub-national organ procurement organizations (OPO), each with jurisdiction spanning about one state on average. These OPOs have primary responsibility for soliciting organ donations and matching patients in need with eligible donors. "
+    },
+    {
+      "block_id": "2016408810175992002",
+      "title": "2.2. Prior literature",
+      "sub_firstblock": "Boulware et al. (2008) were the first to examine whether these state policies were effective in encouraging donations. Like others that followed, and us here, they focused on kidney donations. Kidneys are by far the most frequently donated and demanded organ: approximately two-thirds of all organ donation waiting lists are made up of patients awaiting kidneys. Boulware et al. (2008) pool together all the different state interventions, and find no significant effects of enactment on cadaveric or living related donations. They do, though, find a statistically significant impact of enactment, of about $2 6 \\%$ , for living related donations. They also report that growth in donation rates overall dropped sharply after a state’s first enactment of any legislation, and that trends in end-stage renal disease between 1988 and 2005 appear to predict state enactment. "
+    },
+    {
+      "block_id": "2016408810175992010",
+      "title": "3. Empirical strategy",
+      "sub_firstblock": "3.1. Data and sample"
+    },
+    {
+      "block_id": "2016408810175992011",
+      "title": "3.1. Data and sample",
+      "sub_firstblock": "We use state-level panel data for the period 1988–2012. State data on the number of related and unrelated living adult kidney donors, kidney waiting list additions (candidates) and the number of transplant centers are retrieved from the Organ Procurement and Transplantation Network (OPTN). Aggregate OPTN data on state-by-state number of kidney donors only distinguishes between deceased and living kidney donations and do not report further information on the number of related and unrelated kidney donations. We therefore used state-by-state number of kidney transplant data from the OPTN since every donor can donate only one of his/her kidney. This allowed us to observe the break-down of the number of living kidney donors by donor relation.4 Related donation is composed of donations by blood related child, full sibling, half sibling, identical twin, other relative, parent, spouse and life partner. Unrelated donation are composed of non-biological anonymous donations and other unrelated directed donations only.5 "
+    },
+    {
+      "block_id": "2016408810175992018",
+      "title": "3.1.1. Construction of the Tax Variables",
+      "sub_firstblock": "We hand-collect the details of each state’s tax incentives for organ donation. We double-check our coding against compilations by the National Kidney Foundation,11 TransplantLiving,12 National Conference of State Legislatures,13 Boulware et al. (2008) and Lacetera et al. (2014b). "
+    },
+    {
+      "block_id": "2016408810175992022",
+      "title": "3.1.2. Descriptive statistics",
+      "sub_firstblock": "Table 1 shows the descriptive statistics for 47 U.S. states. The upper panel shows the descriptive statistics for our first sample in which the treatment (tax incentive legislation) is binary and the lower panel shows the means and standard deviation for our second sample in which the treatment is defined as the true dollar value of the tax incentive. In the upper panel, the column “treatment group” shows means and standard deviations for states and periods in which the tax deduction law has been in force and the column “control group” shows means and standard deviations for states and time periods without the legislation. The column “difference” show the differences in means between the treatment and control group along with the standard errors under the null hypothesis of equal means between the treatment and control observations. "
+    },
+    {
+      "block_id": "2016408810175992026",
+      "title": "3.2. Tax incentive legislation as a binary exogenous treatment",
+      "sub_firstblock": "3.2.1. Specification"
+    },
+    {
+      "block_id": "2016408810175992027",
+      "title": "3.2.1. Specification",
+      "sub_firstblock": "We first investigate whether allowing for possible endogeneity in cadaveric donation rates produces results different than prior literature, and for cross-check and verification purposes include baseline results treating cadaveric donations as exogenous. In these specifications, we treat the tax incentive legislation as a binary treatment and specify the following model in the panel data context: "
+    },
+    {
+      "block_id": "2016408810175992038",
+      "title": "3.2.2. DiD results",
+      "sub_firstblock": "Table 2 shows the estimation results for living related (columns 1 through 3) and unrelated (columns 4 through 6) kidney donation rates with an exhaustive set of diagnostics on endogeneity, instrument relevance, weak identification, instrument validity and linearity. When the excluded instruments are only weakly correlated with the endogenous variable, the instrumental variable estimates will be biased in the same direction as the OLS and the significance tests will have incorrect size and confidence interval. Therefore, we further report weak identification-robust inference test results. "
+    },
+    {
+      "block_id": "2016408810175992051",
+      "title": "3.3. Tax incentive legislation as a non-binary endogenous treatment",
+      "sub_firstblock": "3.3.1. Specification"
+    },
+    {
+      "block_id": "2016408810175992052",
+      "title": "3.3.1. Specification",
+      "sub_firstblock": "We next investigate whether more accurately measuring the tax variables may produce different results than prior literature. As described in Section 3.1.1 above, we estimate the actual mean dollar value of each state’s incentive, and substitute it for the binary tax variable employed in Section 3.2. We also allow for the possibility that incentive statutes are endogenous to donation rates. For example, legislators may respond to perceived need, or communities that are effective in organizing donors may also be effective in organizing political activism. "
+    },
+    {
+      "block_id": "2016408810175992062",
+      "title": "3.3.2. LIML results",
+      "sub_firstblock": "Table 3 displays the estimation results for the natural log of living related (columns 1-4) and unrelated (columns 5–8) kidney donation rates. Columns 1 and 5 show our baseline specifications where the mean value of state incentive for donation is instrumented by the IIT marginal rate, the federal medicaid matching grant to state and their squares. In columns 2–4 and 6–8 we perform a robustness check for our baseline specification where we include health spending, unemployment rate, share of itemizers, state median income, share of black population, total population, state medicaid spending and two dummy variables capturing the enactment of paid leave of absence for public and private employees as additional control variables. "
+    },
+    {
+      "block_id": "2016408810175992066",
+      "title": "3.4. Heterogenous causal effects",
+      "sub_firstblock": "In this secton, we attempt to reveal the causal effect of tax incentive legislation by imputing the missing potential outcome, that is the (counterfactual) outcome that would have prevailed if states had not passed the legislation. For this purpose, we invoke the synthetic control method, developed by Abadie and Gardeazabal (2003) and extended by Abadie et al. (2010) and Abadie et al. (2014). Suppose there are $S + 1$ states, indexed by $i = 1$ , 2, . . ., $S + 1$ over T periods, $t = 1$ , 2, . . ., T. Only state $i = 1$ passed the legislation and the remaining S states are the potential control states that did not pass any legislation, called the donor pool. There are $T _ { 0 }$ number of pre-legislation periods and $T _ { 1 }$ number of post-legislation periods so that $T _ { 0 } + T _ { 1 } = T .$ . The effect of the law for unit $i$ at time t is given by $\\alpha _ { i t } = Y _ { i t } ^ { I } - Y _ { i t } ^ { N }$ where $Y _ { i t } ^ { I }$ is the living kidney donation rate of state $i$ if the legislation is enacted in $T _ { 0 } + 1$ to $T$ and $Y _ { i t } ^ { N }$ is the living kidney donation rate in the absence of law. Since only state $i = 1$ enacted the legislation, we need to estimate $\\left( \\alpha _ { 1 T _ { 0 } + 1 } , . . . , \\alpha _ { 1 T } \\right)$ . We first estimate $Y _ { i t } ^ { N }$ by the following factor model: "
+    },
+    {
+      "block_id": "2016408810175992076",
+      "title": "3.4.1. Treatment and control selection",
+      "sub_firstblock": "Until 2012, 18 states in the U.S. passed tax incentive legislation and 15 states did not enact any type of legislation. Of the 18 states that passed tax incentive legislation, Idaho was discarded due to lack of data on the number of living kidney donors and 14 states (Arkansas, Georgia, Iowa, Minnesota, Missisippi, New Mexico, North Dakota, Ohio, Oklahoma, Oregon, Pennsylvania, Utah, Virginia, Wisconsin) were discarded because they had already enacted paid leave of absence legislation (i.e. one cannot isolate the effect of paid leave and the effect of tax incentive legislation). The only exception to this case is New York. As we show in Section 3.4.6, the paid leave of absence legislation in New York (2001) does not exert a causal effect on living unrelated kidney donation rates. Therefore the effect of the following tax incentive legislation (2006) in New York can be isolated. This leaves three treatment states (Louisiana, Rhode Island and New York) to be used in the synthetic control. On the other hand, of the 15 states that enacted none of the above laws, 2 states (Montana, Wyoming) were discarded due to lack of data on the number of living kidney donors. This leaves a total of 13 states to be considered in the donor pool. Table 4 displays the assignment of treated and donor states. "
+    },
+    {
+      "block_id": "2016408810175992088",
+      "title": "3.4.2. Synthetic control results",
+      "sub_firstblock": "Among the three treated states, Rhode Island is discarded from the analysis because the tax incentive legislation is enacted in 2009, leaving only four years to analyze the causal effect of the legislation in the post-legislation period as our sample ends in 2012. The results of the synthetic control and the subsequent placebo studies for Louisiana are not reported either because the synthetic control method was unable to reproduce the pre-legislation donation rate trajectory. We also omit the results of the synthetic controls and the subsequent placebo studies for related donations because the synthetic control method was unable to successfully reproduce the pre-legislation related donation rate trajectory in any of these three treated states. We therefore report here and in the following sections the results of the analysis for New York and for unrelated donation rates only. The entire analysis for Rhode Island and Louisiana or for New York’s related donation rates is available from the authors upon request. "
+    },
+    {
+      "block_id": "2016408810175992101",
+      "title": "3.4.3. Inference",
+      "sub_firstblock": "In order to ensure that a particular synthetic control estimate reflects the impact of the legislation (i.e. the synthetic controls provide good predictors of the trajectory of living kidney donation rate in the pre-legislation periods), we perform a series of falsification tests known as in-space placebo test, in which the legislation period is artificially reassigned to each of the 13 states which did not enact tax deduction legislation and shift the treated state into the donor pool (Abadie et al., 2010). If a particular state enacted the legislation and other states did not, our expectation is that the control states that are subject to the synthetic control method should not be affected by the legislation. Thus we should not observe actual and synthetic living kidney donation rates diverge in the postlegislation period. Our confidence that a sizeable synthetic control estimate reflects the effect of legislation would be severely undermined if similar or larger estimated kidney donation rate gaps are obtained when the legislation is artificially assigned to states which did not enact such legislation (Abadie et al., 2010). "
+    },
+    {
+      "block_id": "2016408810175992107",
+      "title": "3.4.4. Robustness check",
+      "sub_firstblock": "In this section, we perform a robustness check to test the sensitivity of the results to the changes in the synthetic control state weights induced by the exclusion of any particular state from the sample as in Abadie et al. (2014). From Table 5, the synthetic New York is constructed by the weighted average of nine states, namely Alabama, Arizona, Florida, Michigan, Nebraska, New Jersey, Nevada, Tennessee and Vermont. We iteratively re-estimate our model to construct a synthetic New York excluding in each iteration one of the states that was assigned a weight in Table 5. We aim to assess the extent to which our results are driven by any particular state. Fig. 4 displays the results in which the black solid line is the actual living unrelated donation rate, the black dashed line is the synthetic living unrelated donation rate of New York with all nine weight-assigned states and the gray lines are the leave-one-out estimates. "
+    },
+    {
+      "block_id": "2016408810175992117",
+      "title": "3.4.5. Sparse synthetic controls",
+      "sub_firstblock": "In this section, we create synthetic controls that involve a small number of comparison units. Reducing the number of states in the synthetic control allow us to examine the trade-off between sparsity and goodness of fit in the choice of the number of states that contribute to the synthetic control for New York (Abadie et al., 2014). Accordingly, we construct synthetic controls for New York allowing only combinations of eight, seven, six, five, four, three, two, and a single control state respectively. For $l = 8$ , 7, 6, 5, 4, 3, 2, 1, and for all possible combinations of l control states, we choose the one that produces the synthetic control unit that minimizes the minimum RMSPE.22 "
+    },
+    {
+      "block_id": "2016408810175992123",
+      "title": "3.4.6. Paid leave of absence legislation as a potential confounder",
+      "sub_firstblock": "For a state that subsequently passed both the paid leave of absence and the tax incentive legislations, there is the concern that if the former legislation (the paid leave law) have had any causal effect on donation rates, this could confound the effect of the latter legislation (tax incentive law) and our causal estimate will not be able to isolate the effect of former legislation from the effect of the latter. In order to make sure that the paid leave of absence legislation is not a confounder, we perform the synthetic control for the passage of paid leave in New York to test the null hypothesis of no causal effect of the former legislation. This means that a good fit in the period prior to the enactment of the paid leave law has to be obtained and that there should be no divergence between the actual and the synthetic kidney donation rate trajectories in New York in the period following the enactment of the paid leave legislation until the year of the enactment of the tax incentive legislation. Once the null of zero causal effect of the paid leave is confirmed by formal tests (i.e. placebo experiments), the effect of the tax incentive legislation is said to be unconfounded by the enactment of the paid leave of absence legislation. "
+    },
+    {
+      "block_id": "2016408810175992144",
+      "title": "4. Discussion",
+      "sub_firstblock": "In sum, when we employ methods that do not depend on the assumptions of traditional DiD designs, we find evidence consistent with the possibility that tax incentives encourage unrelated kidney donations. While we are only able to identify this evidence clearly in New York, it is possible that other states’ statutes are similarly effective. Again, our methodology does not allow us to say one way or the other. We also cannot say for certain whether the effect we observe is due solely to New York’s tax statute, or to some combination of the tax and “medal” statutes. "
+    },
+    {
+      "block_id": "2016408810175992154",
+      "title": "5. Conclusion",
+      "sub_firstblock": "We used state-level panel data for the period 1988–2012 in order to reveal the causal impact of tax incentive legislation on living kidney donation rates in the U.S. states. For the sake of completeness and for purposes of cross-validation, we first performed a DiD approach that accounts for several possible dimensions of endogeneity. Then we invoked an instrumental variables approach that accounts for large variations in the value of the incentives offered and the endogeneity of the law. Finally, we employed the synthetic control method that accounts for timevarying unobserved state heterogeneity. The latter method is based on estimating the counterfactual: how the state living related and unrelated kidney donation rates would have evolved in the absence of legislation. "
+    }
+  ]
+}

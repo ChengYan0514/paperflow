@@ -1,0 +1,37 @@
+database:
+  host: 
+  port: 5432
+  user: 
+  password: 
+  dbname: 
+  connect_timeout: 10
+  ssl_modes:
+    - disable
+    - prefer
+    - require
+
+data:
+  input_csv: ../llm/final_claims.csv
+  failed_csv: failed_rows.csv
+
+columns:
+  paper_id: paper_id
+  claim: claim
+  cause: cause
+  effect: effect
+
+  sign_of_impact: sign_of_impact
+  type_of_relationship: type_of_relationship
+  is_main_contribution: is_main_contribution
+  statistical_significance: statistical_significance
+  causal_inference_method: causal_inference_method
+  sources_of_exogenous_variation: sources_of_exogenous_variation
+  level_of_tentativeness: level_of_tentativeness
+  evidence_method_other_description: evidence_method_other_description
+  evidence: evidence
+
+  cause_score: cause_score
+  effect_score: effect_score
+
+  claim_cause: cause
+  claim_effect: effect

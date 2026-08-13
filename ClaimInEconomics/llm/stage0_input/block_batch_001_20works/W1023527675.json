@@ -1,0 +1,90 @@
+{
+  "paper_title": "Inflated Reputations: Uncertainty, Leniency, and Moral Wiggle Room in Trader Feedback Systems",
+  "block_set": [
+    {
+      "block_id": "2016411213851922691",
+      "title": "1. Introduction",
+      "sub_firstblock": "\"Brag-and-moan\" is the norm for the Internet feedback systems used to promote trust by a growing number of online and offline markets—for example, Amazon, eBay, Etsy, Taobao, Airbnb, Google reviews, TripAdvisor, and Yelp. Reviews of trade satisfaction tend to extremes: very positive reviews are more prevalent than very negative reviews, with each of these more frequent than moderate reviews (Hu et al. 2009, Filipas et al. 2018). As we will see, the literature finds that feedback tends to be compressed in that trader performance is more disperse than the brag-and-moan pattern implies. Two traders can have quite similar feedback profiles even though one has been a more reliable trading partner. As such, compression can lead to misplaced trust. Understanding the factors behind this compression is an important step toward designing more informative feedback systems. "
+    },
+    {
+      "block_id": "2016411213851922703",
+      "title": "2. Feedback Bias and a Hypothesis on Why Uncertainty Matters",
+      "sub_firstblock": "Reputation systems inform others about issues of adverse selection, such as trader experience and professionalism, and moral hazard, such as whether a trader ships goods that fit the advertised description. The concept behind these mechanisms is ancient (Greif 1993). Word of mouth provides a link between past behavior and future payoffs; rational individuals need to weigh both the long-term and the short-term consequences when deciding on a course of action (e.g., Kreps and Wilson 1982, Wilson 1985, and Milgrom et al. 1990; see also Brandts and Figueras 2003, Bohnet and Huck 2004, and Grosskopf and Sarin 2010 for experimental studies).² The difference between traditional and electronic reputation systems is a matter of speed and scope: traditional word of mouth spreads sequentially, from acquaintance to acquaintance, whereas Internet word of mouth, once posted, is available for the simultaneous viewing of all traders, worldwide. As such, Internet word of mouth likely makes the reliability of reputation information an even bigger factor in market performance than it has been in the past. "
+    },
+    {
+      "block_id": "2016411213851922717",
+      "title": "3. Experimental Design",
+      "sub_firstblock": "We investigate the effect of uncertainty on market feedback ratings in an auction market. There are two treatments. One introduces a factor that randomly distorts a seller's shipped quality, whereas the other does not. In both treatments, market transactions take place over a series of periods, and in each period, one seller and two buyers play the stage game outlined in Table 1. "
+    },
+    {
+      "block_id": "2016411213851922737",
+      "title": "3.1. Hypotheses",
+      "sub_firstblock": "As explained above, the exogenous shock is designed so that, absent a bias in feedback behavior, the introduction of uncertainty should not bias expected feedback scores. Specifically, whereas the introduction of uncertainty might lead to more noise in feedback giving, we take as our null hypothesis that average feedback given, along with the frequency of feedback giving, by a buyer who receives $q _ { r }$ when the seller announced quality $q _ { a }$ is the same across Baseline and Uncertainty treatments. Taking $q _ { r } / q _ { a }$ as the measure of seller honesty, the fill ratio, we write the null hypothesis as follows. "
+    },
+    {
+      "block_id": "2016411213851922746",
+      "title": "4. Results",
+      "sub_firstblock": "4.1. A Descriptive Look at the Data"
+    },
+    {
+      "block_id": "2016411213851922747",
+      "title": "4.1. A Descriptive Look at the Data",
+      "sub_firstblock": "Figure 1 provides a first look at how announced and shipped quality unfold over time.10 There are three observations to make. First, average announced quality, at about $8 6 \\%$ , is very steady across periods and similar across treatments. Second, average shipped quality is lower than announced in all periods and across both treatments. Shipped quality falls off sharply in the last 10 periods, this endgame effect being the first sign that feedback reputation is an important motivation for seller trustworthiness.11 Third, average shipped quality is lower in the Uncertainty treatment. Excluding the last 10 periods, shipped quality averages about $7 6 \\%$ in the Baseline treatment but only $6 7 \\%$ in the Uncertainty treatment. "
+    },
+    {
+      "block_id": "2016411213851922758",
+      "title": "4.2. A Shift in Feedback",
+      "sub_firstblock": "Our main hypothesis is that for instances in which the quality received is lower than the quality announced, buyer feedback ratings will be more lenient in the Uncertainty treatment than in the Baseline treatment. Figure 3 compares the average feedback rating across Baseline and Uncertainty treatments at different buyer fill ratios. Figure 3 also shows the share of silent transactions in which buyers did not leave a feedback rating. Also below, Table 3 reports the corresponding average feedback ratings and rates of silence by fill category. "
+    },
+    {
+      "block_id": "2016411213851922780",
+      "title": "4.3. Effect of Lenient Rating Behavior on Seller Feedback Scores",
+      "sub_firstblock": "In this section, we examine the effect of lenient rating behavior in the Uncertainty treatment on the distribution of the seller feedback scores. We cannot directly compare the feedback scores between treatments, as these scores are associated with different underlying seller honesty distributions (see Figures 1 and 2). A fair comparison needs to correct for this difference between treatments. (For completeness, the comparison of the unconditional feedback score distributions can be found in Figure 1 in Online Appendix B.) The preceding section showed differences in feedback giving between the treatments, in terms of both tendencies to silence and tendencies how to rate the shipment. It is not directly obvious how to quantify the size of the biases introduced by the inflation and omissions and their effect on feedback scores in the Uncertainty treatment. "
+    },
+    {
+      "block_id": "2016411213851922790",
+      "title": "4.4. Predictiveness of the Feedback System",
+      "sub_firstblock": "Perhaps the most important function of the feedback system is to distinguish honest sellers, who ship at least the level of quality they have announced, from sellers who ship less than announced. The informativeness of a feedback system is higher if it discriminates better between honest and dishonest sellers. To compare how well feedback information predicts seller honesty across treatments, we ran a probit regression for each treatment, the dependent variable indicating whether the seller was honest or not,13 regressed on all the information that is available to the buyer before bidding: the seller's feedback score, the number of feedback ratings the seller has received so far, the announced quality, and the current period (see Table 1 in Online Appendix A for the regressions). From these two regressions, we calculate the predicted probabilities to encounter an honest seller along all feedback averages for the two treatments. The results appear in Figure 5. "
+    },
+    {
+      "block_id": "2016411213851922815",
+      "title": "4.5. Buyer Use of the Feedback System",
+      "sub_firstblock": "The preceding discussion on the predictiveness of the feedback score has shown that, conditional on the score, seller honesty decreases and the precision of this estimate becomes smaller as a function of lenient feedback giving and more dishonest seller behavior. Besides the predictiveness of the feedback scores, another important measure of the informational content of a feedback system is how well buyers use the information provided to form expectations about seller behavior. Table 6 offers three such measures: the squared and absolute prediction errors (shipped quality minus expected quality) and the percentage of buyers who expect more than what was actually shipped. We define expected quality as a buyer's bid divided by his valuation. "
+    },
+    {
+      "block_id": "2016411213851922819",
+      "title": "4.6. Seller Behavior",
+      "sub_firstblock": "We hypothesized that sellers would take advantage of lower informativeness about their choice of quality in the Uncertainty treatment. As noted, the announcements made by sellers regarding quality are similar between treatments (Baseline: $8 6 . 6 \\%$ versus Uncertainty: $8 5 . 9 \\%$ ), whereas shipped quality is lower in the Uncertainty treatment $( 7 5 . 7 \\%$ versus $6 7 \\%$ ). Table 7 breaks out the difference in shipping behavior by fill ratio across treatments. "
+    },
+    {
+      "block_id": "2016411213851922832",
+      "title": "4.7. Sellers' Reaction to Feedback",
+      "sub_firstblock": "To closer investigate the disciplining effect of the feedback system, we analyze sellers' reaction to feedback ratings. We test whether the likelihood that a short filling seller becomes honest in the next period depends on the change in his feedback score as a result of the current feedback rating and whether this reaction is different between treatments. This also speaks to the causes of the changes in seller behavior across treatments. Although uncertainty itself certainly plays a role, we will see that in the Uncertainty treatment, the sellers do not react to the feedback as much as they do in the Baseline treatment. The two models in Table 8 show the results of random effects probit regressions with a seller's trustworthiness $0 =$ dishonest and $1 =$ honest) in the next period as the dependent variable. The models are restricted to sellers who ship less than announced in the current period. To measure the effect of feedback ratings, we use the variable Change in feedback score, which is the difference between the received feedback rating and the current feedback score. Thus, a positive (negative) value of the continuous variable Change in feedback score indicates that the received feedback was above (below) the seller's current feedback score, and thus the score increases (decreases) in the following period. "
+    },
+    {
+      "block_id": "2016411213851922841",
+      "title": "4.8. Does Honesty Pay?",
+      "sub_firstblock": "As shown above, sellers falling short are more likely to get away with no negative feedback in the Uncertainty treatment, changing the incentives for honest behavior. In this regard, Model 1 of Table 9 shows that, in aggregate, being honest has a positive effect on seller profits. However, when we allow honest behavior to have different effects in the two treatments (Model 2), we observe that honest behavior pays significantly only in the Baseline treatment. "
+    },
+    {
+      "block_id": "2016411213851922844",
+      "title": "4.9. Market Performance",
+      "sub_firstblock": "Finally, we analyze how the feedback system affects market performance. Descriptive statistics in Table 10 show that efficiency, measured as the ratio of realized to maximum possible surplus, decreases significantly from $6 8 \\%$ to $5 5 \\%$ in the Uncertainty treatment.19 The efficinc os emainly resul eller hipi less than maximum quality. Inferior quality accounts for roughly $7 3 \\%$ of the efficiency losses in both treatments. Misallocation in the sense that the bidder with the lower valuation purchases the product causes the remaining efficiency losses. Efficiency also decreases significantly in a random effects Tobit regression (cf. Table 11), where the announced quality and period are controlled for. "
+    },
+    {
+      "block_id": "2016411213851922853",
+      "title": "5. Discussion and Conclusion",
+      "sub_firstblock": "We reported evidence on the influence of seller attributional uncertainty on the performance of a market that relies on a feedback system to prevent seller moral hazard and adverse selection. We find that, with attributional uncertainty, buyers exhibit a preference for making leniency errors over severity errors, giving sellers who provide value moderately less than advertised higher ratings or remaining silent about their performance more frequently than they do when seller attribution is certain. The compression of feedback scores introduced by leniency on the individual level then works its way up the information chain in the reputation system, hampering the predictiveness of sellers' feedback profiles. In the Uncertainty treatment, a buyer is less likely to encounter an honest seller, even if the seller has a perfect feedback score. Hence, feedback profiles do a poorer job in helping buyers to discriminate between seller types. With the increase in moral wiggle room as a result of noise and lenient feedback giving, sellers deliver less value in the Uncertainty treatment. Buyers fail to account for this reduction in the sense that the prices they pay a seller with a given feedback profile are about the same as under the more accurate feedback obtained when seller attribution is certain. As a result, buyers pay most of the cost of seller malfeasance in the Uncertainty treatment. "
+    },
+    {
+      "block_id": "2016411213851922885",
+      "title": "Acknowledgments",
+      "sub_firstblock": "The authors thank Bill Neilson, Axel Ockenfels, Dirk Sliwka, Achim Wambach, Christoph Feldhaus, Nicolas Fugger, and Florian Goessl for helpful comments and suggestions. Informed consent of participants was obtained from subjects in accordance with the rule of the University of Cologne. "
+    },
+    {
+      "block_id": "2016411213851922887",
+      "title": "Endnotes",
+      "sub_firstblock": "1 Toward answers, see the groundbreaking work of Dellarocas (2005) on binary feedback systems and Golman and Bhatia (2012), who study the related case of subjective performance evaluation in nonfeedback settings. "
+    }
+  ]
+}

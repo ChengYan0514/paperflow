@@ -1,0 +1,125 @@
+project:
+  name: causal-claims-repro-kit
+
+
+models:
+
+  chat:
+    provider: openai-compatible
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    api_key: 
+    model: qwen3.7-max
+
+
+  embedding:
+    provider: openai-compatible
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    api_key: 
+    model: qwen3.7-text-embedding
+
+
+io:
+  project_root: D:/Python/ClaimInEconomics
+
+deal_with:
+  input_dir: dataset/raw_data
+  output_dir: dataset/cleaned
+  delete_dir: dataset/cleaned/delete
+
+deal_delete:
+  input_dir: dataset/raw_data
+  delete_file: dataset/cleaned/delete/delete_no_title.csv
+  output_csv: dataset/cleaned/delete/cleaned/delete_no_title.csv
+  txt_output_dir: llm/stage1_input/delete_no_title
+
+pipeline:
+  stage0:
+    model_type: chat
+
+  stage1:
+    model_type: chat
+
+  stage0_34:
+    model_type: chat
+  map:
+    model_type: embedding
+
+stage0_prepare:
+  input_dir: dataset/cleaned
+  output_dir: llm/stage0_input
+
+stage0:
+  input_json_path: llm/stage0_input/block_batch_001_20works/*.json
+  output_dir: llm/stage0_output
+
+  max_tokens: 10000
+  temperature: 0.0
+  iterations: 1
+
+  system_prompt_file: prompts/stage0_system.tex
+
+  user_prompt_template: |
+    Now evaluate the following blocks:
+
+    Paper title: {{paper_title}}
+
+    Blocks:
+    {{block_set}}
+
+  response_schema_file: schemas/stage0_response_schema.json
+
+stage1_prepare:
+  stage0_outputs_path: llm/stage0_output/stage0_outputs.jsonl
+  csv_path: dataset/cleaned/block_batch_001_20works.csv
+  output_base: llm/stage1_input
+  max_papers: 15000
+
+
+#file_glob:是匹配当前目录和所有子目录的txt文件
+stage1:
+  input_dir: llm/stage1_input
+  output_dir: llm/stage1_output
+  file_glob: "**/*.txt"
+
+  max_tokens: 16000
+  temperature: 0.0
+  iterations: 1
+
+  system_prompt_file: prompts/stage1_system.tex
+
+  user_prompt_template: |
+    Here is a text extract from an economics paper:
+
+    <<PAPER_TEXT_EXTRACT>>
+
+  response_schema_file: schemas/stage1_response_schema.json
+
+
+
+stage0_34:
+  input_jsonl: llm/stage1_output/stage1_outputs.jsonl
+  output_csv: llm/final_claims.csv
+
+  max_workers: 16
+  timeout: 300
+  temperature: 0.0
+  max_tokens: 200
+
+  normalize_fields:
+    sign_of_impact: true
+    type_of_relationship: true
+    statistical_significance: true
+    causal_inference_method: true
+
+    is_main_contribution: false
+    level_of_tentativeness: false
+
+map:
+  causal_data_path: llm/final_claims.csv
+  standard_terms_path: scripts/stw_labels.csv
+  output_path: llm/mapped_results.csv
+
+  batch_size: 20
+  similarity_batch_size: 8192
+  timeout: 600
+  max_retries: 3

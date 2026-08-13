@@ -1,0 +1,44 @@
+{
+  "type": "json_schema",
+  "json_schema": {
+    "name": "stage0_section_screening_response",
+    "strict": true,
+    "schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "block_id": {
+            "type": "string"
+          },
+          "relevant": {
+            "type": "boolean"
+          },
+          "expected_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Claim",
+                "Type",
+                "Method",
+                "sign_of_impact",
+                "effect_size",
+                "statistical_significance",
+                "sources_of_exogenous_variation",
+                "level_of_tentativeness",
+                "evidence"
+              ]
+            }
+          }
+        },
+        "required": [
+          "block_id",
+          "relevant",
+          "expected_fields"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

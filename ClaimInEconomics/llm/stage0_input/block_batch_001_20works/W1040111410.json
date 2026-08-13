@@ -1,0 +1,110 @@
+{
+  "paper_title": "Offline Assortment Optimization in the Presence of an Online Channel",
+  "block_set": [
+    {
+      "block_id": "2016410525138817129",
+      "title": "1. Introduction",
+      "sub_firstblock": "A growing number of firms are selling to their customers through both online and offline (or brick-andmortar) channels. Selling through multiple channels allows the firm to reach customers who have differing channel preferences for purchasing. In addition, the firm can offer a wide selection of its products (at lower inventory costs) through its online channel and showcase its product line through its offline channel. Despite the growing significance of the online channel, maintaining offline channels is essential for firms because customers visit offline stores to physically inspect the products and gain tactile (or \"touch-andfeel\") information before making purchases. Examples include furniture purchases (from firms such as Crate & Barrel, West Elm, etc.) and apparel purchases1 (from firms such as Bonobos, MM.LaFleur, etc.). Therefore, the selection of products that a customer is exposed to in the offline channel impacts her purchase behavior, and the firm faces the key operational problem of optimizing its offline selection with the objective of maximizing overall sales or profits. "
+    },
+    {
+      "block_id": "2016410525138817149",
+      "title": "1.1. Related Work",
+      "sub_firstblock": "This research builds on existing research in marketing, operations, and information systems. We categorize relevant existing research into work pertaining to single- and multiple-channel settings. "
+    },
+    {
+      "block_id": "2016410525138817156",
+      "title": "2. Model",
+      "sub_firstblock": "This section provides the precise details of the decision problem and the corresponding consumer choice model we consider. Our objective is to solve a firm's showcase decision of determining the assortment of products to \"showcase\" in the offline channel to maximize the profit from both offline and online channels. We focus on a firm selling products through an online and an offline channel. The products are reasonably expensive, infrequently purchased, and require a high-involvement buying decision; consequently, customers can benefit from an offline store visit. Furniture, messenger bags, apparel, etc., are good examples. The products are close substitutes but are differentiated along $K$ prespecified attributes. We assume that attribute $k$ takes values from the set $\\mathcal { L } _ { k } : = \\{ 0 , 1 , \\ldots ,$ $L _ { k } - 1 \\}$ of $L _ { k }$ discrete levels. We let $\\mathcal { X }$ denote the set of all feasible products, with each product represented by a length $K$ feature vector $\\begin{array} { r } { \\pmb { x } \\in \\mathcal { L } _ { 1 } \\times \\mathcal { L } _ { 2 } \\times \\cdots \\times \\mathcal { L } _ { K } , } \\end{array}$ where $\\boldsymbol { x } _ { k } \\in \\mathcal { L } _ { k }$ denotes the level of attribute $k$ in the product. For example, suppose products are described by two attributes, size and color, with size being either small or large and color being either blue or black. Then, $K = 2$ and $L _ { 1 } = L _ { 2 } = 2$ , with the vectors $( 0 , 0 ) , ( 0 , 1 ) , ( 1 , 0 ) ,$ and $( 1 , 1 )$ denoting small blue, small black, large blue, and large black products, respectively. "
+    },
+    {
+      "block_id": "2016410525138817161",
+      "title": "2.1. Omnichannel Selling",
+      "sub_firstblock": "The objective of the firm is to determine the selection of products from the online channel to showcase in the offline store to maximize the total profit across both the online and the offline channels. We distinguish two settings: the pure showcase and the general showcase. In a pure showcase setting, the firm does not carry inventory in offline stores and sells products only through the online channel; examples include bulky or customized purchases such as furniture or kitchen cabinetry, or apparel from firms that sell online but showcase their products in offline showrooms (such as Bonobos). In the general showcase setting, by contrast, the firm carries inventory and sells through both the channels; examples include most firms that sell products through multiple channels. Mathematically, the pure showcase decision is a special case of the general showcase decision. However, we study them separately because the (simpler) pure showcase problem is more tractable, while encompassing a wide range of practically important applications. "
+    },
+    {
+      "block_id": "2016410525138817163",
+      "title": "2.2. Customer Choice Model",
+      "sub_firstblock": "The showcase decision affects the purchase behavior of only the customers who visit the offline store. Among these customers, we distinguish two types: the offline type and the online type. The offline type chooses from only the selection of products offered offline, whereas the online type chooses from the entire offered selection (online or offline) and is willing to purchase from either channel. Note that both types may purchase from either channel, depending on their channel purchase preferences and their preferred products. We do not distinguish purchases from different channels and focus on maximizing the combined profit/sales from both channels. We let $\\alpha$ and $1 - \\alpha ,$ for some $\\alpha \\in [ 0 , 1 ] ,$ denote the sizes of the offline and online segments, respectively. For the pure showcase setting described above, all the customers are required to choose from the selection of products online; therefore, the customers are composed entirely of the online type $( \\alpha = 0 )$ . The general showcase setting corresponds to $\\alpha \\in ( 0 , 1 ]$ The case with $\\alpha = 1 ,$ in which none of the customers purchase from the online channel, is similar to the single-channel assortment optimization that has been studied in the operations management literature. However, as discussed in greater detail below, existing results do not apply because of the presence of product features. "
+    },
+    {
+      "block_id": "2016410525138817183",
+      "title": "2.3. Firm's Showcase Decision",
+      "sub_firstblock": "In the context of the above model, we consider the following decision problems: "
+    },
+    {
+      "block_id": "2016410525138817197",
+      "title": "3. The Product Showcase Decision",
+      "sub_firstblock": "We now discuss our results for solving the showcase decision problems introduced above. For the development below, we make the common assumption (e.g., see Kohli and Krishnamurti 1989) that the product universe $\\mathcal { X }$ is full factorial, i.e., $\\mathcal { X } = \\mathcal { X } _ { 1 } \\times \\mathcal { X } _ { 2 } \\times \\cdot \\cdot \\cdot \\times \\mathcal { X } _ { K } ,$ so that every nonprice feature combination is feasible. With the full-factorial assumption, the problem (Pure SHowCASE SaLes Max) becomes tractable, but as we show below both problems (PuRe SHowcAsE ProFIT Max) and (GeN-ERAL SHowCAsE ProFIT MAx) remain NP-complete. In fact, even the sales maximization problem (with $p _ { \\mathbf { x } }$ set to 1 for all $\\mathbf { x }$ in (General SHowcase Profit Max)) under the general showcase setting is NP-complete. However, there may be cases in which the full-factorial assumption is not reasonable. The optimization problems become significantly harder if we allow for arbitrary constraints on feature combinations, even in the single-channel setting. "
+    },
+    {
+      "block_id": "2016410525138817199",
+      "title": "3.1. Pure Showcase Decision",
+      "sub_firstblock": "In the pure showcase setting, all customers who visit the offline store are assumed to also visit the online store before making a purchase. Because all customers choose from the same selection $\\mathcal { X }$ of products, only the offered attributes, and not the offered products, impact the choice probabilities and, consequently, the profits. Therefore, the choice probability expression in (2) may be simplified to "
+    },
+    {
+      "block_id": "2016410525138817270",
+      "title": "3.2. General Showcase Decision",
+      "sub_firstblock": "We now consider the more general setting in which the population comprises both online- and offline-type customers. Recall that both segments visit the offline store. The offline segment of customers chooses from the assortment offered offline, whereas the online segment chooses from the assortments offered both online and offline. Let $\\alpha$ and $1 - \\alpha$ denote the sizes of the offline and online segments of customers, respectively, for some $\\alpha \\in ( 0 , 1 )$ Our goal, then, is to find the profit maximizing assortment of products to carry in the store, i.e., to solve problem (GeNERAL SHowCAse ProFIT Max), restated here: "
+    },
+    {
+      "block_id": "2016410525138817317",
+      "title": "3.3. Integer-Programming-Based Heuristic",
+      "sub_firstblock": "Building on the ideas in the construction of the FPTAS, we now propose an IP-based heuristic to approximately find the profit maximizing assortment of products to offer in the store. Existing work has used IP formulations to solve assortment problems (Bront et al. 2009, Subramanian and Sherali 2010) in the product space when the objective function can be expressed as a ratio of linear functions in decision variables. Instead, we solve the problem in the attribute space, and the objective function is a ratio of a linear to a nonlinear functions in the decision variables; hence, we use the ideas from our FPTAS to convert the nonlinear integer program (NLIP) into a collection of mixed integer linear programs (MILPs). We demonstrate the performance of the heuristic on synthetic data in Section 4 and on real-world data in Section 5. "
+    },
+    {
+      "block_id": "2016410525138817328",
+      "title": "Numerical Study",
+      "sub_firstblock": "We carried out two computational experiments using synthetic data. The first study is designed to assess the optimality gap of the IP-based heuristic on smaller problem instances. On problem instances with four attributes and two levels per attribute, the study shows that the IP-based heuristic obtains profits within $6 . 4 5 \\%$ to $0 . 1 1 \\%$ of the optimal profit, on average, as the number of grid points is increased from $J _ { \\mathrm { o n } } = J _ { \\mathrm { o f f } } = 2$ to $J _ { \\mathrm { o n } } = J _ { \\mathrm { o f f } } = 3 2$ . In all of these instances, the average running time was $< 0 . 5$ seconds. The second study is aimed at demonstrating the practical effectiveness of our IP-based heuristic. The study achieves two objectives: it demonstrates that (a) the computational time of the IP-based heuristic scales to large, practical-sized problems, and (b) the solutions obtained from the IPbased heuristic provide significantly higher profits and sales when compared to the solutions from standard revenue-ordered and greedy heuristics. Our results demonstrate that, on average, the IP-based heuristic runs in less than three minutes for problem instances with 100 attributes and 10 levels per attribute and provides $3 2 \\%$ more profit than the best single-channel solution that ignores the presence of the online channel and $2 8 \\%$ more profit than the best standard heuristic. "
+    },
+    {
+      "block_id": "2016410525138817335",
+      "title": "4.1. Ground-Truth Models Generated",
+      "sub_firstblock": "We considered problem instances of difference sizes by varying the number of attributes $K$ and the number of levels $L$ per attribute. For each combination $( K , L )$ of parameters, we randomly generated 100 model instances, with each instance generated as follows: (a) For each attribute-level combination $( k , l )$ ,such that $1 \\leq k$ $\\le K$ $1 \\leq l \\leq L ,$ san $w _ { k l } ^ { \\mathrm { o f f } }$ y at  random $[ - 4 , 1 ]$ $w _ { k l } ^ { \\mathrm { o f f } }$ $w _ { k l } ^ { \\mathrm { o n } } = w _ { k l } ^ { \\mathrm { o f f } }$ bility $1 - \\rho = 0 . 4$ and sample ${ w _ { k l } ^ { \\mathrm { o n } } }$ uniormly at random from $[ - 4 , w _ { k l } ^ { \\mathrm { o f f } } )$ with probbability $\\rho / 2$ and $\\left( w _ { k l } ^ { \\mathrm { o f f } } , 1 \\right]$ i ith the remaining probability $\\rho / 2$ (c) Sample the profit $r _ { k l }$ for the attribute-level combination $( k , l )$ uniformly at random from the interval $[ 1 0 0 / K , 1 5 0 / K ]$ ensuring that product profits fall in the interval [100, 150]. (d) Sample the size of the offline segment $\\alpha ^ { \\mathrm { o f f } }$ uniformly at random from $[ \\alpha _ { \\mathrm { m i n } } , \\alpha _ { \\mathrm { m a x } } ]$ and set the size of the online segment $\\alpha ^ { \\mathrm { o n } } = 1 - \\alpha ^ { \\mathrm { o f f } }$ We set $\\alpha _ { \\mathrm { m i n } } = \\alpha _ { \\mathrm { m a x } } = 0 . 2$ for the first study and $[ \\alpha _ { \\mathrm { m i n } } , \\alpha _ { \\mathrm { m a x } } ] = [ 0 , 0 . 5 ]$ for the second one. "
+    },
+    {
+      "block_id": "2016410525138817340",
+      "title": "4.2. Optimality Gaps for Smaller Problem Instances",
+      "sub_firstblock": "Table 1 reports the optimality gaps of the IP-based heuristic proposed in Section 3.3 above when $K = 4$ and $L = 2$ We varied the number of grid points from $J _ { \\mathrm { o n } } = J _ { \\mathrm { o f f } } = 2$ to $J _ { \\mathrm { o n } } = J _ { \\mathrm { o f f } } = 3 2$ in powers of two, which ensured that the grids were nested. We fixed $\\alpha ^ { \\mathrm { o f f } } =$ $2 0 \\%$ , reflecting that $8 0 \\%$ of the customers who visit the offline store also visit the online store. For each of the 100 model instances, we computed the optimal solution through exhaustive search and then the optimality gaps of the IP-based heuristic by varying the number of grid points. Table 1 reports the optimality gaps, averaged over the 100 random instances. "
+    },
+    {
+      "block_id": "2016410525138817343",
+      "title": "4.3. Scaling of the IP-Based Heuristic to Larger Problem Instances",
+      "sub_firstblock": "For the second study, we considered eight larger problem instances by varying $K$ over $\\{ 1 0 , 2 0 , 5 0 , 1 0 0 \\}$ and $L$ over $\\{ 5 , 1 0 \\}$ . Because the universe of the products is exponentially large (for $K = 1 0 0$ and $L = 1 0 .$ , the universe consists of $1 \\dot { 0 } ^ { 1 0 0 }$ products), we focused on the problem of finding the profit maximizing assortment of size at most $C = 5 0$ Exhaustive search is no longer computationally feasible, so we assessed the performance of the IP-based heuristic by comparing its profit to that obtained by three benchmark methods: (a) the offline heuristic, (b) the revenue-ordered heuristic, and (c) the greedy heuristic, described next. "
+    },
+    {
+      "block_id": "2016410525138817361",
+      "title": "Timbuk2 Case Study",
+      "sub_firstblock": "This section describes a case study we conducted to illustrate how our techniques apply to a real-world application and quantify the value of our methodologies. Particularly, the study demonstrates that the utility partworths of the same individual can change significantly after physical evaluation. The case study focuses on messenger bags from Timbuk2, a San Francisco-based company that sells customized messenger bags through its online store and also showcases some of the bags in self-owned or third-party (such as Recreational Equipment Inc., or REI) brick-and-mortar retail stores. The key findings are that (a) the differences between online and offline partworths are statistically significant for six of the nine included product attributes, with the magnitude of some of these differences being \"large\"; (b) the gain in sales and revenue from accounting for channel interactions can be substantial (up to $4 0 \\%$ in our case study); and (c) the singlechannel optimal assortment, which ignores channel interactions, is substantially different from the optimal assortment that accounts for channel interactions. "
+    },
+    {
+      "block_id": "2016410525138817364",
+      "title": "5.1. Details of the Conjoint Study",
+      "sub_firstblock": "Conjoint analysis is widely used by practitioners for quantitative preference measurement. In a typical conjoint study, participants are shown a set of products and asked to provide evaluations by either rating, ranking, or choosing products. These evaluations are then used to back out individual-level attribute partworths by fitting utility or choice models to the responses. The measured preferences are used by firms for demand predictions, product design decisions (Kohli and Krishnamurti 1989), and assortment decisions in a single channel (Dobson and Kalish 1988, 1993). "
+    },
+    {
+      "block_id": "2016410525138817372",
+      "title": "5.2. Data Analysis: Parameter Estimation",
+      "sub_firstblock": "From the study, we collected two data sets (online and offline), each set consisting of 20 ratings from the 122 "
+    },
+    {
+      "block_id": "2016410525138817398",
+      "title": "5.3. Assortment Optimization: Impact on Sales and Revenues",
+      "sub_firstblock": "Using the parameters obtained from the conjoint study, we demonstrate how the firm's sales and revenues are affected if the offline assortment is selected without taking into account the online channel. We used the IP formulation obtained in Section 3.3 to optimize the assortment with and without the online channel for various sizes of the offline segment of consumers. Our results demonstrate that the gain in revenues from accounting for the online channel can be significant if a large portion of the population visits both channels. "
+    },
+    {
+      "block_id": "2016410525138817419",
+      "title": "Conclusions and Future Work",
+      "sub_firstblock": "This work focused on a firm's showcase decision: selecting a subset of products to offer in an offline channel from a larger product line offered through the online channel to maximize expected profits across both channels. A key component of our consumer demand model is that utility partworths change when customers learn about products by inspecting them physically in a brick-and-mortar store. In the context of this demand model, we formalized the decision problem, established computational hardness, and proposed approximation algorithms with theoretical guarantees. In addition, we used a demonstrative case study with messenger bags to estimate consumers' utility parameters in a conjoint study. Through this case study, we demonstrated that accounting for channel interactions can result in substantial gains in expected revenue (up to $4 0 \\%$ in our case); the composition of the optimal assortment can also be significantly different. By laying out a framework for product showcasing, this work provides a platform for other interesting aspects of omnichannel retailing. Next, we discuss two specific directions in which this work can be extended. "
+    },
+    {
+      "block_id": "2016410525138817429",
+      "title": "Acknowledgments",
+      "sub_firstblock": "The authors thank department editor Vishal Gaur, the associate editor, and the three anonymous referees for their detailed and thoughtful comments, which greatly improved this paper. The authors are also grateful to the seminar participants of London Business School, University of California at San Diego, and New Economic School for their constructive comments that have helped improve the manuscript. They also thank Prof. John Hauser for his help in designing the conjoint study. "
+    },
+    {
+      "block_id": "2016410525138817431",
+      "title": "Endnotes",
+      "sub_firstblock": "1In fact, there is a growing trend of firms such as Bonobos, Warby Parker, Birchbox, etc., which started online, but then opened brickand-mortar stores to showcase their product lines. "
+    }
+  ]
+}

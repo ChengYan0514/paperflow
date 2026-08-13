@@ -1,0 +1,75 @@
+{
+  "paper_title": "Maternal education and child mortality in Zimbabwe",
+  "block_set": [
+    {
+      "block_id": "2016408778374779103",
+      "title": "Abstract",
+      "sub_firstblock": "Article history:   \nReceived 10 December 2014   \nReceived in revised form 5 August 2015   \nAccepted 7 August 2015   \nAvailable online 24 August 2015   \nJEL classification:   \nI15   \nI12   \nI26   \nJ13   \nO12   \nN37 "
+    },
+    {
+      "block_id": "2016408778374779109",
+      "title": "1. Introduction",
+      "sub_firstblock": "Across the world, studies have generally found that more educated people live longer and healthier lives, and they give birth to fewer but healthier children (Grossman, 2006). However, only a few of these studies have been able to identify causal evidence of the impact of education, and very few studies have been conducted in the developing world (Lochner, 2011). In addition, very few studies have been able to investigate mechanisms through which improved education might affect health outcomes. Given the disproportionate share of the burden of disease as well as persistently high child mortality and fertility rates in developing countries, there is a need to better understand what role education might play in improving development outcomes today. "
+    },
+    {
+      "block_id": "2016408778374779133",
+      "title": "2. Background: The Zimbabwean educational reforms and other post-independence changes",
+      "sub_firstblock": "In April 1980, Zimbabwe gained legal sovereignty from the United Kingdom and became an independent state. Independence in Zimbabwe followed nearly two decades of civil war, which had been fought mainly in the rural areas. In early 1980, Robert Mugabe won the first democratic election in Zimbabwe by a landslide, formed the first black government in Zimbabwe, and became its first, and, as of yet, only President. "
+    },
+    {
+      "block_id": "2016408778374779148",
+      "title": "3. Materials and methods",
+      "sub_firstblock": "3.1. Data"
+    },
+    {
+      "block_id": "2016408778374779149",
+      "title": "3.1. Data",
+      "sub_firstblock": "All of the data used in this study were sourced from five rounds of Demographic and Health Survey (DHS), which are nationally representative surveys of reproductive-aged women, conducted in Zimbabwe in 1988, 1994, 1999, 2005-6 and 2010-11. The sample for the DHS is selected from a two-step process in which enumeration areas are first randomly sampled from census files and then households are randomly selected from the list of households within in each enumeration area. From each of the five surveys, we extracted data from all women who were between the ages of 9 and 20 in 1980, that is all women who were born between 1960 and 1971 in any of the surveys (i.e. women aged 28–39 in the 1999 survey and so on). Pooling across all five surveys, our sample consists of 6442 women who were aged 9–20 (treatment women were aged 9–13 and control women were aged 16–20) in 1980. We include survey fixed effects to capture potential effects from pooling data across surveys. In total, these women gave birth to 24,991 children before they were surveyed in one of the five DHS (see Table 1). The average years of education attained by women in the sample was 5.96 years; $3 2 \\%$ of women had received some secondary schooling; and only $2 5 \\%$ of the households were in urban areas. On average, women gave birth to their first child by the age of 19.13 years. Our treatment and control groups appear to be similar on measures of wealth and whether their household had electricity. "
+    },
+    {
+      "block_id": "2016408778374779163",
+      "title": "3.2. Empirical approach",
+      "sub_firstblock": "To understand the relationship between maternal education and child survival, we wish to estimate the following: "
+    },
+    {
+      "block_id": "2016408778374779179",
+      "title": "4. Results",
+      "sub_firstblock": "4.1. First stage results: Impact of policy changes on maternal education"
+    },
+    {
+      "block_id": "2016408778374779180",
+      "title": "4.1. First stage results: Impact of policy changes on maternal education",
+      "sub_firstblock": "Fig. 1 demonstrates the effects of the reforms on the educational attainment of all women in the DHS (not just those in our samples) with age of the women in 1980 presented along the $x$ -axis. There are two vertical lines in each figure at age 14 and 15, the ages that we consider partially treated. The women immediately on the left hand side of the vertical bars are considered the treatment group, and the women immediately on the right side are the control group (again we show data on all women in the DHS, not just those in our samples). The discontinuity is easily visible: women who were less than 13 in 1980 experienced a greater jump in schooling relative to those who were 16 or older in 1980. Table 2 summarizes the results of our first stage regressions: the discontinuity in education is associated with an increase in education of 1.68 years and an increased probability of attending some secondary school by 25.2 percentage points, after controlling for other variables. It is worth noting that these are very large and very rapid increases in both the number of year and probability of attending any secondary schooling. Table 2 also shows that the first stage is stronger in rural areas and among people with a low wealth index. In Appendix Fig. A1, we show that all provinces in Zimbabwe experienced increases in educational achievement and that this indeed was a country-wide expansion of schooling. We also include estimates of the impact of the educational policy on women who were 14 and 15 in 1980, and the effects are somewhat diminished, which makes sense since these women were only partially treated. In Table 2, we also demonstrate that our first stage results are also robust to the inclusion of polynomials in age in 1980 and with larger bandwidths in our sample. "
+    },
+    {
+      "block_id": "2016408778374779183",
+      "title": "4.2. Impact on child survival",
+      "sub_firstblock": "Fig. 2a charts the mortality of children born to all women in our sample. We see a discontinuous decrease in the probability of child death, which appears to coincide with the timing of the increases in maternal education. Note that the figures only tell us the difference in survival by the age of the mother in 1980, whereas the regressions, due to the instrumental variable approach, tell us the increase in survival due to an extra year of education, the results of which are presented in Table 3. One extra year of maternal education was associated with a 1.7 percentage point decrease in the probability that a child was reported to have died prior to the survey. Given that on average $7 . 9 \\%$ of the children in our sample were reported to have died at the time of the survey, the decrease in child mortality from one year of education represents an approximately $2 1 . 5 \\%$ decrease in child deaths. Table 3 also shows that OLS estimates of this relationship tend to be severely underestimated. Additionally, Table 3 reveals that the effects on mortality by a certain age (5 years or 1 year) are largely similar, negative and statistically significant. Child deaths are heavily concentrated in the early years of life, which is consistent with known patterns of child mortality. This is important, since our primary measure of child survival includes all children ever born to the women in the DHS surveys, including children who may be teenagers or adults by the later surveys. We also test an alternative outcome – mortality by age 5 and mortality by age 1 – to rule out, for example, the rise of HIV among youth. "
+    },
+    {
+      "block_id": "2016408778374779198",
+      "title": "4.3. Channels linking education to survival outcomes",
+      "sub_firstblock": "Next, we explore the mechanisms through which increased education might be associated with changes in child mortality, which are grouped into broad categories and presented in Tables 6–8. We also present reduced form estimates for all of the same outcomes in Appendix Tables A2a–A2c. As an additional robustness check, we also present the results for the same outcomes in Tables 6 and 7 in Appendix Table A3 with a wider bandwidth in age (to allow for polynomials) and with polynomials of age in 1980. The first set of mechanisms that we explore is the impact of expanded access to maternal education on the fertility and sexual behavior of women, the results of which are presented in Table 6 (reduced form OLS estimates for all mechanisms we explore are also presented in Appendix Tables A2a–A2c). We find that increased secondary schooling delays age at first cohabitation, perhaps consequently age at first intercourse and also the age at first birth; an additional year of schooling delays entry into cohabitation by 0.5 years, off a base of 19 years. The delay in terms of having the first child is smaller at around 0.3 years, but it is perhaps mediated by the fact that more schooling reduces the time between marriage and first child. The middle panel of Column 2 in Table 6 shows that schooling also has an impact on the number of children born (including children that eventually die); however, this result is not statistically significant for women close to the end of their fertile cycle (35 years), though the magnitude is similar. We interpret this result with some caution since this is not robust to polynomials in age, the results of which are shown in Appendix Table A3. As seen in Fig. 3, there appears to be little evidence of a strong trend break in number of children in the reduced form. "
+    },
+    {
+      "block_id": "2016408778374779237",
+      "title": "4.4. Robustness tests",
+      "sub_firstblock": "As stated earlier, an important concern is that independence led to other changes, beyond those in the education sector—although why this would occur differentially for those just below and above 13 is perhaps a harder argument to make. Our first attempt at capturing the possibility that other reforms or changes might differentially affect those below 13 in 1980 is to examine our main child mortality outcome for women who had dropped out by age 9 and, hence, never took advantage of the reforms (we repeated this exercise for dropouts by age 10 or 11 and the results looked very similar)5. Fig. 7 shows that there is no discontinuity in child mortality around age 14 or 15 for women who dropped out of school years before independence. Hence, it seems unlikely that independence led to other reforms that had age-specific effects that could explain our results. "
+    },
+    {
+      "block_id": "2016408778374779263",
+      "title": "5. Discussion and conclusions",
+      "sub_firstblock": "A number of channels have been postulated as ways in which education might lead to changes in child mortality and other health outcomes. First, education may make people more efficient producers of health (the productive efficiency hypothesis), which could make people more adherent to treatments or make people get more health out of the same inputs. Second, education may make people more aware of different treatments, which may lead them to make different choices with regards to preventive behaviors or different treatments (the allocative efficiency hypothesis). Third, increased education might lead to higher incomes, which could directly affect health by increasing the purchasing power of individuals (income effects). Finally, there are also a number of additional pathways, which might influence one or more of these channels in less wellestablished ways, such as the propensity to marry a better partner, social networks, etc. "
+    },
+    {
+      "block_id": "2016408778374779269",
+      "title": "Acknowledgements",
+      "sub_firstblock": "This paper has benefited from discussions with Lorenzo Casaburi, Gordon Dahl, Rebecca Diamond, Rajeev Dehejia, Rene Loewenson, Heather Royer, Kudzai Takavarasha, Tom Vogl and participants at PACDEV and CIREQ Applied Microeconomics Conferences. "
+    },
+    {
+      "block_id": "2016408778374779271",
+      "title": "Appendix A.",
+      "sub_firstblock": "All data on female empowerment were taken from the empowerment modules that has been asked in select DHS over the years. The empowerment module of questions was not asked in the 1988 survey and all of the empowerment questions were not asked in each survey. Therefore the response rate to these questions is much lower than for our other outcomes and the number of responses varies by empowerment question. For each set of decisions, women were asked if they alone, they along with their husband, or if someone else in their household had say over how key decisions were made in the household, including how to spend the respondent’s own earnings, how decisions regarding the respondent’s own health care were made, how decisions over large purchases were made, how decisions regarding purchases for daily needs were made, who decides which family members or other relatives the household would visit, how decisions regarding food purchases were made, and how decisions regarding how money were made. For all women who responded to these questions, if women reported having some say, either alone or with her husband, we coded this response as a 1 or 0 otherwise. We then created an index using these dummies to capture empowerment in a single variable. The surveys similarly ask about domestic violence, which contains questions about whether it is acceptable for a man to beat his wife in the event of burning food, going out, refusing sex, or arguing. These responses are coded as 1 if a woman agrees with such statements and we create an index out of all the responses to capture overall attitudes toward domestic violence. "
+    }
+  ]
+}

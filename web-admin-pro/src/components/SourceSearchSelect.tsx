@@ -44,7 +44,7 @@ export default function SourceSearchSelect({
       loading={loading}
       onChange={onChange}
       onSearch={setQuery}
-      placeholder="输入期刊名称、Source ID 或 ISSN"
+      placeholder="输入来源名称、Source ID 或 ISSN"
       showSearch
       options={options.map((source) => ({
         value: source.sourceId,

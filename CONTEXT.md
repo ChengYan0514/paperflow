@@ -113,6 +113,13 @@ It supports interactive Source selection but is not the authoritative source
 for creation-time validation and is not user-managed Source data.
 _Avoid_: Source CRUD, OpenAlex source table copy when referring to search.
 
+**OpenAlex Source Import Task**:
+A persisted request to import one OpenAlex Source's metadata for an optional
+publication-year range. Java creates and presents the task; the independent
+Python worker claims and executes it using the OpenAlex Metadata Importer.
+It imports metadata, not Original Files or downstream processing.
+_Avoid_: Collection job, Original File Job, synchronous import request.
+
 **Soft-deleted Paper**:
 A Paper hidden from normal management views whose database identity and file
 versions are retained in the recovery area. It may be restored by an Admin or

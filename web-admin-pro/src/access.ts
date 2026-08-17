@@ -19,5 +19,6 @@ export default function access(
     canRestorePaperVersions: canDeletePapers,
     canPurgePapers: canSuperAdmin,
     canSearchOpenAlexSources: Boolean(role),
+    canImportOpenAlexJournals: canManageUsers,
   };
 }

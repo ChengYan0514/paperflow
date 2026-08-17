@@ -10,7 +10,7 @@ OpenAlex 元数据、外部交付 CSV、Original File 和 MinerU parsed 输出�
 
 ```mermaid
 flowchart TD
-    A[外部准备<br/>CSV 和 Original File 放入 DATA_ROOT] --> B[OpenAlex Metadata Import<br/>导入 Source / Work / WorkSource / WorkAuthor]
+    A[外部准备<br/>CSV 和 Original File 放入 DATA_ROOT] --> B[OpenAlex Metadata Import<br/>导入 Source / Work / WorkSource / WorkAuthor / WorkTopic]
     B --> C[Original File Import<br/>校验 CSV 与文件并登记 Original File]
     B --> D[Matching<br/>把 Original File Job 匹配到 Work]
     C --> D
@@ -101,11 +101,11 @@ source_id,year,paper_title,authors,doi,url,provider,file_name,file_path,file_typ
 | `source_id` | 必须是 Paperflow 项目库中已存在的 Source |
 | `year` | 可空；非空时必须是整数 |
 | `paper_title` | 可空 |
-| `authors` | 可空；多作者用英文分号 `;` 分隔 |
+| `authors` | 可空；多作者用英文分号 `;` 分隔，单作者不附加分号 |
 | `doi` | 可空；导入时会归一化 |
 | `url` | 可空 |
 | `provider` | 可空；表示外部采集平台 |
-| `file_name` | 必须等于 `file_path` 的文件名 |
+| `file_name` | 无扩展名的 File Hash，必须等于 `file_path` 文件名去掉扩展名后的值 |
 | `file_path` | 必须以 `openalex/original/` 开头 |
 | `file_type` | 只支持 `PDF`、`XML`、`HTML`，也允许写成带点后缀 |
 | `file_size` | 必须等于磁盘文件字节数 |
@@ -129,7 +129,7 @@ source ID 文件每行一个 ID；空行和 `#` 开头的行会被忽略。
 ### 要做的事
 
 - 校验所有传入的 `source_id` 都存在于 OpenAlex 源库。
-- 从 OpenAlex 源库读取 Source、Work、Work-Source、Work-Author 数据。
+- 从 OpenAlex 源库读取 Source、Work、Work-Source、Work-Author、Work-Topic 数据。
 - 写入 Paperflow 项目库。
 - 对本次 Source 下 `flag_match=-1` 的 Original File Job 重置为 `0`。
 
@@ -147,6 +147,7 @@ source ID 文件每行一个 ID；空行和 `#` 开头的行会被忽略。
 - `work`
 - `work_source`
 - `work_author`
+- `work_topic`
 
 不创建 Original File，也不创建 Original File Job。
 
@@ -177,7 +178,7 @@ uv run paperflow import-original-files --csv openalex/csv/batch.csv --data-root 
 - `--csv` 是相对 `DATA_ROOT` 的路径。
 - CSV 文件必须位于 `openalex/csv/` 约定目录下。
 - Original File 必须已经存在；Paperflow 不移动、不复制外部文件。
-- `file_id` 为规范化 `source_id`、`year`、`paper_title` 与 `authors` 的 SHA-256 十六进制哈希；`file_name` 去扩展名必须等于该值。
+- `file_id` 为规范化 `source_id`、`year`、`paper_title` 与 `authors` 的 SHA-256 十六进制哈希；无扩展名的 `file_name` 必须等于该值。
 - 同一 File Hash 重复导入时保留一条 Original File Record。
 - 文件类型优先级为 `PDF > XML > HTML`；更高优先级会替换文件名、路径、类型和大小。
 
@@ -415,6 +416,14 @@ uv run paperflow import-blocks --source-id S123
 
 Matching 和 Text Parsing 都依赖 Original File Import 产生的 Original File Job；
 Text Parsing 不依赖 Matching 成功。Block Import 只依赖 Text Parsing 成功。
+
+### 管理台来源导入入口
+
+管理台的“OpenAlex 来源检索”可以创建单 Source 的导入任务。Java 服务只负责权限、
+权威 Source 存在性校验、任务记录和审计；独立 Python worker 领取任务后复用本阶段的
+`OpenAlexMetadataImporter`。该入口支持空年份范围（导入全部年份），但不创建
+Original File、不运行 Matching、Text Parsing 或 Block Import。任务领取、租约和部署
+规范见 `docs/openalex-journal-import.md`。
 
 显式运行阶段是当前支持的调度方式。不要用一层 CLI wrapper 隐藏 CSV 输入、
 过滤条件、重试策略和 MinerU 依赖；只有引入持久化 batch/run 状态和恢复语义

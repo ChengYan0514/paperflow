@@ -1,13 +1,13 @@
 # Paperflow Java Admin Overview
 
-本文定义 Paperflow Java 后端管理服务当前已经实现的边界。当前服务对 Paperflow
-业务表保持只读，只为登录、用户管理和审计写入本地管理表，不替代 Python
-pipeline。已经接受但尚未实施的 Paper CRUD 新边界见 ADR 0003 和
-`docs/paper-crud-implementation-plan.md`；实现该计划时必须同步修订本文。
+本文定义 Paperflow Java 后端管理服务当前已经实现的边界。除已实施的 Paper 写入外，
+Java 服务对 OpenAlex 元数据保持协调者边界：它创建与查询来源导入任务，不替代 Python
+pipeline。Python worker 是实际执行者，边界见 ADR 0004 和
+`docs/openalex-journal-import.md`。
 
 ## 目标
 
-Java 后端只做七件事：
+Java 后端只做八件事：
 
 1. 从 Paperflow 项目库读取 `source`、`work`、`original_file`、
    `original_file_job`、`text_file`、`block*` 表。
@@ -19,6 +19,8 @@ Java 后端只做七件事：
 6. 为 Source、Work、Original File 列表提供按当前筛选导出 CSV。
 7. 从独立或同库的 causal 数据源提供只读因果知识图谱查询，包括总览、关系、变量、
    论文证据和领域分析。
+8. 为 OpenAlex 来源元数据导入创建、查询和重试持久化任务，并记录审计；不在 Java
+   进程或 HTTP 请求中运行 Python 导入逻辑。
 
 Python 项目继续负责所有数据生产：
 
@@ -28,13 +30,15 @@ Python 项目继续负责所有数据生产：
 - Text Parsing
 - Block Import
 
+其中 OpenAlex Metadata Import 可由独立 worker 从管理台任务表领取。
+
 ## 非目标
 
 第一版 Java 后端不做：
 
-- 数据导入、匹配、解析、block 入库。
+- 执行数据导入、匹配、解析、block 入库。
 - 修改 Paperflow 表，包括状态重置、人工修正匹配、重试任务。
-- 触发 Python CLI 或 MinerU。
+- 触发 Python CLI、Python 子进程或 MinerU。
 - 读取配置的 `DATA_ROOT` 之外的磁盘文件、下载远程 PDF、生成或修改 parsed
   图片。
 - JWT、SSO、自注册、动态权限矩阵和 CORS。

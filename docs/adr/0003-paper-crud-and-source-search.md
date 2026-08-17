@@ -34,7 +34,8 @@ OpenAlex Source 原表为 `dataset_20241125.sources`，其主要字段是 `id`�
 - 支持单次上传一个 PDF、XML 或 HTML 文件，不支持批量上传。
 - Source 只提供搜索、选择和按需同步，不允许用户修改或删除 OpenAlex Source。
 - Work、Work Author、Work Source、任务状态、解析文本、Block 和因果数据仍为只读资源。
-- Java 请求不触发 Python CLI、MinerU 或离线 pipeline。
+- Java 请求不触发 Python CLI、MinerU 或离线 pipeline。来源元数据导入的任务提交和
+  查询边界见 ADR 0004：Java 不执行导入，独立 Python worker 执行既有导入器。
 - 新建 Paper 时仍创建 `original_file_job`：PDF 的 `flag_match/flag_text/flag_block`
   初始化为 `0/0/0`；XML/HTML 初始化为 `0/-2/0`。实际数据库已有
   `flag_vector` 时沿用数据库默认值或显式初始化为 `0`，但本功能不管理向量任务。
@@ -114,8 +115,9 @@ Java 后端建立独立 OpenAlex 数据源，配置前缀为 `OPENALEX_DB_*`。�
 建立精确查询索引。搜索至少输入 2 个字符，默认最多返回 20 条。ID 和 ISSN 精确
 命中优先，名称相似度其次，并用 `works_count` 辅助排序。
 
-本阶段提供幂等的全量初始化和手动同步命令或管理接口，不实现定时同步。搜索结果
-至少显示 Source ID、名称、ISSN、出版社、Works 数、OA/DOAJ 标记和可用主页链接。
+本阶段提供幂等的全量初始化和手动同步命令或管理接口，不实现定时同步。来源检索投影
+当前离线 OpenAlex `sources` 表中的全部 Source；提交导入任务时仍权威回查 Source 存在性。
+搜索结果至少显示 Source ID、名称、ISSN、出版社、Works 数、OA/DOAJ 标记和可用主页链接。
 
 创建或修改 Paper 的 Source 时，前端只提交 `source_id`。后端必须回查 OpenAlex
 权威记录；Paperflow 本地 `source` 不存在时，在业务事务内按需插入必要字段。已存在

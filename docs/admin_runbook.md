@@ -16,9 +16,12 @@ Nginx + systemd 的生产部署方式。
   相关接口会优先使用这组连接信息。
 - causal 数据库首次部署知识图谱查询前，由 schema owner 创建声明关联索引并更新
   统计信息；详见下方“因果知识图谱索引”。
-- 数据库账号需要读写 Paperflow 业务 schema 中的 `original_file`、
-  `original_file_job`、`original_file_version`、Source 搜索快照、文件补偿表和管理表；
-  对 OpenAlex schema 只需要 SELECT。
+- Java 数据库账号需要读写 Paperflow 业务 schema 中的 `original_file`、
+  `original_file_job`、`original_file_version`、Source 搜索快照、来源导入任务、文件
+  补偿表和管理表；对 OpenAlex schema 只需要 SELECT。
+- OpenAlex 来源导入 worker 使用独立账号或最小权限账号：读取 OpenAlex schema，并写
+  Paperflow 的 `source`、`work`、`work_source`、`work_author`、`work_topic`、匹配失败
+  重置涉及的 `original_file_job` 以及 `openalex_journal_import_task`。
 - 如果要预览 PDF/HTML 或 parsed 图片，`.env` 还需要配置 `DATA_ROOT` 指向
   Paperflow 数据根目录；未配置时默认使用仓库相对路径 `data`。
 - Java 进程必须能写 `DATA_ROOT/openalex/original`、`.upload-tmp`、
@@ -193,6 +196,23 @@ sudo systemctl enable --now paperflow-admin
 sudo systemctl reload nginx
 ```
 
+### OpenAlex 来源导入 worker
+
+在 `/opt/paperflow` 部署 Python `paperflow` 项目并用 `uv sync` 准备运行环境。worker
+不开放端口，不需要 `DATA_ROOT` 写权限、MinerU 或 Milvus；它读取与 Java 相同的数据库
+环境变量，并由 systemd 运行：
+
+```bash
+sudo install -m 644 deploy/systemd/paperflow-openalex-import-worker.service /etc/systemd/system/paperflow-openalex-import-worker.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now paperflow-openalex-import-worker
+systemctl status paperflow-openalex-import-worker
+journalctl -u paperflow-openalex-import-worker -f
+```
+
+worker 使用 `paperflow --no-progress run-openalex-import-worker`。任务协议和故障恢复见
+`docs/openalex-journal-import.md`；不要从 Java Controller 直接执行 `uv run`。
+
 常用检查：
 
 ```bash
@@ -212,6 +232,10 @@ curl -s -o /dev/null -w '%{http_code}\n' https://admin.example.com/api/service-s
 ```bash
 sudo systemctl restart paperflow-admin
 ```
+
+本次 Source 检索修复从 V3 升级到 V4。V3 曾错误清空来源检索快照；升级后的 Java
+启动会执行 V4 并移除遗留的 `source_type` 列。若快照为空，以 `SUPER_ADMIN` 登录后在
+“OpenAlex 来源检索”执行一次“同步 OpenAlex 来源”，再验证检索结果。
 
 前端文件由 Nginx 直接读取，静态文件更新不需要重启 Nginx。仅改动 Nginx 配置时先运行
 `sudo nginx -t`，再 `sudo systemctl reload nginx`。

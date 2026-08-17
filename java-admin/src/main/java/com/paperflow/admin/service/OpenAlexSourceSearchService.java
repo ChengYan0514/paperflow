@@ -88,7 +88,7 @@ public class OpenAlexSourceSearchService {
                 INSERT INTO openalex_source_search
                     (source_id, display_name, publisher, issn_l, issn, works_count, cited_by_count,
                      is_oa, is_in_doaj, homepage_url, source_updated_at, synced_at)
-                VALUES (?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?, ?, ?, ?, now())
+                VALUES (?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?, ?, ?, now())
                 ON CONFLICT (source_id) DO UPDATE SET
                     display_name=excluded.display_name, publisher=excluded.publisher,
                     issn_l=excluded.issn_l, issn=excluded.issn,
@@ -116,8 +116,8 @@ public class OpenAlexSourceSearchService {
 
     private OpenAlexSourceDto mapDto(ResultSet rs, int rowNum) throws SQLException {
         return new OpenAlexSourceDto(
-                rs.getString("source_id"), rs.getString("display_name"), rs.getString("publisher"),
-                rs.getString("issn_l"), parseIssn(rs.getString("issn")),
+                rs.getString("source_id"), rs.getString("display_name"),
+                rs.getString("publisher"), rs.getString("issn_l"), parseIssn(rs.getString("issn")),
                 rs.getObject("works_count", Integer.class), rs.getObject("cited_by_count", Integer.class),
                 rs.getObject("is_oa", Boolean.class), rs.getObject("is_in_doaj", Boolean.class),
                 rs.getString("homepage_url"));

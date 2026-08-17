@@ -1,6 +1,8 @@
 # Paperflow 数据库设计文档
 
-本文按 `docs/init_prd_final.md` 更新，描述当前版本实际使用的 PostgreSQL 表结构、约束、索引和状态流转。当前版本只覆盖 OpenAlex 元数据导入、原始文件登记、匹配、MinerU 解析和 block 入库；不包含论文采集、OpenAlex API 导入、向量化、`work_keyword`、`work_topic`。
+本文描述当前版本实际使用的 PostgreSQL 表结构、约束、索引和状态流转。当前版本覆盖
+OpenAlex 元数据导入、原始文件登记、匹配、MinerU 解析、block 入库及其来源导入任务；
+不包含论文采集、OpenAlex API 导入、向量化和 `work_keyword`。
 
 ## 1. 数据库边界
 
@@ -12,6 +14,7 @@
 - `work`
 - `work_source`
 - `work_author`
+- `work_topic`
 - `original_file`
 - `original_file_job`
 - `text_file`
@@ -127,7 +130,28 @@ data
 
 当前版本不增加 `author_order`。
 
-### 2.5 `original_file`
+### 2.5 `work_topic`
+
+表格描述：OpenAlex Work 与主题的关联表，由来源元数据导入写入，供因果图谱与后续
+主题查询使用。
+
+| 名称 | 代码 | 主键 | 数据类型 | 约束/说明 |
+| --- | --- | --- | --- | --- |
+| 作品 ID | `work_id` | TRUE | `varchar(255)` | 外键 `work.work_id`，`ON DELETE CASCADE` |
+| 主题 ID | `topic_id` | TRUE | `varchar(255)` | OpenAlex topic ID |
+| 主题名称 | `topic_name` | FALSE | `varchar(1000)` | 可为空 |
+| 学科领域 | `field_name` | FALSE | `varchar(1000)` | 可为空 |
+| 子领域 | `subfield_name` | FALSE | `varchar(1000)` | 可为空 |
+| 域 | `domain_name` | FALSE | `varchar(1000)` | 可为空 |
+| 关键词 | `keywords` | FALSE | `varchar(1000)` | 可为空；导入时截断到字段上限 |
+| 描述 | `description` | FALSE | `varchar(1000)` | 可为空；导入时截断到字段上限 |
+
+约束和索引：
+
+- 主键：`work_topic(work_id, topic_id)`
+- 普通索引：`work_topic(topic_id)`
+
+### 2.6 `original_file`
 
 表格描述：原始文件登记表。导入阶段只校验和登记，不做匹配。`file_id` 是全库唯一且不可变的原始文件身份，定义为规范化 `source_id`、`year`、`paper_title` 与 `authors` 的 SHA-256 十六进制哈希，不是文件内容 hash。
 
@@ -137,7 +161,7 @@ data
 | 来源 ID | `source_id` | FALSE | `varchar(255)` | 外键 `source.source_id`，`ON DELETE RESTRICT` |
 | 论文年份 | `year` | FALSE | `int4` | CSV 输入 |
 | 论文标题 | `paper_title` | FALSE | `varchar(2000)` | CSV 输入 |
-| 论文作者 | `authors` | FALSE | `varchar(2000)` | CSV 输入；英文分号 `;` 分隔 |
+| 论文作者 | `authors` | FALSE | `varchar(2000)` | CSV 输入；多作者用英文分号 `;` 分隔，单作者不附加分号 |
 | DOI | `doi` | FALSE | `varchar(500)` | 归一化 DOI，可为空 |
 | 文章采集链接 | `url` | FALSE | `varchar(2000)` | CSV 输入；原始采集页面或下载链接，可为空 |
 | 采集平台 | `provider` | FALSE | `varchar(255)` | CSV 输入；如 `springer`，以后查询采集平台以该字段为准 |
@@ -158,7 +182,7 @@ data
 
 同一个 File Hash 重复导入时保持一条记录。如果后续导入提供更高优先级文件类型，按 `PDF > XML > HTML` 在 Original File Import 阶段替换 `original_file_name`、`original_file_path`、`original_file_type` 和 `file_size`。
 
-### 2.6 `original_file_job`
+### 2.7 `original_file_job`
 
 表格描述：按 `original_file.file_id` 粒度记录真实原始文件的匹配和下游处理状态。Original File Import 插入新的 `original_file` 后，同步创建 `original_file_job`。
 
@@ -208,7 +232,39 @@ data
 
 失败状态不会在任务启动时自动重置，必须通过显式 retry 参数重跑。`XML` 和 `HTML` 原始文件在创建 `original_file_job` 时设置 `flag_text=-2`，当前版本不进入 MinerU。
 
-### 2.8 `text_file`
+### 2.8 `openalex_journal_import_task`
+
+表格描述：管理平台提交、Python worker 领取和展示 OpenAlex 来源元数据导入的协调表。
+它不保存 OpenAlex 原数据，也不替代 `source`、`work` 与关联表。
+
+| 名称 | 代码 | 主键 | 数据类型 | 约束/说明 |
+| --- | --- | --- | --- | --- |
+| 任务 ID | `task_id` | TRUE | `varchar(64)` | UUID 文本主键 |
+| 来源 ID | `source_id` | FALSE | `varchar(255)` | OpenAlex Source ID；不设本地 `source` 外键 |
+| 起始年份 | `year_from` | FALSE | `int4` | 可为空 |
+| 结束年份 | `year_to` | FALSE | `int4` | 可为空 |
+| 状态 | `status` | FALSE | `varchar(16)` | `QUEUED/RUNNING/SUCCEEDED/FAILED` |
+| 创建人 | `created_by` | FALSE | `int8` | 提交人的 `admin_user.id`；管理用户表独立初始化，不设数据库外键 |
+| 重试来源任务 | `retry_of_task_id` | FALSE | `varchar(64)` | 自关联；仅失败任务可被重试 |
+| worker 标识 | `worker_id` | FALSE | `varchar(255)` | 可为空 |
+| 租约与心跳 | `lease_expires_at`, `last_heartbeat_at` | FALSE | `timestamptz` | 仅运行中任务使用 |
+| 领取次数 | `attempt_count` | FALSE | `int4` | 默认 `0` |
+| 进度 | `progress_current`, `progress_total`, `progress_message` | FALSE | `int4/int4/varchar(1000)` | 默认 `0/0`；总步数不是 API 固定值 |
+| 结果 | `result` | FALSE | `jsonb` | 成功后的计数结果 |
+| 错误 | `error_code`, `error_message` | FALSE | `varchar(80)/varchar(2000)` | 过滤后的安全摘要 |
+| 生命周期时间 | `created_at`, `started_at`, `finished_at` | FALSE | `timestamptz` | 创建时间必填，其他可空 |
+
+约束和索引：
+
+- `CHECK status IN ('QUEUED','RUNNING','SUCCEEDED','FAILED')`
+- `CHECK year_from IS NULL OR year_to IS NULL OR year_from <= year_to`
+- `CHECK progress_current >= 0 AND progress_total >= 0 AND progress_current <= progress_total`
+- `UNIQUE (source_id) WHERE status IN ('QUEUED','RUNNING')`
+- 索引：`(source_id, created_at DESC)`、`(status, lease_expires_at, created_at)`。
+
+详见 `docs/openalex-journal-import.md` 与 ADR 0004。
+
+### 2.9 `text_file`
 
 表格描述：解析后全文文件登记表，只登记规范化 parsed 输出文件，不登记 MinerU raw 中间文件。
 
@@ -227,7 +283,7 @@ data
 
 Block Import 只依赖 parsed JSON；MD 可以登记，但不作为 block 入库来源。Text Parsing 重跑前删除该 `file_id` 的旧 `text_file` 记录，解析成功后重建。
 
-### 2.9 `block`
+### 2.10 `block`
 
 表格描述：内容块主表，存储全文内容块，包括标题、正文、公式、表格、图片、引用、脚注和丢弃块。
 
@@ -252,7 +308,7 @@ Block Import 只依赖 parsed JSON；MD 可以登记，但不作为 block 入库
 
 Block Import 按 `file_id` 幂等重建。删除 `block` 主表记录时，扩展表通过外键 `ON DELETE CASCADE` 自动清理。查询某个 OpenAlex Work 的全文块时，通过 `original_file_job.matched_work_id -> original_file_job.file_id -> block.file_id` 关联。
 
-### 2.10 `block_image`
+### 2.11 `block_image`
 
 表格描述：图片块扩展表，保存图片类内容块的图片路径、标题和脚注。
 
@@ -267,7 +323,7 @@ Block Import 按 `file_id` 幂等重建。删除 `block` 主表记录时，扩�
 
 - 主键：`block_image(block_id)`
 
-### 2.11 `block_table`
+### 2.12 `block_table`
 
 表格描述：表格块扩展表，保存表格类内容块的图片路径、表题和脚注。
 
@@ -282,7 +338,7 @@ Block Import 按 `file_id` 幂等重建。删除 `block` 主表记录时，扩�
 
 - 主键：`block_table(block_id)`
 
-### 2.12 `block_equation`
+### 2.13 `block_equation`
 
 表格描述：公式块扩展表，保存公式类内容块的图片路径和公式格式。
 
@@ -296,7 +352,7 @@ Block Import 按 `file_id` 幂等重建。删除 `block` 主表记录时，扩�
 
 - 主键：`block_equation(block_id)`
 
-### 2.13 `block_footnote`
+### 2.14 `block_footnote`
 
 表格描述：页脚注扩展表，保存 MinerU `page_footnote` 映射结果。关联的
 `block.block_type` 为 `page_footnote`。
@@ -311,7 +367,7 @@ Block Import 按 `file_id` 幂等重建。删除 `block` 主表记录时，扩�
 
 - 主键：`block_footnote(block_id)`
 
-### 2.14 `block_reference`
+### 2.15 `block_reference`
 
 表格描述：参考文献扩展表，统一保存 MinerU 解析得到的参考文献条目。关联的
 `block.block_type` 为 `reference`。
@@ -338,19 +394,17 @@ Block Import 按 `file_id` 幂等重建。删除 `block` 主表记录时，扩�
 - `work`
 - `work_source`
 - `work_author`
-
-不写入：
-
-- `work_keyword`
 - `work_topic`
+
+不写入 `work_keyword`。
 
 导入规则：
 
 1. 导入由一个或多个 `source_id` 驱动，年份范围可选。
 2. 导入前必须校验所有传入 `source_id` 都存在于 OpenAlex 源库；任意一个不存在则整体失败。
 3. `source`、`work` 按主键 upsert。
-4. `work_source`、`work_author` 按复合键 upsert，或在事务中重建本次导入 work 的关联。
-5. OpenAlex Metadata Import 不创建任务行。
+4. `work_source`、`work_author`、`work_topic` 按复合键 upsert，或在事务中重建本次导入 work 的关联。
+5. CLI 直接运行不创建任务行；管理平台来源导入创建协调任务，由 Python worker 领取后执行同一导入器。
 6. 对本次导入 Source 下 `original_file_job.flag_match=-1` 的记录，重置为 `0`，允许新增或更新后的 OpenAlex 元数据触发重新匹配。
 7. 导入范围缩小时，不自动删除旧 `work` 或旧 `original_file_job`。
 
@@ -374,6 +428,9 @@ Block Import 按 `file_id` 幂等重建。删除 `block` 主表记录时，扩�
 | `works_authorships.author_id` | `work_author.author_id` |
 | `authors.display_name` | `work_author.author_name` |
 | `works_authorships.author_position` | `work_author.author_position` |
+| `works_topics.work_id` | `work_topic.work_id` |
+| `works_topics.topic_id` | `work_topic.topic_id` |
+| `topics` 的名称、领域、关键词和描述字段 | `work_topic` 对应字段 |
 
 ### 3.2 Original File Import
 
@@ -408,17 +465,17 @@ CSV 字段映射：
 | `file_size` | `original_file.file_size` |
 | `source_id`、`year`、`paper_title`、`authors` | 规范化后计算 `original_file.file_id` |
 
-CSV 不提供 `file_id` 字段，由导入器根据元数据计算；`file_name` 去扩展名必须与计算结果相同。
+CSV 不提供 `file_id` 字段，由导入器根据元数据计算；无扩展名的 `file_name` 必须与计算结果相同，`file_path` 指向带扩展名的实际文件。
 
 每行 CSV 必须满足：
 
 1. `source_id` 存在于本地 `source` 表。
 2. `file_path` 是以 `openalex/original/` 开头的相对路径。
 3. `file_path` 指向的物理文件存在。
-4. `file_name` 与 `file_path` 末尾文件名一致。
+4. `file_name` 是无扩展名的 File Hash，等于 `file_path` 末尾文件名去掉扩展名后的值。
 5. `file_type` 规范化后只能是 `PDF`、`XML`、`HTML`。
 6. `file_size` 应与实际文件大小一致。
-7. `authors` 使用英文分号 `;` 分隔。
+7. 多位作者使用英文分号 `;` 分隔；单作者不附加分号。
 8. `url` 可为空；非空时保留原值，不做 URL 规范化。
 9. `provider` 可为空；非空时去除首尾空白后入库。
 
@@ -429,7 +486,7 @@ CSV 不提供 `file_id` 字段，由导入器根据元数据计算；`file_name`
 1. `file_type` 入库统一为大写无点后缀：`PDF`、`XML`、`HTML`。
 2. DOI 去除首尾空白、`https://doi.org/`、`http://dx.doi.org/`、`doi:` 前缀后转小写；空字符串视为 `NULL`。
 3. 本地 `work.doi` 和 `original_file.doi` 都保存归一化 DOI，不额外保存原始 DOI。
-4. 作者字段导入时不猜测多种格式。CSV `authors` 必须使用英文分号。
+4. 作者字段导入时不猜测多种格式。多作者使用英文分号分隔，单作者保持原值。
 5. `provider` 仅记录原始文件采集平台；不校验是否存在于 `source.provider`。
 
 幂等规则：

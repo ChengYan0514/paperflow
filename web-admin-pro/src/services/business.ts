@@ -148,6 +148,36 @@ export type OpenAlexSource = {
   homepageUrl?: string | null;
 };
 
+export type OpenAlexJournalImportStatus = 'QUEUED' | 'RUNNING' | 'SUCCEEDED' | 'FAILED';
+
+export type OpenAlexJournalImportResult = {
+  sourceCount: number;
+  workCount: number;
+  workSourceCount: number;
+  workAuthorCount: number;
+  workTopicCount: number;
+  matchResetCount: number;
+};
+
+export type OpenAlexJournalImportTask = {
+  taskId: string;
+  sourceId: string;
+  yearFrom?: number | null;
+  yearTo?: number | null;
+  status: OpenAlexJournalImportStatus;
+  retryOfTaskId?: string | null;
+  attemptCount: number;
+  progressCurrent: number;
+  progressTotal: number;
+  progressMessage?: string | null;
+  result?: OpenAlexJournalImportResult | null;
+  errorCode?: string | null;
+  errorMessage?: string | null;
+  createdAt: string;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+};
+
 export type PaperMutation = { fileId: string; recordVersion: number };
 export type TrashedPaper = PaperMutation & {
   sourceId: string;
@@ -334,6 +364,24 @@ export function getOpenAlexSource(sourceId: string) {
 
 export function syncOpenAlexSources() {
   return writeJson<{ syncedCount: number }>('/api/openalex/source-search/sync', 'POST');
+}
+
+export function createOpenAlexJournalImport(sourceId: string, yearFrom?: number, yearTo?: number) {
+  return writeJson<OpenAlexJournalImportTask>('/api/openalex/journal-imports', 'POST', {
+    sourceId,
+    yearFrom,
+    yearTo,
+  });
+}
+
+export function listOpenAlexJournalImports(sourceId?: string) {
+  const params = new URLSearchParams();
+  if (sourceId) params.set('sourceId', sourceId);
+  return getJson<Page<OpenAlexJournalImportTask>>('/api/openalex/journal-imports', withDefaults(params));
+}
+
+export function retryOpenAlexJournalImport(taskId: string) {
+  return writeJson<OpenAlexJournalImportTask>(`/api/openalex/journal-imports/${taskId}/retry`, 'POST');
 }
 
 export function createPaper(metadata: PaperMetadataInput, file: File) {

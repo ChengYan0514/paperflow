@@ -16,6 +16,7 @@ tags:
   - name: Sources
   - name: Works
   - name: Original Files
+  - name: OpenAlex Source Imports
   - name: Assets
 paths:
   /api/auth/csrf:
@@ -806,7 +807,7 @@ paths:
             maximum: 20
       responses:
         "200":
-          description: Source recommendations.
+          description: OpenAlex Source recommendations.
           content:
             application/json:
               schema:
@@ -843,6 +844,105 @@ paths:
                   syncedCount:
                     type: integer
                     format: int64
+  /api/openalex/journal-imports:
+    post:
+      tags: [OpenAlex Source Imports]
+      operationId: createOpenAlexJournalImport
+      summary: Queue an OpenAlex Source metadata import. ADMIN and SUPER_ADMIN only.
+      parameters:
+        - $ref: "#/components/parameters/CsrfToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenAlexJournalImportRequest"
+      responses:
+        "201":
+          description: Source import task created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenAlexJournalImportTask"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/ValidationError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    get:
+      tags: [OpenAlex Source Imports]
+      operationId: listOpenAlexJournalImports
+      summary: List OpenAlex Source metadata import tasks.
+      parameters:
+        - name: sourceId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/OpenAlexJournalImportStatus"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: Import task page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenAlexJournalImportTaskPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /api/openalex/journal-imports/{taskId}:
+    get:
+      tags: [OpenAlex Source Imports]
+      operationId: getOpenAlexJournalImport
+      summary: Get an OpenAlex Source metadata import task.
+      parameters:
+        - $ref: "#/components/parameters/OpenAlexJournalImportTaskId"
+      responses:
+        "200":
+          description: Import task.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenAlexJournalImportTask"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/ValidationError"
+  /api/openalex/journal-imports/{taskId}/retry:
+    post:
+      tags: [OpenAlex Source Imports]
+      operationId: retryOpenAlexJournalImport
+      summary: Retry a failed OpenAlex Source metadata import. ADMIN and SUPER_ADMIN only.
+      parameters:
+        - $ref: "#/components/parameters/CsrfToken"
+        - $ref: "#/components/parameters/OpenAlexJournalImportTaskId"
+      responses:
+        "201":
+          description: Retry task created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenAlexJournalImportTask"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/ValidationError"
   /api/papers/{fileId}/blocks:
     get:
       tags: [Papers]
@@ -1263,6 +1363,13 @@ components:
       schema:
         type: string
         pattern: "^S.+"
+    OpenAlexJournalImportTaskId:
+      name: taskId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     WorkId:
       name: workId
       in: path
@@ -2250,6 +2357,110 @@ components:
         homepageUrl:
           type: string
           nullable: true
+    OpenAlexJournalImportRequest:
+      type: object
+      required: [sourceId]
+      properties:
+        sourceId:
+          type: string
+        yearFrom:
+          type: integer
+          nullable: true
+        yearTo:
+          type: integer
+          nullable: true
+      description: Both years may be omitted to import all available years. When both are supplied, yearFrom must not exceed yearTo.
+    OpenAlexJournalImportStatus:
+      type: string
+      enum: [QUEUED, RUNNING, SUCCEEDED, FAILED]
+    OpenAlexJournalImportResult:
+      type: object
+      required: [sourceCount, workCount, workSourceCount, workAuthorCount, workTopicCount, matchResetCount]
+      properties:
+        sourceCount:
+          type: integer
+          format: int64
+        workCount:
+          type: integer
+          format: int64
+        workSourceCount:
+          type: integer
+          format: int64
+        workAuthorCount:
+          type: integer
+          format: int64
+        workTopicCount:
+          type: integer
+          format: int64
+        matchResetCount:
+          type: integer
+          format: int64
+    OpenAlexJournalImportTask:
+      type: object
+      required: [taskId, sourceId, status, attemptCount, progressCurrent, progressTotal, createdAt]
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        sourceId:
+          type: string
+        yearFrom:
+          type: integer
+          nullable: true
+        yearTo:
+          type: integer
+          nullable: true
+        status:
+          $ref: "#/components/schemas/OpenAlexJournalImportStatus"
+        retryOfTaskId:
+          type: string
+          format: uuid
+          nullable: true
+        attemptCount:
+          type: integer
+        progressCurrent:
+          type: integer
+        progressTotal:
+          type: integer
+        progressMessage:
+          type: string
+          nullable: true
+        result:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/OpenAlexJournalImportResult"
+        errorCode:
+          type: string
+          nullable: true
+        errorMessage:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+        finishedAt:
+          type: string
+          format: date-time
+          nullable: true
+    OpenAlexJournalImportTaskPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenAlexJournalImportTask"
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+          format: int64
     TextFile:
       type: object
       required: [fileId, fileType, fileName, filePath, fileUrl, fileSize]

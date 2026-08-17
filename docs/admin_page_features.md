@@ -4,7 +4,10 @@
 
 ## 使用范围与边界
 
-Paperflow 管理平台用于查看 Paperflow 已有的业务数据和文件资源，并非数据处理控制台。除账号管理相关数据外，平台不会写入 Paperflow 的业务表，也不会在页面中执行 OpenAlex Metadata Import、Original File Import、Matching、Text Parsing、Block Import 或 MinerU。
+Paperflow 管理平台用于查看 Paperflow 业务数据和文件资源，并提供受控的 OpenAlex
+来源元数据导入任务入口。Java 服务不执行导入逻辑；它只创建和展示任务，独立 Python
+worker 执行 OpenAlex Metadata Import。平台不会执行原始文件采集、Matching、Text
+Parsing、Block Import 或 MinerU。
 
 页面中出现的“论文”对应项目术语 **Work**，即 OpenAlex 论文记录；“来源期刊”对应 **Source**，即 OpenAlex 出版来源；“原始文件”是本地存储的论文源文件。状态含义如下：
 
@@ -38,6 +41,14 @@ Paperflow 管理平台用于查看 Paperflow 已有的业务数据和文件资�
 - 可跳转到对应的来源期刊详情，继续查看其 Work 和原始文件。
 
 ## 文献资源
+
+### OpenAlex 来源检索（`/source-search`）
+
+- 按来源名称、Source ID、ISSN 或出版社检索 OpenAlex Source。
+- 展示 Source ID、ISSN、出版社、Works 数、开放获取标记与来源主页，帮助确认导入目标。
+- `ADMIN` 与 `SUPER_ADMIN` 可为单个 Source 创建元数据导入任务，年份范围可选；留空即导入该 Source 全部年份。
+- 显示该 Source 的最近导入任务、执行进度、导入计数和安全的失败摘要；失败任务可重试。
+- 导入只更新 Source、Work、作者、来源关联与主题元数据，不采集原始全文，也不执行匹配、解析或全文入库。
 
 ### 来源期刊列表（`/sources`）
 

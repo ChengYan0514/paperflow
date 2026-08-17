@@ -42,9 +42,12 @@ export async function createImportBatch(uploadName: string) {
 export async function uploadImportPart(batchId: string, partNo: number, blob: Blob) {
   const form = new FormData();
   form.append('part', blob, `part-${partNo}`);
-  const digest = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
-  const hash = Array.from(new Uint8Array(digest)).map((value) => value.toString(16).padStart(2, '0')).join('');
-  return request<void>(`/api/original-file-imports/${batchId}/parts/${partNo}`, { method: 'PUT', data: form, headers: { ...(await csrfHeaders()), 'X-Part-SHA256': hash } });
+  const headers: Record<string, string> = await csrfHeaders();
+  if (globalThis.crypto?.subtle?.digest) {
+    const digest = await globalThis.crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
+    headers['X-Part-SHA256'] = Array.from(new Uint8Array(digest)).map((value) => value.toString(16).padStart(2, '0')).join('');
+  }
+  return request<void>(`/api/original-file-imports/${batchId}/parts/${partNo}`, { method: 'PUT', data: form, headers });
 }
 
 export async function completeImportBatch(batchId: string) {

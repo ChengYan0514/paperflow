@@ -337,8 +337,7 @@ public class OriginalFileImportService {
 
     private String validateRow(CsvRow row, Path extracted, Set<String> entries, Set<String> referenced) {
         if (blank(row.sourceId()) || blank(row.fileName()) || blank(row.filePath()) || blank(row.title()) || blank(row.authors())) return "REQUIRED_FIELD_MISSING";
-        if (!row.authors().contains(";")) return "AUTHORS_FORMAT_INVALID";
-        if (!row.fileName().equals(Path.of(row.filePath()).getFileName().toString()) || !row.filePath().startsWith("openalex/original/")) return "PATH_MISMATCH";
+        if (!isCsvFileNameForPath(row.fileName(), row.filePath()) || !row.filePath().startsWith("openalex/original/")) return "PATH_MISMATCH";
         String[] parts = row.filePath().split("/");
         if (parts.length < 4 || !parts[2].equals(row.sourceId())) return "SOURCE_PATH_MISMATCH";
         if (!entries.contains(row.filePath())) return "FILE_NOT_FOUND";
@@ -411,7 +410,10 @@ public class OriginalFileImportService {
             return null;
         } catch (IOException exc) { return null; }
     }
-    private String fileId(String name) { int dot = name.lastIndexOf('.'); return dot > 0 ? name.substring(0, dot) : name; }
+    private static String fileId(String name) { int dot = name.lastIndexOf('.'); return dot > 0 ? name.substring(0, dot) : name; }
+    static boolean isCsvFileNameForPath(String fileName, String filePath) {
+        return fileName != null && filePath != null && fileName.equals(fileId(Path.of(filePath).getFileName().toString()));
+    }
     private String value(CSVRecord r, String key) { return r.isMapped(key) ? r.get(key).trim() : ""; }
     private Integer nullableInt(String value) { try { return blank(value) ? null : Integer.valueOf(value); } catch (NumberFormatException exc) { return null; } }
     private long actualSize(Path path) { try { return path == null ? 0 : Files.size(path); } catch (IOException exc) { return 0; } }

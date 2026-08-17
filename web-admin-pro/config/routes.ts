@@ -26,7 +26,7 @@ export default [
       },
       {
         path: '/source-search',
-        name: 'OpenAlex 来源检索',
+        name: 'OpenAlex 期刊检索',
         component: './SourceSearch',
       },
       {

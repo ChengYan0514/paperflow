@@ -127,7 +127,7 @@ export type OriginalFile = {
   flagText: number;
   flagBlock: number;
   textFiles: TextFile[];
-  recordVersion?: number;
+  recordVersion: number;
   currentVersion?: number;
   createdAt?: string | null;
   createdBy?: number | null;
@@ -179,6 +179,8 @@ export type OpenAlexJournalImportTask = {
 };
 
 export type PaperMutation = { fileId: string; recordVersion: number };
+export type PaperBatchDeleteItem = PaperMutation;
+export type PaperBatchDeleteResponse = { items: PaperMutation[] };
 export type TrashedPaper = PaperMutation & {
   sourceId: string;
   sourceName?: string | null;
@@ -339,7 +341,10 @@ async function writeJson<T>(path: string, method: string, data?: unknown) {
   const token = await csrfToken();
   return request<T>(path, {
     method,
-    headers: { 'X-XSRF-TOKEN': token },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': token,
+    },
     data,
   });
 }
@@ -418,6 +423,10 @@ export function restorePaperVersion(fileId: string, versionNo: number, recordVer
 
 export function softDeletePaper(fileId: string, recordVersion: number, reason?: string) {
   return writeJson<PaperMutation>(`/api/papers/${fileId}`, 'DELETE', { recordVersion, reason });
+}
+
+export function softDeletePapers(papers: PaperBatchDeleteItem[], reason?: string) {
+  return writeJson<PaperBatchDeleteResponse>('/api/papers/batch', 'DELETE', { papers, reason });
 }
 
 export function listTrashedPapers(query?: string) {

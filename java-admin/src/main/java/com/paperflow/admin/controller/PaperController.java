@@ -3,6 +3,8 @@ package com.paperflow.admin.controller;
 import com.paperflow.admin.dto.BlockPage;
 import com.paperflow.admin.dto.MatchedFileDto;
 import com.paperflow.admin.dto.OriginalFilePage;
+import com.paperflow.admin.dto.PaperBatchDeleteRequest;
+import com.paperflow.admin.dto.PaperBatchDeleteResponse;
 import com.paperflow.admin.dto.PaperDetail;
 import com.paperflow.admin.dto.PaperCreateMetadata;
 import com.paperflow.admin.dto.PaperDeleteRequest;
@@ -158,6 +160,18 @@ public class PaperController {
         PaperMutationResponse result = writes.softDelete(principal, fileId, body.recordVersion(), body.reason());
         auditLogs.success(principal, "PAPER_SOFT_DELETE", "PAPER", fileId, request, "删除论文");
         return result;
+    }
+
+    @DeleteMapping("/batch")
+    public PaperBatchDeleteResponse deleteBatch(
+            @AuthenticationPrincipal AdminUserPrincipal principal,
+            @Valid @RequestBody PaperBatchDeleteRequest body,
+            HttpServletRequest request) {
+        List<PaperMutationResponse> results = writes.softDeleteBatch(principal, body.papers(), body.reason());
+        for (PaperMutationResponse result : results) {
+            auditLogs.success(principal, "PAPER_SOFT_DELETE", "PAPER", result.fileId(), request, "删除论文");
+        }
+        return new PaperBatchDeleteResponse(results);
     }
 
     @GetMapping("/trash")

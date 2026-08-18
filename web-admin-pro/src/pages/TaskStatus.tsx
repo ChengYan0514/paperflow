@@ -135,7 +135,7 @@ export default function TaskStatusPage() {
                     showSizeChanger: true,
                     showTotal: (total) => `共 ${total} 条`,
                   }}
-                  scroll={{ x: 1080 }}
+                  scroll={{ x: 990 }}
                   columns={[
                     {
                       title: fieldLabel('sourceId'),
@@ -185,11 +185,6 @@ export default function TaskStatusPage() {
                           total={source.originalFileCount}
                         />
                       ),
-                    },
-                    {
-                      title: '操作',
-                      width: 90,
-                      render: (_, source) => <Link to={`/sources/${source.sourceId}`}>查看详情</Link>,
                     },
                   ]}
                 />

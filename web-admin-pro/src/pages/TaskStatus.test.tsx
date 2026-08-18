@@ -41,7 +41,8 @@ vi.mock('@/services/business', () => ({
       {
         sourceId: 'S2',
         sourceName: 'Science',
-        provider: 'Institute for Operations Research and the Management Sciences',
+        provider:
+          'Institute for Operations Research and the Management Sciences',
         workCount: 4,
         originalFileCount: 3,
         matchedWorkCount: 1,
@@ -63,11 +64,24 @@ describe('TaskStatus page', () => {
     expect(listTaskStatus).toHaveBeenCalled();
     expect(await screen.findByText('来源期刊数')).toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'S2' })).toHaveAttribute('href', '/sources/S2');
+    expect(screen.getByRole('link', { name: 'S2' })).toHaveAttribute(
+      'href',
+      '/sources/S2',
+    );
     expect(screen.getByText('Nature')).toBeInTheDocument();
-    expect(screen.getByText('Institute for Operations Research and the Management Sciences')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Institute for Operations Research and the Management Sciences',
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText('论文匹配 5/6')).toBeInTheDocument();
     expect(screen.getByText('全文入库 2/4')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('columnheader', { name: '操作' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: '查看详情' }),
+    ).not.toBeInTheDocument();
   });
 
   it('filters and sorts sources locally', () => {
@@ -95,8 +109,8 @@ describe('TaskStatus page', () => {
     ];
     const params = new URLSearchParams('provider=open&sort=workCountDesc');
 
-    expect(filterTaskStatusSources(sources, params).map((source) => source.sourceId)).toEqual([
-      'S1',
-    ]);
+    expect(
+      filterTaskStatusSources(sources, params).map((source) => source.sourceId),
+    ).toEqual(['S1']);
   });
 });

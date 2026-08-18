@@ -3,6 +3,7 @@ package com.paperflow.admin.controller;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -121,6 +123,71 @@ class PaperWriteControllerIntegrationTest {
                         .file(metadata).with(csrf()).with(authentication(authToken())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void softDeletesSelectedPapersAtomically() throws Exception {
+        seedPaper("F1", 0);
+        seedPaper("F2", 0);
+
+        mockMvc.perform(delete("/api/papers/batch")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"papers":[
+                                  {"fileId":"F1","recordVersion":0},
+                                  {"fileId":"F2","recordVersion":0}
+                                ],"reason":"重复导入"}
+                                """)
+                        .with(csrf()).with(authentication(authToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].fileId").value("F1"))
+                .andExpect(jsonPath("$.items[1].recordVersion").value(1));
+
+        assertEquals(2, jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM original_file WHERE deleted_at IS NOT NULL", Integer.class));
+        assertEquals("重复导入", jdbcTemplate.queryForObject(
+                "SELECT delete_reason FROM original_file WHERE file_id='F1'", String.class));
+        assertEquals(2, jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM admin_audit_log WHERE action='PAPER_SOFT_DELETE'", Integer.class));
+        assertEquals(true, Files.exists(Path.of("target/test-data/paper-write/paperflow/trash/F1/1.pdf")));
+    }
+
+    @Test
+    void rejectsInvalidBatchWithoutDeletingAnyPaper() throws Exception {
+        seedPaper("F1", 0);
+        seedPaper("F2", 0);
+
+        mockMvc.perform(delete("/api/papers/batch")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"papers":[
+                                  {"fileId":"F1","recordVersion":0},
+                                  {"fileId":"F2","recordVersion":1}
+                                ]}
+                                """)
+                        .with(csrf()).with(authentication(authToken())))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("PAPER_VERSION_CONFLICT"));
+
+        assertEquals(0, jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM original_file WHERE deleted_at IS NOT NULL", Integer.class));
+        assertEquals(true, Files.exists(Path.of("target/test-data/paper-write/paperflow/original/S123/F1.pdf")));
+    }
+
+    private void seedPaper(String fileId, long recordVersion) throws Exception {
+        String path = "paperflow/original/S123/" + fileId + ".pdf";
+        Path fullPath = Path.of("target/test-data/paper-write").resolve(path);
+        Files.createDirectories(fullPath.getParent());
+        Files.writeString(fullPath, "%PDF-1.7\ntest");
+        jdbcTemplate.update(
+                "INSERT INTO original_file (file_id, source_id, original_file_name, original_file_path, original_file_type, file_size, record_version, current_version) VALUES (?, 'S123', ?, ?, 'PDF', 10, ?, 1)",
+                fileId, fileId + ".pdf", path, recordVersion);
+        jdbcTemplate.update(
+                "INSERT INTO original_file_job (file_id, flag_match, flag_text, flag_block, flag_vector) VALUES (?, 0, 0, 0, 0)",
+                fileId);
+        jdbcTemplate.update(
+                "INSERT INTO original_file_version (file_id, version_no, file_name, file_path, file_type, file_size, is_current) VALUES (?, 1, ?, ?, 'PDF', 10, true)",
+                fileId, fileId + ".pdf", path);
     }
 
     private UsernamePasswordAuthenticationToken authToken() {

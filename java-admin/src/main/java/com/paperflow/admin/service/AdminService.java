@@ -646,7 +646,8 @@ public class AdminService {
                 row.getMatchedWorkId(),
                 row.getFlagText(),
                 row.getFlagBlock(),
-                mapper.findTextFiles(row.getFileId()).stream().map(this::toTextFile).toList());
+                mapper.findTextFiles(row.getFileId()).stream().map(this::toTextFile).toList(),
+                row.getRecordVersion());
     }
 
     private PaperOriginalFile toPaperOriginalFile(MatchedFileRow row) {

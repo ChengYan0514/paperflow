@@ -3,6 +3,7 @@ package com.paperflow.admin.service;
 import com.paperflow.admin.dto.AdminRole;
 import com.paperflow.admin.dto.ErrorCode;
 import com.paperflow.admin.dto.OpenAlexSourceDto;
+import com.paperflow.admin.dto.PaperBatchDeleteItem;
 import com.paperflow.admin.dto.PaperCreateMetadata;
 import com.paperflow.admin.dto.PaperFileVersionDto;
 import com.paperflow.admin.dto.PaperMutationResponse;
@@ -13,6 +14,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -232,6 +235,28 @@ public class PaperWriteService {
     public PaperMutationResponse softDelete(
             AdminUserPrincipal actor, String fileId, long expectedVersion, String reason) {
         requireAdmin(actor);
+        return softDeleteInternal(actor, fileId, expectedVersion, reason);
+    }
+
+    @Transactional
+    public List<PaperMutationResponse> softDeleteBatch(
+            AdminUserPrincipal actor, List<PaperBatchDeleteItem> papers, String reason) {
+        requireAdmin(actor);
+        Set<String> fileIds = new HashSet<>();
+        for (PaperBatchDeleteItem paper : papers) {
+            if (!fileIds.add(paper.fileId())) {
+                throw new IllegalArgumentException("Duplicate paper in batch");
+            }
+            PaperRow current = requireActive(paper.fileId());
+            if (current.recordVersion() != paper.recordVersion()) throw versionConflict();
+        }
+        return papers.stream()
+                .map(paper -> softDeleteInternal(actor, paper.fileId(), paper.recordVersion(), reason))
+                .toList();
+    }
+
+    private PaperMutationResponse softDeleteInternal(
+            AdminUserPrincipal actor, String fileId, long expectedVersion, String reason) {
         PaperRow current = requireActive(fileId);
         if (current.recordVersion() != expectedVersion) throw versionConflict();
         List<PathMove> moves = new java.util.ArrayList<>();

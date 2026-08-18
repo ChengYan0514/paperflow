@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PaperDetailPage from './PaperDetail';
 import PapersPage from './Papers';
@@ -12,17 +18,28 @@ import {
   getSource,
   listPapers,
   listSources,
+  softDeletePapers,
 } from '@/services/business';
 
+const modalConfirm = vi.hoisted(() => vi.fn());
 let searchParams = new URLSearchParams();
 let setSearchParams = vi.fn();
 let params = { sourceId: 'S1', workId: 'W1', fileId: 'F1' };
+let canDeletePapers = true;
+
+vi.mock('antd', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('antd')>();
+  return {
+    ...actual,
+    Modal: { ...actual.Modal, confirm: modalConfirm },
+  };
+});
 
 vi.mock('@umijs/max', () => ({
   history: { push: vi.fn() },
   Link: ({ children, to }: any) => <a href={to}>{children}</a>,
   useAccess: () => ({
-    canDeletePapers: true,
+    canDeletePapers,
     canRestorePaperVersions: true,
   }),
   useSearchParams: () => [searchParams, setSearchParams],
@@ -36,9 +53,42 @@ vi.mock('@ant-design/pro-components', () => ({
       {children}
     </main>
   ),
-  ProTable: ({ dataSource = [], columns = [], rowKey, pagination, toolBarRender }: any) => (
+  ProTable: ({
+    dataSource = [],
+    columns = [],
+    rowKey,
+    pagination,
+    rowSelection,
+    toolBarRender,
+  }: any) => (
     <>
       <div>{typeof toolBarRender === 'function' ? toolBarRender() : null}</div>
+      {rowSelection
+        ? dataSource.map((row: any) => {
+            const key =
+              typeof rowKey === 'function' ? rowKey(row) : row[rowKey];
+            const selected = rowSelection.selectedRowKeys.includes(key);
+            return (
+              <label key={`selection-${key}`}>
+                <input
+                  aria-label={`选择 ${key}`}
+                  checked={selected}
+                  type="checkbox"
+                  onChange={() =>
+                    rowSelection.onChange(
+                      selected
+                        ? rowSelection.selectedRowKeys.filter(
+                            (item: any) => item !== key,
+                          )
+                        : [...rowSelection.selectedRowKeys, key],
+                      [],
+                    )
+                  }
+                />
+              </label>
+            );
+          })
+        : null}
       <table>
         <thead>
           <tr>
@@ -55,7 +105,10 @@ vi.mock('@ant-design/pro-components', () => ({
                   {column.render
                     ? column.render(undefined, row)
                     : Array.isArray(column.dataIndex)
-                      ? column.dataIndex.reduce((value: any, key: string) => value?.[key], row)
+                      ? column.dataIndex.reduce(
+                          (value: any, key: string) => value?.[key],
+                          row,
+                        )
                       : row[column.dataIndex]}
                 </td>
               ))}
@@ -66,7 +119,9 @@ vi.mock('@ant-design/pro-components', () => ({
       {pagination ? (
         <button
           type="button"
-          onClick={() => pagination.onChange(pagination.current + 1, pagination.pageSize)}
+          onClick={() =>
+            pagination.onChange(pagination.current + 1, pagination.pageSize)
+          }
         >
           下一页
         </button>
@@ -110,6 +165,7 @@ const file = {
   matchedWorkId: 'W1',
   flagText: 2,
   flagBlock: 1,
+  recordVersion: 0,
   textFiles: [
     {
       fileId: 'F1',
@@ -142,24 +198,55 @@ const work = {
 
 vi.mock('@/services/business', () => ({
   assetUrl: (path?: string | null) => path,
-  listSources: vi.fn(async () => ({ items: [source], page: 1, size: 10, total: 1 })),
-  sourcesExportUrl: vi.fn((params?: URLSearchParams) => `/api/sources/export?${params}`),
+  listSources: vi.fn(async () => ({
+    items: [source],
+    page: 1,
+    size: 10,
+    total: 1,
+  })),
+  sourcesExportUrl: vi.fn(
+    (params?: URLSearchParams) => `/api/sources/export?${params}`,
+  ),
   getSource: vi.fn(async () => source),
-  listPapers: vi.fn(async () => ({ items: [file], page: 1, size: 10, total: 1 })),
-  papersExportUrl: vi.fn((params?: URLSearchParams) => `/api/papers/export?${params}`),
+  listPapers: vi.fn(async () => ({
+    items: [file],
+    page: 1,
+    size: 10,
+    total: 1,
+  })),
+  papersExportUrl: vi.fn(
+    (params?: URLSearchParams) => `/api/papers/export?${params}`,
+  ),
   getPaper: vi.fn(async () => ({
     originalFile: {
-      fileId: file.fileId, sourceId: file.sourceId, sourceName: file.sourceName, year: file.year,
-      paperTitle: file.paperTitle, authors: file.authors, doi: file.doi, url: file.url, provider: file.provider,
-      originalFileName: file.originalFileName, originalFilePath: file.originalFilePath,
-      originalFileUrl: file.originalFileUrl, originalFileType: file.originalFileType, fileSize: file.fileSize,
+      fileId: file.fileId,
+      sourceId: file.sourceId,
+      sourceName: file.sourceName,
+      year: file.year,
+      paperTitle: file.paperTitle,
+      authors: file.authors,
+      doi: file.doi,
+      url: file.url,
+      provider: file.provider,
+      originalFileName: file.originalFileName,
+      originalFilePath: file.originalFilePath,
+      originalFileUrl: file.originalFileUrl,
+      originalFileType: file.originalFileType,
+      fileSize: file.fileSize,
     },
-    taskStatus: { flagMatch: file.flagMatch, flagText: file.flagText, flagBlock: file.flagBlock },
+    taskStatus: {
+      flagMatch: file.flagMatch,
+      flagText: file.flagText,
+      flagBlock: file.flagBlock,
+    },
     openAlex: null,
     textFiles: file.textFiles,
     causalSummary: null,
   })),
   listPaperVersions: vi.fn(async () => []),
+  softDeletePapers: vi.fn(async () => ({
+    items: [{ fileId: 'F1', recordVersion: 1 }],
+  })),
   getServiceStatus: vi.fn(async () => ({
     status: 'UP',
     version: '0.1.0',
@@ -178,6 +265,8 @@ describe('business pages', () => {
     searchParams = new URLSearchParams('sourceId=S1&sort=sourceIdAsc');
     setSearchParams = vi.fn();
     params = { sourceId: 'S1', workId: 'W1', fileId: 'F1' };
+    canDeletePapers = true;
+    modalConfirm.mockReset();
   });
 
   it('lists sources using the current URL query', async () => {
@@ -215,7 +304,9 @@ describe('business pages', () => {
     await waitFor(() => expect(setSearchParams).toHaveBeenCalled());
 
     const next = setSearchParams.mock.calls[0][0] as URLSearchParams;
-    expect(next.toString()).toBe('sourceId=S1&sort=sourceIdAsc&sourceName=Nature');
+    expect(next.toString()).toBe(
+      'sourceId=S1&sort=sourceIdAsc&sourceName=Nature',
+    );
   });
 
   it('renders advanced filters separately from the primary search', async () => {
@@ -232,46 +323,101 @@ describe('business pages', () => {
     render(<SourceDetailPage />);
 
     expect(getSource).toHaveBeenCalledWith('S1');
-    expect(await screen.findByText('查看论文')).toHaveAttribute('href', '/papers?sourceId=S1');
+    expect(await screen.findByText('查看论文')).toHaveAttribute(
+      'href',
+      '/papers?sourceId=S1',
+    );
   });
 
   it('lists papers in the configured order', async () => {
     searchParams = new URLSearchParams('sourceName=Nature&sort=yearDesc');
     render(<PapersPage />);
 
-    expect(await screen.findByText('Paper title')).toHaveAttribute('href', '/papers/F1');
+    expect(await screen.findByText('Paper title')).toHaveAttribute(
+      'href',
+      '/papers/F1',
+    );
     expect(listPapers).toHaveBeenCalledWith(searchParams);
     expect(screen.getByText('Nature')).toHaveAttribute('href', '/sources/S1');
-    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
-      '标题',
-      '作者',
-      '来源期刊',
-      '年份',
-      '平台',
-      '文本解析状态',
-    ]);
+    expect(
+      screen.getAllByRole('columnheader').map((header) => header.textContent),
+    ).toEqual(['标题', '作者', '来源期刊', '年份', '平台', '文本解析状态']);
     expect(screen.getByRole('link', { name: /导出 CSV/ })).toHaveAttribute(
       'href',
       '/api/papers/export?sourceName=Nature&sort=yearDesc',
     );
+    expect(screen.getByRole('button', { name: '删除已选' })).toBeDisabled();
+    expect(
+      screen.getAllByRole('columnheader').map((header) => header.textContent),
+    ).not.toContain('操作');
+  });
+
+  it('deletes one checked paper from the list with its record version', async () => {
+    render(<PapersPage />);
+
+    await screen.findByText('Paper title');
+    fireEvent.click(screen.getByLabelText('选择 F1'));
+    fireEvent.click(screen.getByRole('button', { name: '删除已选（1）' }));
+    expect(modalConfirm).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await modalConfirm.mock.calls[0][0].onOk();
+    });
+    expect(softDeletePapers).toHaveBeenCalledWith(
+      [{ fileId: 'F1', recordVersion: 0 }],
+      '',
+    );
+  });
+
+  it('deletes checked papers as one batch', async () => {
+    render(<PapersPage />);
+
+    await screen.findByText('Paper title');
+    fireEvent.click(screen.getByLabelText('选择 F1'));
+    const batchButton = screen.getByRole('button', { name: '删除已选（1）' });
+    expect(batchButton).toBeEnabled();
+    fireEvent.click(batchButton);
+
+    await act(async () => {
+      await modalConfirm.mock.calls[0][0].onOk();
+    });
+    expect(softDeletePapers).toHaveBeenCalledWith(
+      [{ fileId: 'F1', recordVersion: 0 }],
+      '',
+    );
+  });
+
+  it('hides list deletion controls from users without deletion permission', async () => {
+    canDeletePapers = false;
+    render(<PapersPage />);
+
+    await screen.findByText('Paper title');
+    expect(screen.queryByLabelText('选择 F1')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /删除/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getAllByRole('columnheader').map((header) => header.textContent),
+    ).not.toContain('操作');
   });
 
   it('keeps the source journal visible when listing papers from a source detail page', async () => {
     searchParams = new URLSearchParams('sourceId=S1&sort=yearDesc');
     render(<PapersPage />);
 
-    expect(await screen.findByRole('heading', { name: 'Nature 的论文' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Nature 的论文' }),
+    ).toBeInTheDocument();
     expect(getSource).toHaveBeenCalledWith('S1');
     expect(screen.getByText('当前范围')).toBeInTheDocument();
     expect(screen.getAllByText('OpenAlex')).toHaveLength(2);
-    expect(screen.getByRole('link', { name: '返回来源详情' })).toHaveAttribute('href', '/sources/S1');
-    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
-      '标题',
-      '作者',
-      '年份',
-      '平台',
-      '文本解析状态',
-    ]);
+    expect(screen.getByRole('link', { name: '返回来源详情' })).toHaveAttribute(
+      'href',
+      '/sources/S1',
+    );
+    expect(
+      screen.getAllByRole('columnheader').map((header) => header.textContent),
+    ).toEqual(['标题', '作者', '年份', '平台', '文本解析状态']);
 
     fireEvent.click(screen.getByRole('button', { name: '清除期刊筛选' }));
     const next = setSearchParams.mock.calls[0][0] as URLSearchParams;
@@ -292,24 +438,48 @@ describe('business pages', () => {
 
     expect(getPaper).toHaveBeenCalledWith('F1');
     expect(await screen.findByText('Paper title')).toBeInTheDocument();
-    expect(screen.getByText('查看解析后全文').closest('a')).toHaveAttribute('href', '/papers/F1/blocks');
+    expect(screen.getByText('查看解析后全文').closest('a')).toHaveAttribute(
+      'href',
+      '/papers/F1/blocks',
+    );
   });
 
   it('shows the causal summary before linking to causal claims', async () => {
     vi.mocked(getPaper).mockResolvedValueOnce({
       originalFile: {
-        fileId: file.fileId, sourceId: file.sourceId, sourceName: file.sourceName, year: file.year,
-        paperTitle: file.paperTitle, authors: file.authors, doi: file.doi, url: file.url, provider: file.provider,
-        originalFileName: file.originalFileName, originalFilePath: file.originalFilePath,
-        originalFileUrl: file.originalFileUrl, originalFileType: file.originalFileType, fileSize: file.fileSize,
+        fileId: file.fileId,
+        sourceId: file.sourceId,
+        sourceName: file.sourceName,
+        year: file.year,
+        paperTitle: file.paperTitle,
+        authors: file.authors,
+        doi: file.doi,
+        url: file.url,
+        provider: file.provider,
+        originalFileName: file.originalFileName,
+        originalFilePath: file.originalFilePath,
+        originalFileUrl: file.originalFileUrl,
+        originalFileType: file.originalFileType,
+        fileSize: file.fileSize,
       },
-      taskStatus: { flagMatch: file.flagMatch, flagText: file.flagText, flagBlock: file.flagBlock },
+      taskStatus: {
+        flagMatch: file.flagMatch,
+        flagText: file.flagText,
+        flagBlock: file.flagBlock,
+      },
       openAlex: {
-        workId: 'W1', title: 'OpenAlex Paper', sources: [], authors: [],
+        workId: 'W1',
+        title: 'OpenAlex Paper',
+        sources: [],
+        authors: [],
       },
       textFiles: file.textFiles,
       causalSummary: {
-        workId: 'W1', claimRecordCount: 8, standardClaimCount: 4, variableCount: 5, hasCausalClaims: true,
+        workId: 'W1',
+        claimRecordCount: 8,
+        standardClaimCount: 4,
+        variableCount: 5,
+        hasCausalClaims: true,
       },
     } as any);
 
@@ -333,7 +503,10 @@ describe('business pages', () => {
       (await screen.findByText('查看论文全文文件：paper.pdf')).closest('a'),
     ).toHaveAttribute('href', '/api/assets/openalex/original/S1/F1.pdf');
     expect(screen.getByText('paper.md')).toBeInTheDocument();
-    expect(screen.getByText('查看解析后全文').closest('a')).toHaveAttribute('href', '/papers/F1/blocks');
+    expect(screen.getByText('查看解析后全文').closest('a')).toHaveAttribute(
+      'href',
+      '/papers/F1/blocks',
+    );
   });
 
   it('shows real service status', async () => {
@@ -348,9 +521,18 @@ describe('business pages', () => {
     searchParams = new URLSearchParams('stage=BLOCK_IMPORT&sourceId=S1');
     render(<FailureTasksPage />);
 
-    expect(await screen.findByText('全文入库失败：文件已解析，但内容块未成功入库。')).toBeInTheDocument();
-    const requestParams = vi.mocked(listPapers).mock.calls[0][0] as URLSearchParams;
-    expect(requestParams.toString()).toBe('sourceId=S1&sort=textStatusIssueFirst&flagText=2&flagBlock=-1');
-    expect(screen.getByText('uv run paperflow import-blocks --file-id F1 --retry-failed')).toBeInTheDocument();
+    expect(
+      await screen.findByText('全文入库失败：文件已解析，但内容块未成功入库。'),
+    ).toBeInTheDocument();
+    const requestParams = vi.mocked(listPapers).mock
+      .calls[0][0] as URLSearchParams;
+    expect(requestParams.toString()).toBe(
+      'sourceId=S1&sort=textStatusIssueFirst&flagText=2&flagBlock=-1',
+    );
+    expect(
+      screen.getByText(
+        'uv run paperflow import-blocks --file-id F1 --retry-failed',
+      ),
+    ).toBeInTheDocument();
   });
 });

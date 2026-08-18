@@ -63,7 +63,8 @@ class PaperControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.total").value(3))
                 .andExpect(jsonPath("$.items[2].fileId").value("F3"))
-                .andExpect(jsonPath("$.items[2].flagMatch").value(-1));
+                .andExpect(jsonPath("$.items[2].flagMatch").value(-1))
+                .andExpect(jsonPath("$.items[2].recordVersion").value(0));
     }
 
     @Test

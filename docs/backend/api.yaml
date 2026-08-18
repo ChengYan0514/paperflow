@@ -607,6 +607,28 @@ paths:
                 format: binary
         "400":
           $ref: "#/components/responses/ValidationError"
+  /api/papers/batch:
+    delete:
+      tags: [Papers]
+      operationId: softDeletePapers
+      summary: Atomically move up to 100 Papers to trash. ADMIN or SUPER_ADMIN only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaperBatchDeleteRequest"
+      responses:
+        "200":
+          description: All selected Papers were moved to trash.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaperBatchDeleteResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: A selected Paper is already in trash or its version changed; no Paper is deleted.
   /api/papers/{fileId}:
     put:
       tags: [Papers]
@@ -2280,6 +2302,39 @@ components:
           type: string
           maxLength: 500
           nullable: true
+    PaperBatchDeleteItem:
+      type: object
+      required: [fileId, recordVersion]
+      properties:
+        fileId:
+          type: string
+          minLength: 1
+        recordVersion:
+          type: integer
+          format: int64
+          minimum: 0
+    PaperBatchDeleteRequest:
+      type: object
+      required: [papers]
+      properties:
+        papers:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/PaperBatchDeleteItem"
+        reason:
+          type: string
+          maxLength: 500
+          nullable: true
+    PaperBatchDeleteResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaperMutation"
     PaperVersionActionRequest:
       type: object
       required: [recordVersion]

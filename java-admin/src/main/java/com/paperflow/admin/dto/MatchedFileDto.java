@@ -21,5 +21,6 @@ public record MatchedFileDto(
         String matchedWorkId,
         Integer flagText,
         Integer flagBlock,
-        List<TextFileDto> textFiles) {
+        List<TextFileDto> textFiles,
+        Long recordVersion) {
 }

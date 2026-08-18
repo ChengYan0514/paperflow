@@ -57,4 +57,26 @@ describe('business service', () => {
       { method: 'GET' },
     );
   });
+
+  it('sends the batch paper deletion payload as JSON', async () => {
+    document.cookie = 'XSRF-TOKEN=test-token';
+    requestMock
+      .mockResolvedValueOnce({ items: [{ fileId: 'F1', recordVersion: 1 }] });
+    const { softDeletePapers } = await import('./business');
+
+    await softDeletePapers([{ fileId: 'F1', recordVersion: 0 }], '重复导入');
+
+    expect(requestMock).toHaveBeenCalledWith('/api/papers/batch', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-XSRF-TOKEN': 'test-token',
+      },
+      data: {
+        papers: [{ fileId: 'F1', recordVersion: 0 }],
+        reason: '重复导入',
+      },
+    });
+    document.cookie = 'XSRF-TOKEN=; Max-Age=0';
+  });
 });

@@ -211,6 +211,7 @@ export type PaperMetadataInput = {
   authors: string[];
   doi?: string;
   url?: string;
+  provider?: string;
 };
 
 export type PaperTaskStatus = {

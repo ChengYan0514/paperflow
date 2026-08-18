@@ -48,7 +48,7 @@ public class PaperWriteService {
             AdminUserPrincipal actor, PaperCreateMetadata request, MultipartFile file) {
         requireActor(actor);
         PaperMetadata metadata = PaperMetadata.normalize(
-                request.sourceId(), request.year(), request.paperTitle(), request.authors(), request.doi(), request.url());
+                request.sourceId(), request.year(), request.paperTitle(), request.authors(), request.doi(), request.url(), request.provider());
         validateYear(metadata.year());
         OpenAlexSourceDto source = sources.requireAuthoritative(metadata.sourceId());
         String fileId = PaperMetadata.fileId(
@@ -63,16 +63,17 @@ public class PaperWriteService {
         String filePath = files.currentPath(metadata.sourceId(), fileId, staged.extension());
         try {
             upsertLocalSource(source);
+            String provider = resolveProvider(metadata.sourceId(), metadata.provider(), source.publisher());
             jdbcTemplate.update(
                     """
                     INSERT INTO original_file
                         (file_id, source_id, year, paper_title, authors, doi, url, provider,
                          original_file_name, original_file_path, original_file_type, file_size,
                          created_at, created_by, updated_at, updated_by, record_version, current_version)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, 'manual-upload', ?, ?, ?, ?, now(), ?, now(), ?, 0, 1)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), ?, now(), ?, 0, 1)
                     """,
                     fileId, metadata.sourceId(), metadata.year(), metadata.title(), metadata.authorsText(),
-                    metadata.doi(), metadata.url(), fileName, filePath, staged.type(), staged.size(), actor.id(), actor.id());
+                    metadata.doi(), metadata.url(), provider, fileName, filePath, staged.type(), staged.size(), actor.id(), actor.id());
             int textFlag = "PDF".equals(staged.type()) ? 0 : -2;
             jdbcTemplate.update(
                     "INSERT INTO original_file_job (file_id, flag_match, matched_work_id, flag_text, flag_block, flag_vector) VALUES (?, 0, NULL, ?, 0, 0)",
@@ -101,7 +102,7 @@ public class PaperWriteService {
         requireActor(actor);
         PaperRow current = requireActive(fileId);
         PaperMetadata metadata = PaperMetadata.normalize(
-                request.sourceId(), request.year(), request.paperTitle(), request.authors(), request.doi(), request.url());
+                request.sourceId(), request.year(), request.paperTitle(), request.authors(), request.doi(), request.url(), request.provider());
         validateYear(metadata.year());
         if (current.flagMatch() == 1 && matchedFieldsChanged(current, metadata)) {
             throw new ApiException(HttpStatus.CONFLICT, ErrorCode.PAPER_MATCHED_FIELDS_LOCKED, "Matched paper metadata is locked");
@@ -109,22 +110,24 @@ public class PaperWriteService {
         String oldPath = current.filePath();
         String newPath = oldPath;
         boolean sourceChanged = !current.sourceId().equals(metadata.sourceId());
+        OpenAlexSourceDto source = null;
         if (sourceChanged) {
-            OpenAlexSourceDto source = sources.requireAuthoritative(metadata.sourceId());
+            source = sources.requireAuthoritative(metadata.sourceId());
             upsertLocalSource(source);
             newPath = files.currentPath(metadata.sourceId(), fileId, extension(current.fileName()));
             files.moveRelative(oldPath, newPath);
         }
+        String provider = resolveProvider(metadata.sourceId(), metadata.provider(), source == null ? null : source.publisher());
         int updated;
         try {
             updated = jdbcTemplate.update(
                 """
-                UPDATE original_file SET source_id=?, year=?, paper_title=?, authors=?, doi=?, url=?,
+                UPDATE original_file SET source_id=?, year=?, paper_title=?, authors=?, doi=?, url=?, provider=?,
                     original_file_path=?, updated_at=now(), updated_by=?, record_version=record_version+1
                 WHERE file_id=? AND deleted_at IS NULL AND record_version=?
                 """,
                 metadata.sourceId(), metadata.year(), metadata.title(), metadata.authorsText(), metadata.doi(),
-                metadata.url(), newPath, actor.id(), fileId, request.recordVersion());
+                metadata.url(), provider, newPath, actor.id(), fileId, request.recordVersion());
         } catch (RuntimeException exc) {
             if (sourceChanged) files.moveRelative(newPath, oldPath);
             throw exc;
@@ -482,6 +485,18 @@ public class PaperWriteService {
             PathMove move = moves.get(index);
             files.moveRelative(move.target(), move.source());
         }
+    }
+
+    private String resolveProvider(String sourceId, String requested, String authoritativeProvider) {
+        String explicit = blankToNull(requested);
+        if (explicit != null) return explicit;
+        String local = jdbcTemplate.query(
+                "SELECT provider FROM source WHERE source_id=?",
+                rs -> rs.next() ? blankToNull(rs.getString(1)) : null,
+                sourceId);
+        if (local != null) return local;
+        String fallback = blankToNull(authoritativeProvider);
+        return fallback != null ? fallback : blankToNull(sources.requireAuthoritative(sourceId).publisher());
     }
 
     private void onCommit(Runnable action) {

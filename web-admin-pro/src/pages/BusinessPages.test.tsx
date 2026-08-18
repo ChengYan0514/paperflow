@@ -31,7 +31,7 @@ vi.mock('antd', async (importOriginal) => {
   const actual = await importOriginal<typeof import('antd')>();
   return {
     ...actual,
-    Modal: { ...actual.Modal, confirm: modalConfirm },
+    Modal: Object.assign(actual.Modal, { confirm: modalConfirm }),
   };
 });
 

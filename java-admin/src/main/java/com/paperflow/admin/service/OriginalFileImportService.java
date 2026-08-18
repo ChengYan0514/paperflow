@@ -380,15 +380,16 @@ public class OriginalFileImportService {
             Files.createDirectories(target.getParent());
             Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException exc) { throw storageError(); }
+        String provider = resolveProvider(item.sourceId(), item.provider());
         if (existing == null) {
-            jdbc.update("INSERT INTO original_file(file_id,source_id,year,paper_title,authors,doi,url,provider,original_file_name,original_file_path,original_file_type,file_size,created_at,created_by,updated_at,updated_by,record_version,current_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,now(),?,now(),?,0,1)", item.fileId(), item.sourceId(), item.year(), item.title(), item.authors(), item.doi(), item.url(), item.provider(), item.fileName(), item.filePath(), item.fileType(), item.fileSize(), actor.id(), actor.id());
+            jdbc.update("INSERT INTO original_file(file_id,source_id,year,paper_title,authors,doi,url,provider,original_file_name,original_file_path,original_file_type,file_size,created_at,created_by,updated_at,updated_by,record_version,current_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,now(),?,now(),?,0,1)", item.fileId(), item.sourceId(), item.year(), item.title(), item.authors(), item.doi(), item.url(), provider, item.fileName(), item.filePath(), item.fileType(), item.fileSize(), actor.id(), actor.id());
             jdbc.update("INSERT INTO original_file_job(file_id,flag_match,matched_work_id,flag_text,flag_block,flag_vector) VALUES (?,0,NULL,?,0,0)", item.fileId(), "PDF".equals(item.fileType()) ? 0 : -2);
             jdbc.update("INSERT INTO original_file_version(file_id,version_no,file_name,file_path,file_type,file_size,uploaded_by,is_current) VALUES (?,1,?,?,?,?,?,true)", item.fileId(), item.fileName(), item.filePath(), item.fileType(), item.fileSize(), actor.id());
         } else {
             int next = jdbc.queryForObject("SELECT COALESCE(MAX(version_no),0)+1 FROM original_file_version WHERE file_id=?", Integer.class, item.fileId());
             jdbc.update("UPDATE original_file_version SET is_current=false WHERE file_id=? AND is_current=true", item.fileId());
             jdbc.update("INSERT INTO original_file_version(file_id,version_no,file_name,file_path,file_type,file_size,uploaded_by,is_current) VALUES (?,?,?,?,?,?,?,true)", item.fileId(), next, item.fileName(), item.filePath(), item.fileType(), item.fileSize(), actor.id());
-            jdbc.update("UPDATE original_file SET original_file_name=?,original_file_path=?,original_file_type=?,file_size=?,updated_at=now(),updated_by=?,record_version=record_version+1 WHERE file_id=?", item.fileName(), item.filePath(), item.fileType(), item.fileSize(), actor.id(), item.fileId());
+            jdbc.update("UPDATE original_file SET provider=?,original_file_name=?,original_file_path=?,original_file_type=?,file_size=?,updated_at=now(),updated_by=?,record_version=record_version+1 WHERE file_id=?", provider, item.fileName(), item.filePath(), item.fileType(), item.fileSize(), actor.id(), item.fileId());
         }
         return false;
     }
@@ -399,6 +400,11 @@ public class OriginalFileImportService {
     }
 
     private boolean sourceExists(String sourceId) { Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM source WHERE source_id=?", Integer.class, sourceId); return count != null && count > 0; }
+    private String resolveProvider(String sourceId, String requested) {
+        String explicit = blankToNull(requested);
+        if (explicit != null) return explicit;
+        return jdbc.query("SELECT provider FROM source WHERE source_id=?", rs -> rs.next() ? blankToNull(rs.getString(1)) : null, sourceId);
+    }
     private int priority(String type) { return TYPES.indexOf(type); }
     private String detectType(Path path) {
         try (InputStream input = Files.newInputStream(path)) {

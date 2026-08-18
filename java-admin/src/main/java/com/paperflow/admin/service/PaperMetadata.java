@@ -8,9 +8,14 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 
-record PaperMetadata(String sourceId, int year, String title, List<String> authors, String doi, String url) {
+record PaperMetadata(String sourceId, int year, String title, List<String> authors, String doi, String url, String provider) {
     static PaperMetadata normalize(
             String sourceId, int year, String title, List<String> authors, String doi, String url) {
+        return normalize(sourceId, year, title, authors, doi, url, null);
+    }
+
+    static PaperMetadata normalize(
+            String sourceId, int year, String title, List<String> authors, String doi, String url, String provider) {
         String normalizedSource = canonical(sourceId);
         String normalizedTitle = display(title);
         List<String> normalizedAuthors = authors == null
@@ -21,7 +26,7 @@ record PaperMetadata(String sourceId, int year, String title, List<String> autho
         }
         return new PaperMetadata(
                 normalizedSource.toUpperCase(Locale.ROOT), year, normalizedTitle, normalizedAuthors,
-                normalizeDoi(doi), blankToNull(url));
+                normalizeDoi(doi), blankToNull(url), blankToNull(provider));
     }
 
     String authorsText() {

@@ -13,4 +13,5 @@ public record PaperCreateMetadata(
         @NotBlank @Size(max = 2000) String paperTitle,
         @NotEmpty @Size(max = 100) List<@NotBlank @Size(max = 500) String> authors,
         @Size(max = 500) String doi,
-        @Size(max = 2000) String url) {}
+        @Size(max = 2000) String url,
+        @Size(max = 255) String provider) {}

@@ -88,6 +88,8 @@ class PaperWriteControllerIntegrationTest {
         assertEquals(1, jdbcTemplate.queryForObject("SELECT COUNT(*) FROM original_file", Integer.class));
         assertEquals(fileId + ".pdf", jdbcTemplate.queryForObject(
                 "SELECT original_file_name FROM original_file WHERE file_id=?", String.class, fileId));
+        assertEquals("Test Publisher", jdbcTemplate.queryForObject(
+                "SELECT provider FROM original_file WHERE file_id=?", String.class, fileId));
         assertEquals(0, jdbcTemplate.queryForObject(
                 "SELECT flag_text FROM original_file_job WHERE file_id=?", Integer.class, fileId));
         assertEquals(1, jdbcTemplate.queryForObject(
@@ -97,6 +99,24 @@ class PaperWriteControllerIntegrationTest {
                         .file(metadata).file(file).with(csrf()).with(authentication(authToken())))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("PAPER_ALREADY_EXISTS"));
+    }
+
+    @Test
+    void preservesExplicitProviderInsteadOfInheritingSourceProvider() throws Exception {
+        MockMultipartFile metadata = new MockMultipartFile(
+                "metadata", "", "application/json",
+                """
+                {"sourceId":"S123","year":2024,"paperTitle":"Explicit Provider Paper","authors":["Alice"],"provider":"Custom Provider"}
+                """.getBytes());
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "explicit.pdf", "application/pdf", "%PDF-1.7\ntest".getBytes());
+
+        mockMvc.perform(multipart("/api/papers")
+                        .file(metadata).file(file).with(csrf()).with(authentication(authToken())))
+                .andExpect(status().isCreated());
+
+        assertEquals("Custom Provider", jdbcTemplate.queryForObject(
+                "SELECT provider FROM original_file WHERE paper_title=?", String.class, "Explicit Provider Paper"));
     }
 
     @Test

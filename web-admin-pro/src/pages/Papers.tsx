@@ -2,6 +2,7 @@ import {
   DeleteOutlined,
   DownloadOutlined,
   PlusOutlined,
+  UploadOutlined,
 } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { Link, useAccess, useSearchParams } from '@umijs/max';
@@ -29,6 +30,8 @@ import {
   tablePagination,
   valueLabel,
 } from './businessUtils';
+import { PaperFormContent } from './PaperForm';
+import { OriginalFileImportContent } from './OriginalFileImport';
 
 const primaryField = {
   name: 'q',
@@ -87,6 +90,8 @@ export default function PapersPage() {
   const [error, setError] = useState<unknown>();
   const [loading, setLoading] = useState(true);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+  const [importOpen, setImportOpen] = useState(false);
+  const [batchImportOpen, setBatchImportOpen] = useState(false);
   const sourceId = searchParams.get('sourceId')?.trim() || undefined;
 
   useEffect(() => {
@@ -126,6 +131,18 @@ export default function PapersPage() {
       return;
     }
     setData(refreshed);
+  };
+
+  const refreshAfterImport = async () => {
+    setImportOpen(false);
+    setLoading(true);
+    try {
+      setData(await listPapers(searchParams));
+    } catch (refreshError) {
+      setError(refreshError);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const confirmDelete = (papers: PaperBatchDeleteItem[]) => {
@@ -221,12 +238,19 @@ export default function PapersPage() {
               }
               toolBarRender={() => [
                 <Button
-                  href="/papers/new"
                   icon={<PlusOutlined />}
                   key="create"
+                  onClick={() => setImportOpen(true)}
                   type="primary"
                 >
                   导入论文
+                </Button>,
+                <Button
+                  icon={<UploadOutlined />}
+                  key="batch-import"
+                  onClick={() => setBatchImportOpen(true)}
+                >
+                  批量导入论文
                 </Button>,
                 ...(access.canDeletePapers
                   ? [
@@ -315,6 +339,45 @@ export default function PapersPage() {
           );
         }}
       </QueryState>
+      <Modal
+        destroyOnHidden
+        footer={null}
+        onCancel={() => setImportOpen(false)}
+        open={importOpen}
+        title="导入论文"
+        width={900}
+      >
+        <PaperFormContent
+          onCancel={() => setImportOpen(false)}
+          onSuccess={refreshAfterImport}
+        />
+      </Modal>
+      <Modal
+        destroyOnHidden
+        footer={null}
+        onCancel={() => setBatchImportOpen(false)}
+        open={batchImportOpen}
+        styles={{
+          body: {
+            maxHeight: 'calc(100vh - 180px)',
+            overflowY: 'auto',
+            paddingRight: 8,
+          },
+        }}
+        title="批量导入论文"
+        width={1200}
+      >
+        <OriginalFileImportContent
+          onComplete={() => {
+            setBatchImportOpen(false);
+            setLoading(true);
+            listPapers(searchParams)
+              .then(setData)
+              .catch(setError)
+              .finally(() => setLoading(false));
+          }}
+        />
+      </Modal>
     </PageContainer>
   );
 }

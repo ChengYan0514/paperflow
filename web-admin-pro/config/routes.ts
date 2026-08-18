@@ -41,18 +41,6 @@ export default [
         component: './Papers',
       },
       {
-        path: '/papers/new',
-        name: '导入论文',
-        hideInMenu: true,
-        component: './PaperForm',
-      },
-      {
-        path: '/papers/import',
-        name: '批量导入全文',
-        access: 'canWritePapers',
-        component: './OriginalFileImport',
-      },
-      {
         path: '/papers/trash',
         name: '论文回收站',
         hideInMenu: true,
